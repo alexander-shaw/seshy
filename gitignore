@@ -1,0 +1,141 @@
+# --- OS Noise ---
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+
+# --- Editors / IDEs ---
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+**/IDEWorkspaceChecks.plist
+
+# --- Xcode / iOS ---
+build/
+DerivedData/
+*.xccheckout
+*.xcscmblueprint
+*.xcuserstate
+*.moved-aside
+*.ipa
+*.xcarchive
+# user data
+*.xcuserdatad/
+*.xcworkspace/xcuserdata/
+# Simulator runtimes
+*.simdevicetype
+*.simruntime
+
+# --- Swift Package Manager ---
+.build/
+.swiftpm/
+
+# --- CocoaPods / Carthage / Fastlane ---
+Pods/
+Carthage/Build/
+Carthage/Checkouts/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+.tox/
+.dist/
+.cache/
+venv/
+.venv/
+env/
+ENV/
+.conda/
+*.conda
+
+# --- Node / JS ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+.next/
+.nuxt/
+out/
+
+# --- Databases / Local Storage ---
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.realm
+*.realm.lock
+
+# --- Docker / direnv ---
+docker-compose.override.yml
+*.local.yml
+.envrc
+.direnv/
+.envrc.private
+
+# --- Secrets & Local Config ---
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.p8
+*.der
+*.keystore
+*.jks
+*.credentials.json
+*.serviceAccount.json
+secrets/
+config/local.*
+# iOS / Firebase
+GoogleService-Info.plist
+GoogleService-Info-*.plist
+Firebase/GoogleService-Info.plist
+# Example policy: commit example templates, ignore real config
+*.xcconfig
+!**/Config.example.xcconfig
+
+# --- Terraform / Infra ---
+infra/secrets/
+infra/terraform/**/.terraform/
+infra/terraform/**/terraform.tfstate*
+infra/terraform/**/terraform.tfvars
+infra/terraform/**/*.tfplan
+infra/sql/.venv/
+
+# --- Logs / Dumps ---
+*.log
+*.trace
+*.dmp
+*.stackdump
+
+# --- Images / binaries (Design Sources) ---
+*.psd
+*.ai
+*.sketch
+
+# --- Miscellaneous ---
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.rej

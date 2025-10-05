@@ -1,8 +1,8 @@
 //
 //  ConnectivityManager.swift
-//  Invited
+//  EventsApp
 //
-//  Created by Шоу on 7/11/25.
+//  Created by Шоу on 10/1/25.
 //
 
 import Network

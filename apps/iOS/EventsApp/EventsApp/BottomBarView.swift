@@ -69,7 +69,7 @@ struct TabButton: View {
                 .contentShape(Rectangle())
         }
         .padding(.top, Theme.Spacing.elements)
-        .padding(.bottom, Theme.Spacing.edges)
+        // .padding(.bottom, Theme.Spacing.elements)
         .buttonStyle(CollapseButtonStyle())
         .hapticFeedback(style: .light)
     }

@@ -33,7 +33,7 @@ final class CoreDataStack {
         container.persistentStoreDescriptions = [desc]
 
         container.loadPersistentStores { _, error in
-            if let error = error { fatalError("Core Data load error: \(error)") }
+            if let error = error { fatalError("Core Data load error:  \(error)") }
         }
 
         let vc = container.viewContext

@@ -1,5 +1,5 @@
 //
-//  Theme.swift
+//  Spacing.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/1/25.
