@@ -43,6 +43,18 @@ final class CoreDataStack {
         vc.shouldDeleteInaccessibleFaults = true
     }
 
+    // TODO: FIX THIS CODE HERE.
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "EventsApp")
+
+        // Enable automatic migration
+        let description = container.persistentStoreDescriptions.first
+        description?.shouldMigrateStoreAutomatically = true
+        description?.shouldInferMappingModelAutomatically = true
+
+        return container
+    }()
+
     // An isolated background context (preferred for imports/sync).
     func newBackgroundContext() -> NSManagedObjectContext {
         let ctx = container.newBackgroundContext()
