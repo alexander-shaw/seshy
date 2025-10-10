@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9999CDA2E9988D7008AE0E2 /* H3 */; };
+		F9A504522E9963390009812A /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9A504512E9963390009812A /* H3 */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		F96970A32E8B504A007AE897 /* EventsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9A504522E9963390009812A /* H3 in Frameworks */,
+				F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = EventsApp;
 			packageProductDependencies = (
+				F9A504512E9963390009812A /* H3 */,
+				F9999CDA2E9988D7008AE0E2 /* H3 */,
 			);
 			productName = EventsApp;
 			productReference = F96970A32E8B504A007AE897 /* EventsApp.app */;
@@ -94,6 +103,9 @@
 			);
 			mainGroup = F969709A2E8B5049007AE897;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F96970A42E8B504A007AE897 /* Products */;
 			projectDirPath = "";
@@ -334,6 +346,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../packages/H3;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F9999CDA2E9988D7008AE0E2 /* H3 */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = H3;
+		};
+		F9A504512E9963390009812A /* H3 */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = H3;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F969709B2E8B5049007AE897 /* Project object */;
 }

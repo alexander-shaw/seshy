@@ -1,5 +1,5 @@
-//
-//  This file imports the target's public headers to be exposed to Swift.
+// CH3.h
+// Umbrella header for SwiftPM C target.
 //
 
 // MARK: - CORE HEADERS:

@@ -12,24 +12,30 @@ import PackageDescription
 
 let package = Package(
     name: "H3",
-    platforms: [.iOS(.v18)],
+    platforms: [
+        .iOS(.v15)
+    ],
     products: [
-        .library(name: "H3", targets: ["H3"])  // Import H3 in Swift.
+        .library(
+            name: "H3",
+            targets: ["H3"]
+        )
     ],
     targets: [
-        // C target for the raw H3 C library.
+        // C target (raw H3):
         .target(
             name: "CH3",
-            path: "sources",
-            publicHeadersPath: "../include",
+            // Use default path: Sources/CH3:
+            publicHeadersPath: "include",  // MARK: MUST BE INSIDE Sources/CH3.
+            // If extra header paths are needed, add:
             cSettings: [
-                .headerSearchPath("../include")
+                .headerSearchPath("include")
             ]
         ),
-        // Swift wrapper target (recommended for nicer APIs).
+        // Swift wrapper that depends on the C target:
         .target(
             name: "H3",
-            dependencies: ["CH3"]
+            dependencies: ["CH3"]  // Uses default path: Sources/H3
         ),
         .testTarget(
             name: "H3Tests",

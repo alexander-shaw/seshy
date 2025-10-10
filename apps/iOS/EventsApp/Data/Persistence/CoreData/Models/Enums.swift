@@ -8,12 +8,6 @@
 import Foundation
 import UIKit
 
-// MARK: - LOCATION & MOTION:
-
-public enum MotionType: Int16 {
-    case unknown = 0, walking = 1, running = 2, cycling = 3, driving = 4, flying = 5
-}
-
 // MARK: - PARTY EVENT:
 
 @objc public enum PartyEventStatus: Int16 {

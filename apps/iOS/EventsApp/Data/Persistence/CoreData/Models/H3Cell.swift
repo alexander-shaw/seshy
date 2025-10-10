@@ -13,9 +13,10 @@
 import Foundation
 import CoreData
 import CoreLocation
+import H3
 
 @objc(H3Cell)
-public class H3Cell: NSManagedObject {}
+public class H3Cell: NSManagedObject, H3CellProtocol {}
 
 extension H3Cell {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<H3Cell> {
@@ -24,10 +25,6 @@ extension H3Cell {
 
     @NSManaged public var id: UUID
     @NSManaged public var timestamp: Date
-
-    // H3 Spatial Quantization:
-    @NSManaged public var h3Index: Int64  // MARK: Unique and indexed.
-    @NSManaged public var resolution: Int16
 
     // Motion Context:
     @NSManaged public var motionTypeRaw: Int16
@@ -40,6 +37,10 @@ extension H3Cell {
     @NSManaged public var speedAccuracy: Double
     @NSManaged public var course: Double  // Track direction as angle.
     @NSManaged public var courseAccuracy: Double
+
+    // H3 Spatial Quantization:
+    @NSManaged public var resolution: Int16
+    @NSManaged public var h3Index: Int64  // MARK: Unique and indexed.
 }
 
 extension H3Cell {
@@ -70,12 +71,10 @@ extension H3Cell {
 
         // Walking is more predictable than flying.
         switch motionType {
-            case .cycling: score *= 1.25  // More predictable heading & speed.
-            case .driving: score *= 1.2  // Smooth, road-constrained.
-            case .running: score *= 1.1  // Mostly stable movement.
-            case .walking: score *= 1.0  // Neutral baseline.
-            case .flying: score *= 0.9  // Erratic 3D movement -> less predictable.
-            case .unknown: score *= 0.7  // No motion context -> penalized.
+            case .walking, .running, .cycling, .driving: score *= 1.1
+            case .stationary: score *= 1.0
+            case .flying, .transition: score *= 0.9  // Erratic 3D movement -> less predictable.
+        case .unknown: score *= 0.7  // No motion context -> penalized.
         }
 
         return score
@@ -86,8 +85,7 @@ extension H3Cell {
         let hexagon = H3Cell(context: context)
         hexagon.id = UUID()
         hexagon.timestamp = location.timestamp
-        // TODO: p.h3Index = h3Index
-        // TODO: p.resolution = resolution
+
         hexagon.motionType = motion
 
         // Fallbacks keep numbers finite.
@@ -97,6 +95,11 @@ extension H3Cell {
         hexagon.speedAccuracy = location.speedAccuracy.isFinite ? location.speedAccuracy : 999
         hexagon.course = location.course.isFinite ? location.course : -1
         hexagon.courseAccuracy = location.courseAccuracy.isFinite ? location.courseAccuracy : 999
+
+        // Use cross-project helpers from the Package:
+        hexagon.resolution = Int16(getOptimalResolution())
+        hexagon.h3Index = Int64(bitPattern: getIndex(for: location.coordinate, at: hexagon.resolution))
+
         return hexagon
     }
 }
