@@ -2,12 +2,11 @@
 //  MotionType.swift
 //  EventsApp
 //
-//  Created by Шоу on 10/10/25.
+//  Created by Шоу on 10/25/25.
 //
 
 import Foundation
 
-// Motion categories used by resolution heuristics & trust calculations.
 // Lightweight to avoid coupling to CoreMotion/CoreData.
 public enum MotionType: Int16 {
     case unknown = 0
