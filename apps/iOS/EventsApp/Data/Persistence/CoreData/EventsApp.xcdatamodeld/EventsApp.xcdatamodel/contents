@@ -1,7 +1,173 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24299" systemVersion="24G84" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="DeviceFingerprint" representedClassName="DeviceFingerprint" syncable="YES">
+        <attribute name="appVersion" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deviceIdentifier" attributeType="String"/>
+        <attribute name="deviceModel" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isLockedOut" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="languageCode" attributeType="String"/>
+        <attribute name="lastActiveAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lockoutUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="loginAttemptCount" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="regionCode" attributeType="String"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="systemVersion" attributeType="String"/>
+        <attribute name="timezone" attributeType="String"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="deviceUser" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="fingerprint" inverseEntity="DeviceUser"/>
+    </entity>
+    <entity name="DeviceUser" representedClassName="DeviceUser" syncable="YES">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="username" optional="YES" attributeType="String"/>
+        <relationship name="fingerprint" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceFingerprint" inverseName="deviceUser" inverseEntity="DeviceFingerprint"/>
+        <relationship name="login" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserLogin" inverseName="user" inverseEntity="UserLogin"/>
+        <relationship name="members" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Member"/>
+        <relationship name="profile" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserProfile" inverseName="user" inverseEntity="UserProfile"/>
+        <relationship name="settings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserSettings" inverseName="user" inverseEntity="UserSettings"/>
+    </entity>
+    <entity name="EventMedia" representedClassName="EventMedia" parentEntity="MediaBase" syncable="YES"/>
     <entity name="EventMediaCache" representedClassName="EventMediaCache" parentEntity="MediaBase" syncable="YES"/>
-    <entity name="MediaBase" representedClassName="MediaBase" isAbstract="YES" syncable="YES"/>
+    <entity name="MediaBase" representedClassName="MediaBase" isAbstract="YES" syncable="YES">
+        <attribute name="averageColorHex" optional="YES" attributeType="String"/>
+        <attribute name="mimeType" optional="YES" attributeType="String"/>
+        <attribute name="position" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="url" attributeType="String"/>
+    </entity>
+    <entity name="Member" representedClassName="Member" syncable="YES">
+        <attribute name="avatarURL" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="displayName" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="roleRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="userID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="username" optional="YES" attributeType="String"/>
+        <relationship name="event" maxCount="1" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="members" inverseEntity="UserEvent"/>
+    </entity>
     <entity name="OwnedMedia" representedClassName="OwnedMedia" parentEntity="MediaBase" syncable="YES"/>
+    <entity name="Place" representedClassName="Place" syncable="YES">
+        <attribute name="city" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="details" optional="YES" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="maxCapacity" optional="YES" attributeType="Integer 64" defaultValueString="100" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="radius" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
+        <attribute name="roomNumber" optional="YES" attributeType="String"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <attribute name="stateRegion" optional="YES" attributeType="String"/>
+        <attribute name="streetAddress" optional="YES" attributeType="String"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="location" inverseEntity="UserEvent"/>
+    </entity>
     <entity name="ProfileMedia" representedClassName="ProfileMedia" parentEntity="MediaBase" syncable="YES"/>
+    <entity name="Tag" representedClassName="Tag" syncable="YES">
+        <attribute name="categoryRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isActive" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="slug" attributeType="String"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="systemDefined" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="tags" inverseEntity="UserEvent"/>
+    </entity>
+    <entity name="UserEvent" representedClassName="UserEvent" syncable="YES">
+        <attribute name="brandColor" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="details" optional="YES" attributeType="String"/>
+        <attribute name="durationMinutes" optional="YES" attributeType="Integer 64" usesScalarValueType="YES"/>
+        <attribute name="endTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="inviteLink" optional="YES" attributeType="String"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="maxCapacity" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="scheduleStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="visibilityRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Place" inverseName="events" inverseEntity="Place"/>
+        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserMedia"/>
+        <relationship name="members" toMany="YES" deletionRule="Nullify" destinationEntity="Member" inverseName="event" inverseEntity="Member"/>
+        <relationship name="previews" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EventMedia"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="events" inverseEntity="Tag"/>
+    </entity>
+    <entity name="UserLogin" representedClassName="UserLogin" syncable="YES">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="emailAddressHashed" optional="YES" attributeType="String"/>
+        <attribute name="emailDomain" optional="YES" attributeType="String"/>
+        <attribute name="emailVerifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastLoginAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="phoneE164Hashed" attributeType="String"/>
+        <attribute name="phoneVerifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="login" inverseEntity="DeviceUser"/>
+    </entity>
+    <entity name="UserMedia" representedClassName="UserMedia" parentEntity="MediaBase" syncable="YES">
+        <relationship name="ownerProfile" maxCount="1" deletionRule="Nullify" destinationEntity="UserProfile" inverseName="media" inverseEntity="UserProfile"/>
+    </entity>
+    <entity name="UserProfile" representedClassName="UserProfile" syncable="YES">
+        <attribute name="bio" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="dateOfBirth" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="displayName" attributeType="String"/>
+        <attribute name="genderCategoryRaw" optional="YES" attributeType="Integer 16" usesScalarValueType="YES"/>
+        <attribute name="genderIdentity" optional="YES" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isVerified" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="showAge" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="showGender" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="wasVerifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserMedia" inverseName="ownerProfile" inverseEntity="UserMedia"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag"/>
+        <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="profile" inverseEntity="DeviceUser"/>
+    </entity>
+    <entity name="UserSettings" representedClassName="UserSettings" syncable="YES">
+        <attribute name="appearanceModeRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="mapBearingDegrees" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="mapEndDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="mapEndRollingDays" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="mapPitchDegrees" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="mapStyleRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="preferredUnitsRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="settings" inverseEntity="DeviceUser"/>
+    </entity>
 </model>

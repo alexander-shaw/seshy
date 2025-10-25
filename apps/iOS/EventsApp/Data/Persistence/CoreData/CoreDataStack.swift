@@ -5,11 +5,21 @@
 //  Created by Шоу on 10/1/25.
 //
 
+// Infrastructure-only: owns the container and create contexts.
+// Creates a single instance at app start and inject contexts into repositories/view models.
+
+// Manages the Core Data stack for the application.
+// Provides a singleton instance that handles:
+// - Persistent container initialization.
+// - Background context creation for async operations.
+// - Automatic lightweight migrations.
+// - Context management and merging policies.
+
 import CoreData
 
-// MARK: Infrastructure-only: owns the container and create contexts.
-// MARK: Create a single instance at app start and inject contexts into repositories/view models.
 final class CoreDataStack {
+    static let shared = CoreDataStack()
+    
     let container: NSPersistentContainer
 
     var viewContext: NSManagedObjectContext { container.viewContext }
@@ -43,18 +53,6 @@ final class CoreDataStack {
         vc.shouldDeleteInaccessibleFaults = true
     }
 
-    // TODO: FIX THIS CODE HERE.
-    lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "EventsApp")
-
-        // Enable automatic migration
-        let description = container.persistentStoreDescriptions.first
-        description?.shouldMigrateStoreAutomatically = true
-        description?.shouldInferMappingModelAutomatically = true
-
-        return container
-    }()
-
     // An isolated background context (preferred for imports/sync).
     func newBackgroundContext() -> NSManagedObjectContext {
         let ctx = container.newBackgroundContext()
@@ -81,7 +79,7 @@ final class CoreDataStack {
     }
 }
 
-// MARK: Small helpers.
+// Small helpers.
 extension NSManagedObjectContext {
     func saveIfNeeded() throws { if hasChanges { try save() } }
 

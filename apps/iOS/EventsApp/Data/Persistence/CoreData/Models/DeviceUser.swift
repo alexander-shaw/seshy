@@ -7,34 +7,39 @@
 
 import Foundation
 import CoreData
+import CoreDomain
 
 @objc(DeviceUser)
 public class DeviceUser: NSManagedObject {}
 
-extension DeviceUser {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<DeviceUser> {
+public extension DeviceUser {
+    @nonobjc class func fetchRequest() -> NSFetchRequest<DeviceUser> {
         NSFetchRequest<DeviceUser>(entityName: "DeviceUser")
     }
 
-    @NSManaged public var id: UUID  // MARK: Unique.
-    @NSManaged public var createdAt: Date
-    @NSManaged public var username: String?
+    @NSManaged var id: UUID  // MARK: Unique.
+    @NSManaged var username: String?
 
     // Relationships:
-    @NSManaged public var login: UserLogin  // One-to-one.
-    @NSManaged public var profile: UserProfile  // One-to-one.
-    @NSManaged public var settings: UserSettings  // One-to-one.
+    @NSManaged var fingerprint: DeviceFingerprint?  // One-to-one.
+    @NSManaged var login: UserLogin?  // One-to-one.
+    @NSManaged var profile: UserProfile?  // One-to-one.
+    @NSManaged var settings: UserSettings?  // One-to-one.
 
     // App Features:
-    @NSManaged public var memberships: Set<Member>?
-
-    // Local & Cloud Storage:
-    @NSManaged public var lastLocallySavedAt: Date?
-    @NSManaged public var lastCloudSyncedAt: Date?
-    @NSManaged public var syncStatusRaw: Int16
+    @NSManaged var memberships: Set<Member>?
 }
 
-extension DeviceUser {
+// Local & Cloud Storage:
+extension DeviceUser: SyncTrackable {
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date
+    @NSManaged public var deletedAt: Date?
+    @NSManaged public var syncStatusRaw: Int16
+    @NSManaged public var lastCloudSyncedAt: Date?
+    @NSManaged public var schemaVersion: Int
+
+    // Computed:
     public var syncStatus: SyncStatus {
         get { SyncStatus(rawValue: syncStatusRaw) ?? .pending }
         set { syncStatusRaw = newValue.rawValue }

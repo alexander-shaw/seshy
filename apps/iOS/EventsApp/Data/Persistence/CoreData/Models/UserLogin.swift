@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreData
+import CoreDomain
 
 @objc(UserLogin)
 public class UserLogin: NSManagedObject {}
@@ -17,7 +18,6 @@ extension UserLogin {
     }
 
     @NSManaged public var id: UUID
-    @NSManaged public var createdAt: Date
     @NSManaged public var lastLoginAt: Date?
 
     // Phone (Required):
@@ -27,10 +27,26 @@ extension UserLogin {
 
     // Email (Optional):
     // Hash for privacy.
-    @NSManaged public var emailAddressHashed: String  // MARK: Unique.
+    @NSManaged public var emailAddressHashed: String?  // MARK: Unique.
     @NSManaged public var emailDomain: String?
     @NSManaged public var emailVerifiedAt: Date?
 
     // Relationship:
     @NSManaged public var user: DeviceUser
+}
+
+// Local & Cloud Storage:
+extension UserLogin: SyncTrackable {
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date
+    @NSManaged public var deletedAt: Date?
+    @NSManaged public var syncStatusRaw: Int16
+    @NSManaged public var lastCloudSyncedAt: Date?
+    @NSManaged public var schemaVersion: Int
+
+    // Computed:
+    public var syncStatus: SyncStatus {
+        get { SyncStatus(rawValue: syncStatusRaw) ?? .pending }
+        set { syncStatusRaw = newValue.rawValue }
+    }
 }

@@ -5,10 +5,12 @@
 //  Created by Шоу on 10/8/25.
 //
 
-// MARK: Read-only cache to render full public profiles.  Evictable and refreshable.
+// Read-only cache to render full public profiles.
+// Evictable and refreshable.
 
 import Foundation
 import CoreData
+import CoreDomain
 
 @objc(PublicProfile)
 public class PublicProfile: NSManagedObject {}
@@ -27,9 +29,22 @@ extension PublicProfile {
     @NSManaged public var gender: String?
     @NSManaged public var isVerified: Bool
 
-    // Cache freshness.
-    @NSManaged public var lastFetchedAt: Date
-
     // Read-only, evictable profile gallery (ordered by position).
     @NSManaged var media: Set<ProfileMedia>?
+}
+
+// Local & Cloud Storage:
+extension PublicProfile: SyncTrackable {
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date
+    @NSManaged public var deletedAt: Date?
+    @NSManaged public var syncStatusRaw: Int16
+    @NSManaged public var lastCloudSyncedAt: Date?
+    @NSManaged public var schemaVersion: Int
+
+    // Computed:
+    public var syncStatus: SyncStatus {
+        get { SyncStatus(rawValue: syncStatusRaw) ?? .pending }
+        set { syncStatusRaw = newValue.rawValue }
+    }
 }
