@@ -1,5 +1,5 @@
 //
-//  ConnectivityManager.swift
+//  ConnectivityViewModel.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/1/25.
@@ -8,8 +8,8 @@
 import Network
 import Combine
 
-final class ConnectivityManager: ObservableObject {
-    static let shared = ConnectivityManager()
+final class ConnectivityViewModel: ObservableObject {
+    static let shared = ConnectivityViewModel()
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "ConnectivityMonitor")
@@ -28,13 +28,5 @@ final class ConnectivityManager: ObservableObject {
             }
         }
         monitor.start(queue: queue)
-    }
-
-    func checkCloudConnection() {
-        // Google Firebase.
-
-        // Google Cloud PostgreSQL.
-
-        return
     }
 }
