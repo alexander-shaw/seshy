@@ -5,7 +5,6 @@
 //  Created by Шоу on 10/25/25.
 //
 
-import Foundation
 import UIKit
 
 public enum AppearanceMode: Int16, Sendable {
@@ -32,13 +31,22 @@ public extension AppearanceMode {
             case .lightMode: return .light
         }
     }
+}
 
-    // SwiftUI helper (nil means follow system).
-    static func from(_ scheme: ColorScheme?) -> AppearanceMode {
+#if canImport(SwiftUI)
+import SwiftUI
+
+// SwiftUI adapter (gated to iOS 13+).
+// Handles future cases safely.
+@available(iOS 13.0, tvOS 13.0, macOS 10.15, watchOS 6.0, *)
+public extension AppearanceMode {
+    static func from(_ scheme: SwiftUI.ColorScheme?) -> AppearanceMode {
+        guard let scheme else { return .system }
         switch scheme {
-            case .some(.light): return .lightMode
-            case .some(.dark): return .darkMode
-            case .none: return .system
+        case .light: return .lightMode
+        case .dark:  return .darkMode
+        @unknown default: return .system
         }
     }
 }
+#endif
