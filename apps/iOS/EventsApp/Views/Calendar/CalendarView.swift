@@ -1,22 +1,22 @@
 //
-//  ProfileView.swift
+//  CalendarView.swift
 //  EventsApp
 //
-//  Created by Шоу on 10/1/25.
+//  Created by Шоу on 10/25/25.
 //
 
 import SwiftUI
 
-struct ProfileView: View {
+struct CalendarView: View {
     @Binding var bottomBarHeight: CGFloat
     @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
             TitleView(
-                titleText: "Profile", trailing: {
-                    IconButton(icon: "gearshape.fill") {
-                        // TODO: Settings.
+                titleText: "Next", trailing: {
+                    IconButton(icon: "bell.fill") {
+                        // TODO: Event Notifications.
                     }
                 }
             )

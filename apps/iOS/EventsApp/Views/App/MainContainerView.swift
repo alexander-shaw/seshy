@@ -12,10 +12,10 @@ struct MainContainerView: View {
     @StateObject var tabManager: TabManager
 
     @Binding var discoverPath: NavigationPath
-    @Binding var messagesPath: NavigationPath
+    @Binding var calendarPath: NavigationPath
     @Binding var profilePath: NavigationPath
 
-    @State private var bottomBarHeight: CGFloat = 60  // Fallback height.
+    @State private var bottomBarHeight: CGFloat = 44  // Fallback height.
 
     var body: some View {
         ZStack {
@@ -25,9 +25,9 @@ struct MainContainerView: View {
                     NavigationStack(path: $discoverPath) {
                         DiscoverView(bottomBarHeight: $bottomBarHeight)
                     }
-                } else if tabManager.currentTab == .messagesTab {
-                    NavigationStack(path: $messagesPath) {
-                        MessagesView(bottomBarHeight: $bottomBarHeight)
+                } else if tabManager.currentTab == .calendarTab {
+                    NavigationStack(path: $calendarPath) {
+                        CalendarView(bottomBarHeight: $bottomBarHeight)
                     }
                 } else if tabManager.currentTab == .profileTab {
                     NavigationStack(path: $profilePath) {

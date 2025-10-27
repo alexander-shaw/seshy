@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>MBXAccessToken</key>
+	<string>pk.eyJ1IjoiYW1iaWVudC1ldmVyeXdhcmUiLCJhIjoiY21iMW1teDhxMDlyOTJpcTNkejlhMWNyMyJ9.50BPR9dq0nP_OJorxLVB1w</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>location</string>
+	</array>
+</dict>
+</plist>

@@ -1,5 +1,5 @@
 
-## Authors
+## Team
 
 - [@Alexander-Shaw](https://github.com/alexander-shaw)
 
@@ -11,4 +11,4 @@
 
 # Seshy
 
-## A campus app that turns study sessions into social connections—helping students find friends while getting work done together.
+## An events app that helps college students effortlessly create, discover, and attend real-world experiences.

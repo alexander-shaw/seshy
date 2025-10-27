@@ -10,7 +10,7 @@ import Combine
 
 enum Tab: String, CaseIterable {
     case discoverTab = "Discover"
-    case messagesTab = "Messages"
+    case calendarTab = "Calendar"
     case profileTab = "Profile"
 }
 
