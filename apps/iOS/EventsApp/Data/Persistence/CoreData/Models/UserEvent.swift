@@ -30,6 +30,7 @@ extension UserEvent {
     @NSManaged public var startTime: Date?
     @NSManaged public var endTime: Date?
     @NSManaged public var durationMinutes: NSNumber?
+    @NSManaged public var isAllDay: Bool
     @NSManaged public var location: Place?
 
     @NSManaged public var maxCapacity: Int64
@@ -103,7 +104,7 @@ extension UserEvent: SyncTrackable {
     @NSManaged public var deletedAt: Date?
     @NSManaged public var syncStatusRaw: Int16
     @NSManaged public var lastCloudSyncedAt: Date?
-    @NSManaged public var schemaVersion: Int
+    @NSManaged public var schemaVersion: Int16
 
     // Computed:
     public var syncStatus: SyncStatus {

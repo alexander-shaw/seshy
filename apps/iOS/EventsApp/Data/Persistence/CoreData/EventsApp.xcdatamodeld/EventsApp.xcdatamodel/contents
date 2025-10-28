@@ -57,7 +57,7 @@
         <relationship name="event" maxCount="1" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="members" inverseEntity="UserEvent"/>
     </entity>
     <entity name="OwnedMedia" representedClassName="OwnedMedia" parentEntity="MediaBase" syncable="YES"/>
-    <entity name="Place" representedClassName="Place" syncable="YES">
+    <entity name="Place" representedClassName="Place" codegenType="manual" syncable="YES">
         <attribute name="city" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -101,6 +101,7 @@
         <attribute name="endTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="inviteLink" optional="YES" attributeType="String"/>
+        <attribute name="isAllDay" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="maxCapacity" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>

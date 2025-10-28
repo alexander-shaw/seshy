@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreData
 import CoreDomain
 
 struct GenderStepView: View {

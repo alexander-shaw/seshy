@@ -17,7 +17,7 @@ public struct WrapAroundLayout: Layout {
         var currentRowWidth: CGFloat = 0
         var totalHeight: CGFloat = 0
         var maxRowHeight: CGFloat = 0
-        let spacing: CGFloat = theme.spacing.small  // Default spacing.
+        let spacing: CGFloat = 12  // Default spacing.
 
         for subview in subviews {
             let subviewSize = subview.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))

@@ -23,7 +23,11 @@ struct MainContainerView: View {
             Group {
                 if tabManager.currentTab == .discoverTab {
                     NavigationStack(path: $discoverPath) {
-                        DiscoverView(bottomBarHeight: $bottomBarHeight)
+                        if tabManager.discoverViewMode == .map {
+                            DiscoverMapView(bottomBarHeight: $bottomBarHeight)
+                        } else {
+                            DiscoverListView(bottomBarHeight: $bottomBarHeight)
+                        }
                     }
                 } else if tabManager.currentTab == .calendarTab {
                     NavigationStack(path: $calendarPath) {

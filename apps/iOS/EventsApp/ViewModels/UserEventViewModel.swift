@@ -26,6 +26,7 @@ final class UserEventViewModel: ObservableObject {
     @Published var startTime: Date?
     @Published var endTime: Date?
     @Published var durationMinutes: Int64?
+    @Published var isAllDay: Bool = false
     @Published var maxCapacity: Int64 = 50
     @Published var visibility: UserEventVisibility = .requiresApproval
     @Published var inviteLink: String?
@@ -97,16 +98,87 @@ final class UserEventViewModel: ObservableObject {
                 startTime: startTime,
                 endTime: endTime,
                 durationMinutes: durationMinutes,
+                isAllDay: isAllDay,
                 location: location,
                 maxCapacity: maxCapacity,
                 visibility: visibility,
-                inviteLink: inviteLink
+                inviteLink: inviteLink,
+                status: .draft
             )
             
             userEvent = event
             populateFromEvent(event)
         } catch {
             errorMessage = "Failed to create event: \(error.localizedDescription)"
+        }
+        
+        isSaving = false
+    }
+    
+    func saveEvent() async {
+        isSaving = true
+        errorMessage = nil
+        
+        do {
+            let event = try await repository.createEvent(
+                name: name,
+                details: details.isEmpty ? nil : details,
+                brandColor: brandColor,
+                startTime: startTime,
+                endTime: endTime,
+                durationMinutes: durationMinutes,
+                isAllDay: isAllDay,
+                location: location,
+                maxCapacity: maxCapacity,
+                visibility: visibility,
+                inviteLink: inviteLink,
+                status: .draft
+            )
+            
+            userEvent = event
+            populateFromEvent(event)
+        } catch {
+            errorMessage = "Failed to save event: \(error.localizedDescription)"
+        }
+        
+        isSaving = false
+    }
+    
+    func publishEvent() async {
+        isSaving = true
+        errorMessage = nil
+        
+        /*
+         // FUTURE: Full publish flow with invite selection.
+         // This will open a modal sheet where user can:
+         // 1. Select contacts/users to invite
+         // 2. Set custom max capacity (different from default)
+         // 3. Choose visibility level (directInvites, requiresApproval, openToAll)
+         // 4. Then publish locally and sync to cloud
+         */
+        
+        do {
+            let event = try await repository.createEvent(
+                name: name,
+                details: details.isEmpty ? nil : details,
+                brandColor: brandColor,
+                startTime: startTime,
+                endTime: endTime,
+                durationMinutes: durationMinutes,
+                isAllDay: isAllDay,
+                location: location,
+                maxCapacity: maxCapacity,
+                visibility: visibility,
+                inviteLink: inviteLink,
+                status: .upcoming
+            )
+            
+            userEvent = event
+            populateFromEvent(event)
+            
+            // FUTURE: Sync to cloud after publishing locally.
+        } catch {
+            errorMessage = "Failed to publish event: \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -127,6 +199,7 @@ final class UserEventViewModel: ObservableObject {
             event.startTime = startTime
             event.endTime = endTime
             event.durationMinutes = durationMinutes.map { NSNumber(value: $0) }
+            event.isAllDay = isAllDay
             event.maxCapacity = maxCapacity
             event.visibilityRaw = visibility.rawValue
             event.inviteLink = inviteLink
@@ -310,6 +383,7 @@ final class UserEventViewModel: ObservableObject {
         // Location validation: must have a proper location.
         let hasValidLocation = location.name != "Temporary Place" && location.latitude != 0.0 && location.longitude != 0.0
         
+        // For now, only require name and location. We'll add date/time validation later.
         // Date/time validation: at least 2 of 3 fields must be provided.
         let hasStartTime = startTime != nil
         let hasEndTime = endTime != nil
@@ -321,7 +395,8 @@ final class UserEventViewModel: ObservableObject {
         // If startTime is provided, it should be in the future.
         let isStartTimeValid = startTime == nil || startTime! >= Date()
 
-        return hasName && hasValidLocation && hasValidDateTime && isStartTimeValid
+        // Temporarily relax validation for testing - only require name and location
+        return hasName && hasValidLocation // && hasValidDateTime && isStartTimeValid
     }
     
     // MARK: - PRIVATE METHODS:
@@ -333,6 +408,7 @@ final class UserEventViewModel: ObservableObject {
         startTime = event.startTime
         endTime = event.endTime
         durationMinutes = event.durationMinutes?.int64Value
+        isAllDay = event.isAllDay
         maxCapacity = event.maxCapacity
         visibility = UserEventVisibility(rawValue: event.visibilityRaw) ?? .requiresApproval
         inviteLink = event.inviteLink
@@ -367,6 +443,7 @@ final class UserEventViewModel: ObservableObject {
         startTime = nil
         endTime = nil
         durationMinutes = nil
+        isAllDay = false
         maxCapacity = 50
         visibility = .requiresApproval
         inviteLink = nil

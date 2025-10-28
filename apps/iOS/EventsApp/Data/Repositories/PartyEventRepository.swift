@@ -11,9 +11,11 @@ import UIKit
 import CoreDomain
 
 public protocol UserEventRepository: Sendable {
-    func createEvent(name: String, details: String?, brandColor: String, startTime: Date?, endTime: Date?, durationMinutes: Int64?, location: Place?, maxCapacity: Int64, visibility: UserEventVisibility, inviteLink: String?) async throws -> UserEvent
+    func createEvent(name: String, details: String?, brandColor: String, startTime: Date?, endTime: Date?, durationMinutes: Int64?, isAllDay: Bool, location: Place?, maxCapacity: Int64, visibility: UserEventVisibility, inviteLink: String?, status: UserEventStatus) async throws -> UserEvent
     func getEvent(by id: UUID) async throws -> UserEvent?
     func getAllEvents() async throws -> [UserEvent]
+    func getPublishedEvents() async throws -> [UserEvent]
+    func getDraftEvents() async throws -> [UserEvent]
     func getUpcomingEvents() async throws -> [UserEvent]
     func getLiveEvents() async throws -> [UserEvent]
     func getPastEvents() async throws -> [UserEvent]
@@ -33,29 +35,37 @@ final class CoreDataUserEventRepository: UserEventRepository {
         self.coreDataStack = coreDataStack
     }
     
-    func createEvent(name: String, details: String? = nil, brandColor: String = "#007AFF", startTime: Date? = nil, endTime: Date? = nil, durationMinutes: Int64? = nil, location: Place?, maxCapacity: Int64, visibility: UserEventVisibility, inviteLink: String? = nil) async throws -> UserEvent {
-        return try await coreDataStack.performBackgroundTask { context in
-            // Create the event.
-            let event = UserEvent(context: context)
-            event.id = UUID()
-            event.createdAt = Date()
-            event.updatedAt = Date()
-            event.name = name
-            event.details = details
-            event.brandColor = brandColor
-            event.startTime = startTime
-            event.endTime = endTime
-            event.durationMinutes = durationMinutes.map { NSNumber(value: $0) }
-            event.location = location
-            event.maxCapacity = maxCapacity
-            event.visibilityRaw = visibility.rawValue
-            event.inviteLink = inviteLink
-            event.scheduleStatusRaw = UserEventStatus.upcoming.rawValue
-            event.syncStatusRaw = SyncStatus.pending.rawValue
-            event.schemaVersion = 1
-            
-            try context.save()
-            return event
+    func createEvent(name: String, details: String? = nil, brandColor: String = "#007AFF", startTime: Date? = nil, endTime: Date? = nil, durationMinutes: Int64? = nil, isAllDay: Bool = false, location: Place?, maxCapacity: Int64, visibility: UserEventVisibility, inviteLink: String? = nil, status: UserEventStatus = .draft) async throws -> UserEvent {
+        return try await withCheckedThrowingContinuation { continuation in
+            coreDataStack.viewContext.perform {
+                do {
+                    // Create the event in the main context.
+                    let event = UserEvent(context: self.coreDataStack.viewContext)
+                    event.id = UUID()
+                    event.createdAt = Date()
+                    event.updatedAt = Date()
+                    event.name = name
+                    event.details = details
+                    event.brandColor = brandColor
+                    event.startTime = startTime
+                    event.endTime = endTime
+                    event.durationMinutes = durationMinutes.map { NSNumber(value: $0) }
+                    event.isAllDay = isAllDay
+                    // The location was created in the same viewContext, so we can assign directly.
+                    event.location = location
+                    event.maxCapacity = maxCapacity
+                    event.visibilityRaw = visibility.rawValue
+                    event.inviteLink = inviteLink
+                    event.scheduleStatusRaw = status.rawValue
+                    event.syncStatusRaw = SyncStatus.pending.rawValue
+                    event.schemaVersion = 1
+                    
+                    try self.coreDataStack.viewContext.save()
+                    continuation.resume(returning: event)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
         }
     }
     
@@ -74,6 +84,51 @@ final class CoreDataUserEventRepository: UserEventRepository {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(keyPath: \UserEvent.startTime, ascending: true)]
+            
+            let events = try context.fetch(request)
+            return events
+        }
+    }
+    
+    func getPublishedEvents() async throws -> [UserEvent] {
+        return try await withCheckedThrowingContinuation { continuation in
+            coreDataStack.viewContext.perform {
+                do {
+                    let request: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
+                    // Only fetch published events (not drafts) and events with a location
+                    request.predicate = NSPredicate(format: "scheduleStatusRaw != %d AND location != nil", UserEventStatus.draft.rawValue)
+                    request.sortDescriptors = [NSSortDescriptor(keyPath: \UserEvent.startTime, ascending: true)]
+                    
+                    // Prefetch location relationship to avoid faults
+                    request.relationshipKeyPathsForPrefetching = ["location"]
+                    
+                    let events = try self.coreDataStack.viewContext.fetch(request)
+                    
+                    // Force fault resolution for location objects to ensure they're fully loaded
+                    for event in events {
+                        if let place = event.location {
+                            let _ = place.objectID
+                            let _ = place.latitude
+                            let _ = place.longitude
+                            let _ = place.name
+                        }
+                    }
+                    
+                    print("📊 Fetched \(events.count) published events with locations")
+                    continuation.resume(returning: events)
+                } catch {
+                    print("❌ Error fetching published events: \(error)")
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    func getDraftEvents() async throws -> [UserEvent] {
+        return try await coreDataStack.performBackgroundTask { context in
+            let request: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
+            request.predicate = NSPredicate(format: "scheduleStatusRaw == %d", UserEventStatus.draft.rawValue)
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \UserEvent.updatedAt, ascending: false)]
             
             let events = try context.fetch(request)
             return events

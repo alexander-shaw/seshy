@@ -41,7 +41,7 @@ final class CoreDataPlaceRepository: PlaceRepository {
                     
                     place.createdAt = Date()
                     place.updatedAt = Date()
-                    place.name = name
+                    place.name = name ?? "Unnamed Location"
                     place.details = details
                     place.streetAddress = streetAddress
                     place.city = city

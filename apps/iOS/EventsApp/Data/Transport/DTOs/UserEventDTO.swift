@@ -18,6 +18,7 @@ public struct UserEventDTO: Codable, Sendable, Equatable {
     public let startTime: Date?
     public let endTime: Date?
     public let durationMinutes: Int64?
+    public let isAllDay: Bool
     public let locationID: UUID
     public let maxCapacity: Int64
     public let visibilityRaw: Int16

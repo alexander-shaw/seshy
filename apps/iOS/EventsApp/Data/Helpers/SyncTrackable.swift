@@ -5,7 +5,6 @@
 //  Created by Шоу on 10/18/25.
 //
 
-// MARK: - SyncTrackable Protocol:
 // This protocol defines the interface for entities that can be synchronized with cloud storage.
 // Provides common properties for tracking sync status, timestamps, and schema versioning.
 
@@ -19,12 +18,13 @@ public protocol SyncTrackable {
     var deletedAt: Date? { get set }
     var syncStatusRaw: Int16 { get set }
     var lastCloudSyncedAt: Date? { get set }
-    var schemaVersion: Int { get set }
-    
+    var schemaVersion: Int16 { get set }
+
+    // Only syncStatusRaw is stored in Core Data; syncStatus is computed.
     var syncStatus: SyncStatus { get set }
 }
 
-// MARK: - SyncTrackable Extensions:
+// Computed Properties:
 extension SyncTrackable {
     public var isDeleted: Bool {
         return deletedAt != nil

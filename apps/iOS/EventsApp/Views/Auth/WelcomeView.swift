@@ -22,7 +22,7 @@ struct WelcomeView: View {
             VStack(alignment: .center, spacing: theme.spacing.small) {
                 Spacer(minLength: theme.sizes.screenHeight / 3)
 
-                Text("E v e n t s")
+                Text("s e s h i")
                     .displayTitleStyle()
 
                 Spacer()

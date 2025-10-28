@@ -317,7 +317,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EventsApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Seshy;
+				INFOPLIST_KEY_CFBundleDisplayName = seshi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
@@ -355,7 +355,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EventsApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Seshy;
+				INFOPLIST_KEY_CFBundleDisplayName = seshi;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";

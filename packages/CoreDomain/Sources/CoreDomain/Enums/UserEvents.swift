@@ -28,12 +28,14 @@ public enum UserEventStatus: Int16 {
 }
 
 public enum UserEventVisibility: Int16 {
-    case directInvites = 0
-    case requiresApproval = 1
-    case openToAll = 2
+    case onlyUser = 0  // An event only visible to the user.
+    case directInvites = 1  // Invite specific users.
+    case requiresApproval = 2  // Invite specific users and anyone else can request to join.
+    case openToAll = 3  // Anyone can join, without being invited or requesting to join.
 
     public var descriptionText: String {
         switch self {
+            case .onlyUser: return "Only visible to you."
             case .directInvites: return "Only direct invites."
             case .requiresApproval: return "Those not directly invited can request to join."
             case .openToAll: return "Discoverable and accessible by all users."

@@ -4,6 +4,7 @@
 //
 //  Created by Шоу on 10/26/25.
 //
+
 import SwiftUI
 import UIKit
 
@@ -17,9 +18,9 @@ struct EventColorPicker: View {
 
     // Curated palette (RRGGBB, no '#').
     private let palette: [String] = [
-        "FF3B30", "FF9500", "FFCC00", "34C759",
-        "5AC8FA", "0A84FF", "007AFF", "5856D6",
-        "AF52DE", "FF2D55", "E5E5EA", "8E8E93"
+        "FF2D55", "FF3B30", "FF9500", "FFCC00",
+        "34C759", "5AC8FA", "0A84FF", "007AFF",
+        "5856D6", "AF52DE", "E5E5EA", "8E8E93"
     ]
 
     var body: some View {
@@ -40,32 +41,32 @@ struct EventColorPicker: View {
                         .hapticFeedback(.light)
                     }
 
-                    // Input Hex Value:
-                    HStack(spacing: theme.spacing.small / 2) {
-                        Spacer()
+                    // Input as Hex Value:
+                    HStack(spacing: theme.spacing.small) {
+                        Spacer(minLength: 0)
 
-                        Text("#")
-                            .captionTitleStyle()
+                        Image(systemName: "number")
+                            .foregroundStyle(theme.colors.mainText)
+                            .frame(width: theme.sizes.iconButton * 1 / 4, height: theme.sizes.iconButton * 1 / 4)
 
-                        TextField("HEX", text: $hexInput)
+                        TextField("FFFFFF", text: $hexInput)
+                            .foregroundStyle(theme.colors.mainText)
+                            .fontWeight(.bold)
                             .captionTitleStyle()
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled(true)
                             .keyboardType(.asciiCapable)
-                            .frame(height: theme.sizes.iconButton-4)
                             .onChange(of: hexInput) { _, newValue in
                                 normalizeAndApplyHex(newValue)
                             }
 
-                        Spacer()
+                        Spacer(minLength: 0)
                     }
-                    .background(theme.colors.surface)
-                    .clipShape(Capsule())
-                    .overlay(
-                        Capsule()
-                            .stroke(Color(hex: selectedColorHex) ?? Color.clear)
-                            // .stroke(isHexValid ? (Color(hex: selectedColorHex) ?? Color.clear) : theme.colors.error, lineWidth: 2)
-                    )
+                    .padding(.vertical, theme.spacing.small / 2)
+                    .padding(.horizontal, theme.spacing.small)
+                    .frame(height: theme.sizes.iconButton)
+                    .background(Color(hex: selectedColorHex) ?? Color.clear)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .hapticFeedback(.light)
                 }
                 .padding(.horizontal, theme.spacing.medium)
@@ -111,14 +112,17 @@ private struct ColorSwatchView: View {
 
     var body: some View {
         Button(action: action) {
-            Circle()
-                .fill(color)
-                .frame(width: theme.sizes.iconButton, height: theme.sizes.iconButton)
-                .overlay(
+            ZStack {
+                Circle()
+                    .fill(color)
+                    .frame(width: theme.sizes.iconButton, height: theme.sizes.iconButton)
+
+                if isSelected {
                     Circle()
-                        .strokeBorder(isSelected ? theme.colors.mainText : theme.colors.surface, lineWidth: isSelected ? 2 : 1)
-                )
-                // .shadow(radius: isSelected ? 2 : 0, y: isSelected ? 2 : 0)
+                        .fill(theme.colors.mainText)
+                        .frame(width: theme.sizes.iconButton * 0.3, height: theme.sizes.iconButton * 0.3)
+                }
+            }
         }
     }
 }

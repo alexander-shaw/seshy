@@ -78,7 +78,7 @@ extension H3AggregatedEdge: SyncTrackable {
     @NSManaged public var deletedAt: Date?
     @NSManaged public var syncStatusRaw: Int16
     @NSManaged public var lastCloudSyncedAt: Date?
-    @NSManaged public var schemaVersion: Int
+    @NSManaged public var schemaVersion: Int16
 
     // Computed:
     public var syncStatus: SyncStatus {

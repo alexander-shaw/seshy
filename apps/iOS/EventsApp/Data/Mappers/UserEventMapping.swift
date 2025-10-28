@@ -19,6 +19,7 @@ public func mapUserEventToDTO(_ obj: UserEvent) -> UserEventDTO {
         startTime: obj.startTime,
         endTime: obj.endTime,
         durationMinutes: obj.durationMinutes?.int64Value,
+        isAllDay: obj.isAllDay,
         locationID: obj.location?.id ?? {
             fatalError("Data integrity issue: UserEvent must have a location.")
         }(),
@@ -46,6 +47,7 @@ extension UserEvent {
         startTime = dto.startTime
         endTime = dto.endTime
         durationMinutes = dto.durationMinutes.map { NSNumber(value: $0) }
+        isAllDay = dto.isAllDay
         maxCapacity = dto.maxCapacity
         visibilityRaw = dto.visibilityRaw
         inviteLink = dto.inviteLink

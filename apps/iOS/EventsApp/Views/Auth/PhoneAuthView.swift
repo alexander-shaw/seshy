@@ -5,6 +5,9 @@
 //  Created by Шоу on 10/16/25.
 //
 
+// TODO: (1) Go to verifyCode as soon as 10 phone number digits are submitted.
+// TODO: (2) Refactor enterPhone to allow suggestion auto-fill: .textContentType(.telephoneNumber)
+
 import SwiftUI
 import Combine
 import CoreDomain
@@ -115,7 +118,7 @@ struct PhoneAuthView: View {
                     text: $userSession.userLoginViewModel.localNumber
                 )
                 .textContentType(.telephoneNumber)
-                .keyboardType(.numberPad)
+                .keyboardType(.phonePad)
                 .submitLabel(.next)
             }
 
@@ -197,6 +200,7 @@ struct PhoneAuthView: View {
                     }
                 }
                 .foregroundStyle(theme.colors.accent)
+                .captionTextStyle()
             }
 
             if let error = errorMessage {

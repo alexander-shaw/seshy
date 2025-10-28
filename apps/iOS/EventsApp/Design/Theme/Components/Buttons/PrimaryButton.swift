@@ -13,12 +13,14 @@ public struct PrimaryButton: View {
     public let icon: String?
     public let title: String?
     public let isDisabled: Bool
+    public let backgroundColor: AnyShapeStyle?
     public var action: () -> Void
 
-    public init(icon: String? = nil, title: String? = nil, isDisabled: Bool = false, action: @escaping () -> Void) {
+    public init(icon: String? = nil, title: String? = nil, isDisabled: Bool = false, backgroundColor: AnyShapeStyle? = nil, action: @escaping () -> Void) {
         self.icon = icon
         self.title = title
         self.isDisabled = isDisabled
+        self.backgroundColor = backgroundColor
         self.action = action
     }
 
@@ -36,12 +38,19 @@ public struct PrimaryButton: View {
             }
             .foregroundStyle(isDisabled ? theme.colors.offText : theme.colors.mainText)
             .padding(.vertical, theme.spacing.medium)
-            .frame(minWidth: theme.sizes.screenWidth / 2)
-            .background(isDisabled ? AnyShapeStyle(theme.colors.surface) : AnyShapeStyle(theme.colors.accent))
+            .frame(maxWidth: theme.sizes.screenWidth / 2)
+            .background(buttonBackground)
             .clipShape(Capsule())
         }
         .disabled(isDisabled)
         .buttonStyle(CollapseButtonStyle())
         .hapticFeedback(.medium)
+    }
+    
+    private var buttonBackground: AnyShapeStyle {
+        if isDisabled {
+            return AnyShapeStyle(theme.colors.surface)
+        }
+        return backgroundColor ?? AnyShapeStyle(theme.colors.accent)
     }
 }

@@ -106,7 +106,7 @@ final class PlaceViewModel: ObservableObject {
         
         do {
             // Update the existing place directly.
-            currentPlace.name = name.isEmpty ? nil : name
+            currentPlace.name = name.isEmpty ? "Unnamed Location" : name
             currentPlace.details = details.isEmpty ? nil : details
             currentPlace.streetAddress = streetAddress.isEmpty ? nil : streetAddress
             currentPlace.city = city.isEmpty ? nil : city
@@ -305,7 +305,7 @@ final class PlaceViewModel: ObservableObject {
     // MARK: - PRIVATE METHODS:
     
     private func populateFromPlaceDTO(_ placeDTO: PlaceDTO) {
-        name = placeDTO.name ?? ""
+        name = placeDTO.name
         details = placeDTO.details ?? ""
         streetAddress = placeDTO.streetAddress ?? ""
         city = placeDTO.city ?? ""

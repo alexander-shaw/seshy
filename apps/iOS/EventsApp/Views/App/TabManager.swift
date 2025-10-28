@@ -14,12 +14,23 @@ enum Tab: String, CaseIterable {
     case profileTab = "Profile"
 }
 
+enum DiscoverViewMode {
+    case map
+    case list
+}
+
 class TabManager: ObservableObject {
     @Published var currentTab: Tab = .discoverTab
+    @Published var discoverViewMode: DiscoverViewMode = .map
     var lastTab: Tab = .discoverTab
 
     func select(_ newTab: Tab) {
-        lastTab = currentTab
-        currentTab = newTab
+        // If tapping the same tab, toggle discoverViewMode.
+        if currentTab == newTab && newTab == .discoverTab {
+            discoverViewMode = discoverViewMode == .map ? .list : .map
+        } else {
+            lastTab = currentTab
+            currentTab = newTab
+        }
     }
 }

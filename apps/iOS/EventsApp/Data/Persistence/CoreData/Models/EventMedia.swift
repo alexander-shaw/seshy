@@ -5,8 +5,6 @@
 //  Created by Шоу on 10/12/25.
 //
 
-// UserEvent-related.
-
 import CoreData
 
 @objc(EventMedia)

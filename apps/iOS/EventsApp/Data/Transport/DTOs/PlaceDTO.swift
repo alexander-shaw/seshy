@@ -11,7 +11,7 @@ import Foundation
 // Safe to cross actors and send to cloud.
 public struct PlaceDTO: Codable, Sendable, Equatable {
     public let id: UUID
-    public let name: String?
+    public let name: String
     public let details: String?
     public let streetAddress: String?
     public let city: String?

@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine  // Required for @Published and ObservableObject.
-import CoreData
+public import CoreData
 import CoreDomain
 
 @main
@@ -15,7 +15,6 @@ struct EventsApp: App {
 
     private let theme = AppTheme()
 
-    private let coreDataStack: CoreDataStack
     @StateObject private var userSession: UserSessionViewModel
     @StateObject private var tabManager = TabManager()
     
@@ -24,10 +23,8 @@ struct EventsApp: App {
     @State private var profilePath = NavigationPath()
     
     init() {
-        let stack = CoreDataStack()
-        self.coreDataStack = stack
         _userSession = StateObject(
-            wrappedValue: UserSessionViewModel(context: stack.viewContext)
+            wrappedValue: UserSessionViewModel()
         )
     }
     
@@ -66,7 +63,7 @@ struct EventsApp: App {
                 }
             }
             .theme(theme)
-            .environment(\.managedObjectContext, coreDataStack.viewContext)
+            .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
         }
     }
     

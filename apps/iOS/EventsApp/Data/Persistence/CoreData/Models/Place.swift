@@ -24,7 +24,7 @@ extension Place {
     @NSManaged public var longitude: Double
     @NSManaged public var radius: Double
 
-    @NSManaged public var name: String?
+    @NSManaged public var name: String
     @NSManaged public var details: String?
     @NSManaged public var maxCapacity: NSNumber?  // Nil means infinite or not strictly defined, such as an outdoor space.
 
@@ -44,7 +44,7 @@ extension Place: SyncTrackable {
     @NSManaged public var deletedAt: Date?
     @NSManaged public var syncStatusRaw: Int16
     @NSManaged public var lastCloudSyncedAt: Date?
-    @NSManaged public var schemaVersion: Int
+    @NSManaged public var schemaVersion: Int16
 
     // Computed:
     public var syncStatus: SyncStatus {
