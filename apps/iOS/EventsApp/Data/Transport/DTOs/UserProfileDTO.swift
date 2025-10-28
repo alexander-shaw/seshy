@@ -24,3 +24,5 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
     public let updatedAt: Date
     public let schemaVersion: Int
 }
+
+

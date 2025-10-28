@@ -39,3 +39,5 @@ public struct H3AggregatedEdgeDTO: Codable, Sendable, Equatable {
     public let updatedAt: Date
     public let schemaVersion: Int
 }
+
+

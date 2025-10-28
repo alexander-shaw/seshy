@@ -26,3 +26,5 @@ public struct PublicProfileDTO: Codable, Sendable, Equatable {
     public let lastCloudSyncedAt: Date?
     public let schemaVersion: Int
 }
+
+
