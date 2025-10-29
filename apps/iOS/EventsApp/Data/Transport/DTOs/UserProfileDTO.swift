@@ -25,4 +25,3 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
     public let schemaVersion: Int
 }
 
-

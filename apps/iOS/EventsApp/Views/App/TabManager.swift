@@ -11,6 +11,8 @@ import Combine
 enum Tab: String, CaseIterable {
     case discoverTab = "Discover"
     case calendarTab = "Calendar"
+    case newEventTab = "New"
+    case notificationsTab = "Notifications"
     case profileTab = "Profile"
 }
 

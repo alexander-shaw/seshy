@@ -12,13 +12,24 @@ import CH3
 
 // MARK: - CONVERSIONS:
 @inline(__always) public func degsToRads(_ degrees: CLLocationDegrees) -> Double {
-    return degrees * .pi / 180.0
+    degrees * .pi / 180.0
 }
 
 @inline(__always) public func radsToDegs(_ radians: Double) -> Double {
-    return radians * 180.0 / .pi
+    radians * 180.0 / .pi
 }
 
+// MARK: - VALIDATION / CLAMP:
+@inline(__always) private func clampResolution(_ res: Int) -> Int {
+    // H3 supports 0...15
+    max(0, min(15, res))
+}
+
+@inline(__always) private func isValidCoordinate(_ c: CLLocationCoordinate2D) -> Bool {
+    c.latitude >= -90 && c.latitude <= 90 && c.longitude >= -180 && c.longitude <= 180
+}
+
+// MARK: - H3 WRAPPERS:
 // MARK: Converts a geographic coordinate into a unique H3 Index.
 // Converts the latitude & longitude from degrees to radians (H3 uses radians).
 // Calls latLngToCell to get the H3 Index at a given resolution.
@@ -37,7 +48,7 @@ public func getHexagon(for coordinate: CLLocationCoordinate2D, at resolution: In
 // Initializes an empty LatLng struct.
 // Calls cellToLatLng to fill in the center point of the given H3 Index.
 // Returns them as a CLLocationCoordinate2D.
-func h3CenterCoordinate(for index: UInt64) -> CLLocationCoordinate2D {
+public func h3CenterCoordinate(for index: UInt64) -> CLLocationCoordinate2D {
     var latLng = LatLng(lat: 0, lng: 0)
     cellToLatLng(index, &latLng)
     return CLLocationCoordinate2D(latitude: radsToDegs(latLng.lat), longitude: radsToDegs(latLng.lng))
@@ -48,7 +59,7 @@ func h3CenterCoordinate(for index: UInt64) -> CLLocationCoordinate2D {
 // Uses Swift's Mirror to extract the C array (a fixed-size tuple) into a Swift array of LatLng.
 // Converts each point from radians to degrees.
 // Returns them as an array of CLLocationCoordinate2D points.
-func h3Boundary(for index: UInt64) -> [CLLocationCoordinate2D] {
+public func h3Boundary(for index: UInt64) -> [CLLocationCoordinate2D] {
     var boundary = CellBoundary()
     cellToBoundary(index, &boundary)
 
@@ -92,6 +103,27 @@ func hexagonArea(forResolution res: Int) -> Double? {
     }
 }
 
+// H3 cell area in square meters (uses CH3 cellAreaKm2 and converts).
+@inline(__always) public func h3CellAreaM2(_ index: UInt64) -> Double {
+    var km2: Double = 0
+    cellAreaKm2(index, &km2)
+    return km2 * 1_000_000.0
+}
+
+// MARK: Average area by resolution (meters squared) — optional utility.
+// Source: H3 average areas table (converted to m²).  Useful when fast lookup is needed without location-specific area variance.
+public func averageHexAreaM2(forResolution res: Int) -> Double? {
+    // avg km² per cell by res (H3 docs) × 1e6
+    let avgKm2: [Double] = [
+        4250546.848, 607579.550, 86797.078, 12399.582, 1771.369,
+        252.052, 36.008, 5.144, 0.735, 0.105,
+        0.015, 0.002, 0.0003, 0.00004, 0.000005, 0.0000007
+    ]
+
+    guard res >= 0 && res < avgKm2.count else { return nil }
+    return avgKm2[res] * 1_000_000.0
+}
+
 // MARK: Best H3 Resolution for the given data.
 // Resolution  =>  Edge Length  =>  Real-World Equivalent
 // 0   =>  1,107 km  =>  Continental Region
@@ -129,6 +161,90 @@ public func getOptimalResolution() -> Int16 {
 // 14   =>  12  =>  10 m
 // 15   =>  13  =>  4 m
 // 16   =>  14  =>  1-2 m (tiny and only for visualization)
-public func displayH3Eesolution(forZoom zoom: Double) -> Int {
+public func displayH3Resolution(forZoom zoom: Double) -> Int {
     return max(0, min(14, Int(round(zoom - 3))))
+}
+
+// MARK: Best single hex for a Place with latitude, longitude, and radius.
+// Picks a single H3 hexagon that:
+//  + covers at least minCoverage (default 80%) of the circle area (hex may be inside the circle);
+//  + is not too big relative to the circle (bounded by maxOversize, default 1.25x);
+//  + prefers larger hexagons (lower H3 resolution) within the acceptable band;
+//  + and falls back to the closest-by-area hex, if no candidate matches.
+
+// The minimum/coarsest allowed resolution is 10 (configurable), and we search up to maxRes (default 15).
+public func bestHexagonForPlace(
+    latitude: Double,
+    longitude: Double,
+    radiusMeters: Double,
+    minRes: Int = 9,
+    maxRes: Int = 16,
+    minCoverage: Double = 0.80,
+    maxOversize: Double = 1.20
+) -> (resolution: Int, center: CLLocationCoordinate2D, boundary: [CLLocationCoordinate2D]) {
+    // Input validation & normalization:
+    precondition(radiusMeters > 0, "radiusMeters must be > 0")
+    let clampedMin = clampResolution(minRes)
+    let clampedMax = clampResolution(maxRes)
+    precondition(clampedMin <= clampedMax, "minRes must be <= maxRes")
+
+    var coverage = minCoverage
+    var oversize = maxOversize
+    if coverage <= 0 { coverage = 0.01 }
+    if coverage >= 1 { coverage = 0.99 }
+    if oversize <= coverage { oversize = coverage + 0.05 }  // Auto-repair.
+
+    let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    precondition(isValidCoordinate(coordinate), "Invalid coordinate.")
+
+    // Target circle area:
+    let circleAreaM2 = Double.pi * radiusMeters * radiusMeters
+    let minAreaM2 = coverage * circleAreaM2
+    let maxAreaM2 = oversize * circleAreaM2
+
+    struct Candidate {
+        let res: Int
+        let index: UInt64
+        let areaM2: Double
+    }
+
+    var candidates: [Candidate] = []
+    var closestByArea: Candidate? = nil
+    var smallestAbsDiff: Double = .infinity
+
+    // Search from coarse -> fine:
+    // Prefer bigger cells when acceptable.
+    for res in clampedMin...clampedMax {
+        let idx = getHexagon(for: coordinate, at: Int16(res))
+        let area = h3CellAreaM2(idx)
+
+        let absDiff = abs(area - circleAreaM2)
+        if absDiff < smallestAbsDiff || (absDiff == smallestAbsDiff && (closestByArea == nil || res < closestByArea!.res)) {
+            smallestAbsDiff = absDiff
+            closestByArea = Candidate(res: res, index: idx, areaM2: area)
+        }
+
+        if area >= minAreaM2 && area <= maxAreaM2 {
+            candidates.append(Candidate(res: res, index: idx, areaM2: area))
+        }
+    }
+
+    // Select preferred: lowest res among acceptable; else, closest-by-area.
+    let chosen: Candidate
+    if let preferred = candidates.sorted(by: { lhs, rhs in
+        if lhs.res != rhs.res { return lhs.res < rhs.res }  // Prefer larger hex.
+        return abs(lhs.areaM2 - circleAreaM2) < abs(rhs.areaM2 - circleAreaM2)
+    }).first {
+        chosen = preferred
+    } else if let fallback = closestByArea {
+        chosen = fallback
+    } else {
+        // Extremely unlikely: default to minRes at the coordinate.
+        let idx = getHexagon(for: coordinate, at: Int16(clampedMin))
+        chosen = Candidate(res: clampedMin, index: idx, areaM2: h3CellAreaM2(idx))
+    }
+
+    let center = h3CenterCoordinate(for: chosen.index)
+    let boundary = h3Boundary(for: chosen.index)
+    return (resolution: chosen.res, center: center, boundary: boundary)
 }

@@ -13,13 +13,7 @@ struct CalendarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(
-                titleText: "Next", trailing: {
-                    IconButton(icon: "bell.fill") {
-                        // TODO: Event Notifications.
-                    }
-                }
-            )
+            TitleView(titleText: "Next")
 
             Spacer(minLength: 0)
         }

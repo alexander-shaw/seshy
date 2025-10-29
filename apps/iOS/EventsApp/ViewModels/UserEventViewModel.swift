@@ -13,9 +13,9 @@
 // - Member and media management.
 
 import Foundation
+import Combine
 import CoreData
 import SwiftUI
-import Combine
 import CoreDomain
 
 @MainActor

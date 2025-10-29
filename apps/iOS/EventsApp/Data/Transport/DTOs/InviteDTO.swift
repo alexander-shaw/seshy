@@ -26,4 +26,3 @@ public struct InviteDTO: Codable, Sendable, Equatable {
     public let schemaVersion: Int
 }
 
-

@@ -13,9 +13,9 @@
 // - Integration with Core Data persistence layer.
 
 import Foundation
+import Combine
 import CoreData
 import SwiftUI
-import Combine
 import CoreDomain
 
 @MainActor

@@ -17,7 +17,7 @@ struct RemoteMediaImage: View {
             .setProcessor(ImagePipeline.downsampler(for: targetSize))
             .cacheOriginalImage(false)  // Store only downsampled version.
             .targetCache(ImagePipeline.cache)
-            .fade(duration: 0.5)  // 0.15
+            .fade(duration: 0.25)  // 0.15
             .resizable()
             .scaledToFill()
             .clipped()

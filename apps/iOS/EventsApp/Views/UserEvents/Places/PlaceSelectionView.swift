@@ -20,7 +20,7 @@ struct PlaceSelectionView: View {
     // Pullman, WA base coordinates:
     private let pullmanLat: Double = 46.7317
     private let pullmanLon: Double = -117.1814
-    
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -82,13 +82,13 @@ struct PlaceSelectionView: View {
         // Add/subtract random value up to ~0.01 degrees (roughly 1 km).
         let latOffset = Double.random(in: -0.01...0.01)
         let lonOffset = Double.random(in: -0.01...0.01)
-        
+
         let randomLatitude = pullmanLat + latOffset
         let randomLongitude = pullmanLon + lonOffset
         
         // Generate random radius between 5-100 meters.
         let randomRadius = Double.random(in: 50...500)
-        
+
         // Update the existing place instead of creating a new one, which ensures the correct managed object context.
         selectedPlace.name = "Event Location"
         selectedPlace.details = "Generated location in Pullman, WA"
@@ -110,7 +110,7 @@ struct PlaceSelectionView: View {
         context.performAndWait {
             do {
                 try context.save()
-                print("Place saved:  \(selectedPlace.name ?? "nil") at (\(selectedPlace.latitude), \(selectedPlace.longitude))")
+                print("Place saved:  \(selectedPlace.name) at (\(selectedPlace.latitude), \(selectedPlace.longitude))")
             } catch {
                 print("Failed to save place:  \(error)")
             }

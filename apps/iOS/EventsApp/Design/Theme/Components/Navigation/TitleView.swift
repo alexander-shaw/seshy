@@ -47,14 +47,14 @@ public struct TitleView<Trailing: View>: View {
                 .allowsTightening(false)
                 .truncationMode(.tail)
                 .padding(.leading, !canGoBack ? theme.spacing.medium : 0)
+                .frame(minHeight: theme.sizes.iconButton)
 
             Spacer()
 
             trailing()
         }
-        .padding(.top, theme.spacing.small)
+        .padding(.vertical, theme.spacing.small)
         .padding(.trailing, theme.spacing.small)
-        .padding(.bottom, theme.spacing.small)
         .overlay(alignment: .bottom) {
             Divider()
                 .foregroundStyle(theme.colors.surface)

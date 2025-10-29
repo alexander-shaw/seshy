@@ -28,6 +28,9 @@ struct EventStartEndView: View {
     @State private var expandedEndDate: Bool = false
     @State private var expandedEndTime: Bool = false
     
+    // Track if user is currently adjusting end time to allow manual override.
+    @State private var isUserAdjustingEnd: Bool = false
+    
     var body: some View {
         VStack(spacing: 0) {
             // MARK: - ALL DAY TOGGLE:
@@ -42,8 +45,8 @@ struct EventStartEndView: View {
                     .tint(theme.colors.accent)
             }
             .padding(.horizontal, theme.spacing.medium)
-            .padding(.vertical, theme.spacing.small)
-            
+            .frame(minHeight: theme.sizes.iconButton)
+
             Divider()
                 .foregroundStyle(theme.colors.surface)
             
@@ -60,7 +63,8 @@ struct EventStartEndView: View {
                 onTimeChange: { updateStartTime(timeComponent: $0) },
                 showTimeFields: !isAllDay
             )
-            
+            .frame(minHeight: theme.sizes.iconButton)
+
             Divider()
                 .foregroundStyle(theme.colors.surface)
 
@@ -75,10 +79,19 @@ struct EventStartEndView: View {
                     expandedTime: $expandedEndTime,
                     dateFormat: formattedEndDate,
                     timeFormat: formattedEndTime,
-                    onDateChange: { updateEndTime(dateComponent: $0) },
-                    onTimeChange: { updateEndTime(timeComponent: $0) },
+                    onDateChange: { 
+                        isUserAdjustingEnd = true
+                        updateEndTime(dateComponent: $0) 
+                        isUserAdjustingEnd = false
+                    },
+                    onTimeChange: { 
+                        isUserAdjustingEnd = true
+                        updateEndTime(timeComponent: $0) 
+                        isUserAdjustingEnd = false
+                    },
                     showTimeFields: !isAllDay
                 )
+                .frame(minHeight: theme.sizes.iconButton)
             }
         }
         .background(theme.colors.surface)
@@ -187,28 +200,11 @@ struct EventStartEndView: View {
         if let combinedDate = calendar.date(from: combinedComponents) {
             startTime = combinedDate
             
-            // Check if we need to auto-adjust the end date/time.
-            if let currentEnd = endTime {
-                // Extract just the date components (ignoring time) for comparison.
-                let startDateOnly = calendar.startOfDay(for: combinedDate)
-                let endDateOnly = calendar.startOfDay(for: currentEnd)
-                
-                // If start date is in the future compared to end date, adjust end date to match start date.
-                if startDateOnly > endDateOnly {
-                    // Keep the end time the same, but update the date to match start date.
-                    let endTimeComponents = calendar.dateComponents([.hour, .minute], from: currentEnd)
-                    var newEndComponents = dateComponents
-                    newEndComponents.hour = endTimeComponents.hour
-                    newEndComponents.minute = endTimeComponents.minute
-                    
-                    if let newEndDate = calendar.date(from: newEndComponents) {
-                        endTime = newEndDate
-                        internalEndDate = newEndDate
-                        internalEndTime = newEndDate
-                    }
-                }
-                // If end time is before or equal to start time, add 2 hours to start time.
-                else if currentEnd <= combinedDate {
+            // Only auto-adjust end time if user is NOT manually adjusting it
+            // and if end time is before or equal to start time
+            if let currentEnd = endTime, !isUserAdjustingEnd {
+                if currentEnd <= combinedDate {
+                    // Auto-adjust: add 2 hours to start time
                     let newEnd = calendar.date(byAdding: .hour, value: 2, to: combinedDate) ?? combinedDate
                     endTime = newEnd
                     internalEndDate = newEnd
@@ -233,21 +229,14 @@ struct EventStartEndView: View {
         combinedComponents.minute = timeComponents.minute
         
         if let combinedDate = calendar.date(from: combinedComponents) {
-            // Ensure end time is after start time.
-            if let start = startTime, combinedDate <= start {
-                // Auto-adjust to be 1 hour after start time.
-                let adjustedEnd = calendar.date(byAdding: .hour, value: 1, to: start) ?? start
-                endTime = adjustedEnd
-                internalEndDate = adjustedEnd
-                internalEndTime = adjustedEnd
-            } else {
-                endTime = combinedDate
-            }
+            // Allow user to set end time before start if they're manually adjusting.
+            // Only auto-adjust if user changes start time and end becomes invalid.
+            endTime = combinedDate
             
             // Recalculate duration when end time changes.
             if let start = startTime {
                 let duration = Int64(combinedDate.timeIntervalSince(start) / 60)
-                durationMinutes = max(0, duration)
+                durationMinutes = duration  // Allow negative durations if user explicitly sets it.
             }
         }
     }
@@ -287,10 +276,10 @@ private struct DateTimePickerRow: View {
                 }) {
                     Text(dateFormat)
                         .captionTitleStyle()
-                        .padding(.vertical, theme.spacing.small / 2)
-                        .padding(.horizontal, theme.spacing.small)
-                        .background(expandedDate ? theme.colors.background : Color.clear)
-                        .cornerRadius(6)
+                        // .padding(.vertical, theme.spacing.small / 2)
+                        // .padding(.horizontal, theme.spacing.small)
+                        // .background(expandedDate ? theme.colors.background : Color.clear)
+                        // .cornerRadius(6)
                 }
                 .hapticFeedback(.soft)
 
@@ -304,10 +293,10 @@ private struct DateTimePickerRow: View {
                     }) {
                         Text(timeFormat)
                             .captionTitleStyle()
-                            .padding(.vertical, theme.spacing.small / 2)
-                            .padding(.horizontal, theme.spacing.small)
-                            .background(expandedTime ? theme.colors.background : Color.clear)
-                            .cornerRadius(6)
+                            // .padding(.vertical, theme.spacing.small / 2)
+                            // .padding(.horizontal, theme.spacing.small)
+                            // .background(expandedTime ? theme.colors.background : Color.clear)
+                            // .cornerRadius(6)
                     }
                     .hapticFeedback(.soft)
                 }

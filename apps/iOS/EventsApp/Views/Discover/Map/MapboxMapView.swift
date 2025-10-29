@@ -16,21 +16,20 @@ struct MapboxMapView: UIViewRepresentable {
     @Binding var zoomLevel: Double
     var events: [UserEvent] = []
 
-    // Choose the style you want; default is .dark.
-    var styleURI: StyleURI = .standard  // TODO: Implement dark & light modes via AppeareanceMode and UserSettings.
+    var styleURI: StyleURI = .standard
 
     func makeUIView(context: Context) -> UIView {
-        // Initial camera based on the incoming bindings
+        // Initial camera based on the incoming bindings.
         let camera = CameraOptions(center: centerCoordinate, zoom: zoomLevel)
 
-        // Create the Mapbox map view
+        // Create the Mapbox map view.
         let initOptions = MapInitOptions(cameraOptions: camera)
         let mapView = MapboxMaps.MapView(frame: .zero, mapInitOptions: initOptions)
 
-        // Keep a reference for later updates
+        // Keep a reference for later updates.
         context.coordinator.mapView = mapView
 
-        // Optional: simple ornament & gesture polish (safe to remove)
+        // Ornament & gesture polish.
         mapView.ornaments.options.compass.visibility = .visible
         mapView.ornaments.options.scaleBar.visibility = .hidden
         mapView.ornaments.options.logo.margins = .init(x: 12, y: 12)

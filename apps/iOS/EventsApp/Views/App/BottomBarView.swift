@@ -21,6 +21,7 @@ struct BottomBarView: View {
                 TabButton(icon: "location.north.fill", tab: .discoverTab, selectedTab: tabManager.currentTab) {
                     tabManager.select(.discoverTab)
                 }
+                .hapticFeedback(.light)
 
                 Spacer()
 
@@ -29,12 +30,28 @@ struct BottomBarView: View {
                 TabButton(icon: "checkmark.circle.fill", tab: .calendarTab, selectedTab: tabManager.currentTab) {
                     tabManager.select(.calendarTab)
                 }
+                .hapticFeedback(.light)
+
+                Spacer()
+
+                TabButton(icon: "plus", tab: .newEventTab, selectedTab: tabManager.currentTab) {
+                    tabManager.select(.newEventTab)
+                }
+                .hapticFeedback(.light)
+
+                Spacer()
+
+                TabButton(icon: "bell.fill", tab: .notificationsTab, selectedTab: tabManager.currentTab) {
+                    tabManager.select(.notificationsTab)
+                }
+                .hapticFeedback(.light)
 
                 Spacer()
 
                 TabButton(icon: "person.fill", tab: .profileTab, selectedTab: tabManager.currentTab) {
                     tabManager.select(.profileTab)
                 }
+                .hapticFeedback(.light)
 
                 Spacer()
             }

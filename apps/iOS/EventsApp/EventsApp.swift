@@ -7,7 +7,7 @@
 
 import SwiftUI
 import Combine  // Required for @Published and ObservableObject.
-public import CoreData
+import CoreData
 import CoreDomain
 
 @main
@@ -20,6 +20,8 @@ struct EventsApp: App {
     
     @State private var discoverPath = NavigationPath()
     @State private var calendarPath = NavigationPath()
+    @State private var newEventPath = NavigationPath()
+    @State private var notificationsPath = NavigationPath()
     @State private var profilePath = NavigationPath()
     
     init() {
@@ -57,6 +59,8 @@ struct EventsApp: App {
                             tabManager: tabManager,
                             discoverPath: $discoverPath,
                             calendarPath: $calendarPath,
+                            newEventPath: $newEventPath,
+                            notificationsPath: $notificationsPath,
                             profilePath: $profilePath
                         )
                         .onOpenURL { handleDeepLink($0) }

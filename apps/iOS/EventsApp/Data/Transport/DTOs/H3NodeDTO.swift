@@ -26,4 +26,3 @@ public struct H3NodeDTO: Codable, Sendable, Equatable {
     public let schemaVersion: Int
 }
 
-

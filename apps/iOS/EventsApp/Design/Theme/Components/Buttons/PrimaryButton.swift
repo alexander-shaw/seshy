@@ -37,8 +37,9 @@ public struct PrimaryButton: View {
                 }
             }
             .foregroundStyle(isDisabled ? theme.colors.offText : theme.colors.mainText)
-            .padding(.vertical, theme.spacing.medium)
+            .padding(.vertical, theme.spacing.small * 1.5)
             .frame(maxWidth: theme.sizes.screenWidth / 2)
+            .frame(minHeight: theme.sizes.iconButton)
             .background(buttonBackground)
             .clipShape(Capsule())
         }

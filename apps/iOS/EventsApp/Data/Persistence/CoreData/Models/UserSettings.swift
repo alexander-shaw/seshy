@@ -51,12 +51,35 @@ extension UserSettings {
     }
 
     public var preferredUnits: Units {
-        get { Units(rawValue: preferredUnitsRaw) ?? .imperial }
-        set { preferredUnitsRaw = newValue.rawValue }
+        get {
+            // Use saved value if present.
+            if let saved = Units(rawValue: preferredUnitsRaw) {
+                return saved
+            }
+            // Fallback to device setting.
+            switch Locale.current.measurementSystem {
+                case .metric:
+                    return .metric
+                // Treat UK/US as imperial for distance.
+                case .uk, .us:
+                    return .imperial
+                default:
+                    return .metric
+            }
+        }
+        set {
+            preferredUnitsRaw = newValue.rawValue
+        }
     }
     
     public var mapStyle: MapStyle {
-        get { MapStyle(rawValue: mapStyleRaw) ?? ((appearanceMode == .darkMode) ? .darkMap : .lightMap)}
+        get { 
+            if let style = MapStyle(rawValue: mapStyleRaw) {
+                return style
+            }
+            // Default follows appearance mode
+            return (appearanceMode == .darkMode) ? .darkMap : .lightMap
+        }
         set { mapStyleRaw = newValue.rawValue }
     }
 

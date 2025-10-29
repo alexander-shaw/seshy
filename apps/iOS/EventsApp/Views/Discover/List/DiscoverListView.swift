@@ -32,11 +32,7 @@ struct DiscoverListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Events", trailing: {
-                IconButton(icon: "plus") {
-                    discoverMapFlow = .openNewEvent
-                }
-            })
+            TitleView(titleText: "Events")
 
             // TODO: Date Picker Button.
             // Tap: Cycles through a short list: 2d -> 2w -> 1m -> 6m -> All.

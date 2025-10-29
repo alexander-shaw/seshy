@@ -74,4 +74,3 @@ public struct ProfileMediaDTO: Codable, Sendable, Equatable {
     public let schemaVersion: Int
 }
 
-
