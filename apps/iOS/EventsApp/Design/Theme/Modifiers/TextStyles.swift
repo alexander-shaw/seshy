@@ -92,7 +92,6 @@ private struct ButtonTextStyle: ViewModifier {
             .font(theme.typography.body)
             .foregroundStyle(theme.colors.mainText)
             .fontWeight(.heavy)
-            .textCase(.uppercase)
             .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -103,7 +102,7 @@ private struct BodyTextStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(theme.typography.body)
-            .foregroundStyle(theme.colors.offText)
+            .foregroundStyle(theme.colors.mainText)
             .minimumScaleFactor(0.90)
             .fixedSize(horizontal: false, vertical: true)
     }

@@ -89,7 +89,7 @@ struct TabButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(theme.typography.icon)
+                .font(tab == .newEventTab ? theme.typography.title : theme.typography.icon)
                 .foregroundStyle(selectedTab == tab ? theme.colors.mainText : theme.colors.offText)
                 .frame(minWidth: theme.sizes.iconButton)
                 .contentShape(Rectangle())

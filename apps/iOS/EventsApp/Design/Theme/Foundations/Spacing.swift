@@ -23,8 +23,8 @@ public struct Spacing: Equatable {
     }
 
     public static let primary = Spacing(
-        large: 48,
-        medium: 24,
-        small: 12
+        large: 40,
+        medium: 20,
+        small: 10
     )
 }

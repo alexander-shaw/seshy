@@ -5,6 +5,8 @@
 //  Created by Шоу on 10/1/25.
 //
 
+// TODO: Move Notifications View to Calendar Tab as a trailing button in the Title View.  Replace here and elsewhere with Messages Tab/View.
+
 import SwiftUI
 import Combine
 
@@ -16,23 +18,12 @@ enum Tab: String, CaseIterable {
     case profileTab = "Profile"
 }
 
-enum DiscoverViewMode {
-    case map
-    case list
-}
-
 class TabManager: ObservableObject {
     @Published var currentTab: Tab = .discoverTab
-    @Published var discoverViewMode: DiscoverViewMode = .map
     var lastTab: Tab = .discoverTab
 
     func select(_ newTab: Tab) {
-        // If tapping the same tab, toggle discoverViewMode.
-        if currentTab == newTab && newTab == .discoverTab {
-            discoverViewMode = discoverViewMode == .map ? .list : .map
-        } else {
-            lastTab = currentTab
-            currentTab = newTab
-        }
+        lastTab = currentTab
+        currentTab = newTab
     }
 }

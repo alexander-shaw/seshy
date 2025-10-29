@@ -2,7 +2,7 @@
 //  DiscoverMapViewController.swift
 //  EventsApp
 //
-//  Created on 10/25/25.
+//  Created by Шоу on 10/25/25.
 //
 
 import UIKit
@@ -233,4 +233,3 @@ class DiscoverMapViewController: UIViewController {
         return FeatureCollection(features: features)
     }
 }
-

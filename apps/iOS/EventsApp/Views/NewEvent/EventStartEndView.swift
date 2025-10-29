@@ -15,6 +15,7 @@ struct EventStartEndView: View {
     @Binding var endTime: Date?
     @Binding var durationMinutes: Int64?
     @Binding var isAllDay: Bool
+    @Binding var selectedColorHex: String
 
     // Local state for non-nil date handling.
     @State private var internalStartDate: Date = Date()
@@ -37,15 +38,16 @@ struct EventStartEndView: View {
             HStack {
                 Text("ALL DAY")
                     .captionTitleStyle()
-                
+
                 Spacer()
                 
                 Toggle("", isOn: $isAllDay)
                     .labelsHidden()
-                    .tint(theme.colors.accent)
+                    .tint(Color(hex: selectedColorHex))
             }
+            .padding(.vertical, theme.spacing.small)
             .padding(.horizontal, theme.spacing.medium)
-            .frame(minHeight: theme.sizes.iconButton)
+            .frame(minHeight: theme.spacing.large)
 
             Divider()
                 .foregroundStyle(theme.colors.surface)
@@ -57,13 +59,14 @@ struct EventStartEndView: View {
                 time: $internalStartTime,
                 expandedDate: $expandedStartDate,
                 expandedTime: $expandedStartTime,
+                selectedColorHex: $selectedColorHex,
                 dateFormat: formattedStartDate,
                 timeFormat: formattedStartTime,
                 onDateChange: { updateStartTime(dateComponent: $0) },
                 onTimeChange: { updateStartTime(timeComponent: $0) },
                 showTimeFields: !isAllDay
             )
-            .frame(minHeight: theme.sizes.iconButton)
+            .frame(minHeight: theme.spacing.large)
 
             Divider()
                 .foregroundStyle(theme.colors.surface)
@@ -77,6 +80,7 @@ struct EventStartEndView: View {
                     time: $internalEndTime,
                     expandedDate: $expandedEndDate,
                     expandedTime: $expandedEndTime,
+                    selectedColorHex: $selectedColorHex,
                     dateFormat: formattedEndDate,
                     timeFormat: formattedEndTime,
                     onDateChange: { 
@@ -91,7 +95,7 @@ struct EventStartEndView: View {
                     },
                     showTimeFields: !isAllDay
                 )
-                .frame(minHeight: theme.sizes.iconButton)
+                .frame(minHeight: theme.spacing.large)
             }
         }
         .background(theme.colors.surface)
@@ -251,6 +255,7 @@ private struct DateTimePickerRow: View {
     @Binding var time: Date
     @Binding var expandedDate: Bool
     @Binding var expandedTime: Bool
+    @Binding var selectedColorHex: String
 
     let dateFormat: String
     let timeFormat: String
@@ -276,11 +281,8 @@ private struct DateTimePickerRow: View {
                 }) {
                     Text(dateFormat)
                         .captionTitleStyle()
-                        // .padding(.vertical, theme.spacing.small / 2)
-                        // .padding(.horizontal, theme.spacing.small)
-                        // .background(expandedDate ? theme.colors.background : Color.clear)
-                        // .cornerRadius(6)
                 }
+                .frame(minHeight: theme.spacing.large)
                 .hapticFeedback(.soft)
 
                 // Time field (shown only when showTimeFields is true).
@@ -293,11 +295,8 @@ private struct DateTimePickerRow: View {
                     }) {
                         Text(timeFormat)
                             .captionTitleStyle()
-                            // .padding(.vertical, theme.spacing.small / 2)
-                            // .padding(.horizontal, theme.spacing.small)
-                            // .background(expandedTime ? theme.colors.background : Color.clear)
-                            // .cornerRadius(6)
                     }
+                    .frame(minHeight: theme.spacing.large)
                     .hapticFeedback(.soft)
                 }
             }
@@ -312,8 +311,8 @@ private struct DateTimePickerRow: View {
                     displayedComponents: .date
                 )
                 .datePickerStyle(.graphical)
-                .padding(.horizontal, theme.spacing.small)
-                .padding(.bottom, theme.spacing.small)
+                .tint(Color(hex: selectedColorHex))
+                .padding([.horizontal, .bottom], theme.spacing.small)
                 .onChange(of: date) { _, newDate in
                     onDateChange(newDate)
                 }
@@ -325,7 +324,7 @@ private struct DateTimePickerRow: View {
                     displayedComponents: .hourAndMinute
                 )
                 .datePickerStyle(.wheel)
-                .frame(height: 180)
+
                 .onChange(of: time) { _, newTime in
                     onTimeChange(newTime)
                 }

@@ -5,14 +5,17 @@
 //  Created on 10/25/25.
 //
 
+// TODO: Continue refactoring this code.
+
 import SwiftUI
 import CoreDomain
 
 struct SettingsView: View {
     @StateObject private var viewModel: UserSettingsViewModel
     @Environment(\.dismiss) private var dismiss
-    
-    // Local state for tracking changes
+    @Environment(\.theme) private var theme
+
+    // Local state for tracking changes.
     @State private var originalAppearanceMode: AppearanceMode
     @State private var originalPreferredUnits: Units
     
@@ -22,45 +25,50 @@ struct SettingsView: View {
         _originalPreferredUnits = State(initialValue: viewModel.preferredUnits)
     }
     
-    // Computed property to detect if there are unsaved changes
+    // Computed property to detect if there are unsaved changes.
     private var hasUnsavedChanges: Bool {
-        viewModel.appearanceMode != originalAppearanceMode ||
-        viewModel.preferredUnits != originalPreferredUnits
+        viewModel.appearanceMode != originalAppearanceMode || viewModel.preferredUnits != originalPreferredUnits
     }
     
     var body: some View {
-        NavigationStack {
-            Form {
-                appearanceSection
-                unitsSection
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        // Revert changes
-                        viewModel.appearanceMode = originalAppearanceMode
-                        viewModel.preferredUnits = originalPreferredUnits
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+        VStack(alignment: .leading, spacing: 0) {
+            TitleView(
+                titleText: "Settings",
+                canGoBack: true,
+                backIcon: "xmark",
+                onBack: {
+                    // Revert changes.
+                    viewModel.appearanceMode = originalAppearanceMode
+                    viewModel.preferredUnits = originalPreferredUnits
+                    dismiss()
+                }, trailing: {
+                    IconButton(icon: "checkmark") {
                         viewModel.persist()
-                        // Update originals
+
+                        // Update originals.
                         originalAppearanceMode = viewModel.appearanceMode
                         originalPreferredUnits = viewModel.preferredUnits
                         dismiss()
                     }
-                    .disabled(!hasUnsavedChanges)
+                    // .disabled(!hasUnsavedChanges)
                 }
+            )
+
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: theme.spacing.medium) {
+                    appearanceSection
+
+                    unitsSection
+                }
+                .padding(.horizontal, theme.spacing.medium)
             }
+
+            Spacer(minLength: 0)
         }
+        .background(theme.colors.background)
     }
     
-    // MARK: - Appearance Section
-    
+    // MARK: - APPEARANCE:
     private var appearanceSection: some View {
         Section("Appearance") {
             AppearanceButtonsView(
@@ -72,8 +80,7 @@ struct SettingsView: View {
         }
     }
     
-    // MARK: - Units Section
-    
+    // MARK: - UNITS:
     private var unitsSection: some View {
         Section {
             HStack {
@@ -105,7 +112,7 @@ struct SettingsView: View {
                     }
                     
                     Button(action: {
-                        viewModel.selectUnits(nil) // Use system default
+                        viewModel.selectUnits(nil)  // Use system default.
                     }) {
                         HStack {
                             Text("System Default")
@@ -115,10 +122,8 @@ struct SettingsView: View {
                         }
                     }
                 } label: {
-            Text(selectedUnitsLabel)
-                .foregroundColor(.secondary)
-                .accessibilityLabel("Units selection: \(selectedUnitsLabel)")
-                .accessibilityHint("Tap to change units")
+                    Text(selectedUnitsLabel)
+                        .foregroundColor(.secondary)
                 }
             }
             
@@ -151,4 +156,3 @@ struct SettingsView: View {
             : "System default: \(systemDefault)"
     }
 }
-

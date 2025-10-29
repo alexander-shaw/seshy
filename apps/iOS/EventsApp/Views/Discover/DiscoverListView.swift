@@ -1,22 +1,21 @@
 //
-//  DiscoverView.swift
+//  DiscoverListView.swift
 //  EventsApp
 //
-//  Created by Шоу on 10/1/25.
+//  Created by Шоу on 10/25/25.
 //
 
 import SwiftUI
-import CoreLocation
-import MapboxMaps
 import CoreData
 import CoreDomain
 
 enum DiscoverListFlow: Identifiable {
-    case openNewEvent
+    case openEvent(event: UserEvent)
 
     var id: String {
         switch self {
-            case .openNewEvent: return "openNewEvent"
+            case .openEvent(let event):
+                return event.objectID.uriRepresentation().absoluteString
         }
     }
 }
@@ -25,14 +24,14 @@ struct DiscoverListView: View {
     @Binding var bottomBarHeight: CGFloat
     @Environment(\.theme) private var theme
 
-    @State private var discoverMapFlow: DiscoverListFlow?
+    @State private var selectedEvent: DiscoverListFlow?
     @State private var events: [UserEvent] = []
     
     private let repository: UserEventRepository = CoreDataUserEventRepository()
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Events")
+            TitleView(titleText: "Discover")
 
             // TODO: Date Picker Button.
             // Tap: Cycles through a short list: 2d -> 2w -> 1m -> 6m -> All.
@@ -44,7 +43,7 @@ struct DiscoverListView: View {
                 VStack {
                     Spacer()
 
-                    Text("No events found.")
+                    Text("Requesting new events.")
                         .captionTextStyle()
                         .padding(.horizontal, theme.spacing.medium)
 
@@ -52,22 +51,24 @@ struct DiscoverListView: View {
                 }
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 12) {
+                    LazyVStack(spacing: theme.spacing.medium) {
                         ForEach(events, id: \.objectID) { event in
-                            EventListRow(event: event)
+                            Button(action: {
+                                selectedEvent = .openEvent(event: event)
+                            }) {
+                                EventPreview(event: event)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .padding(.top, theme.spacing.small)
-                    .padding(.horizontal, theme.spacing.medium)
                     .padding(.bottom, bottomBarHeight)
                 }
             }
         }
         .background(theme.colors.background)
-        .fullScreenCover(item: $discoverMapFlow) { flow in
-            switch flow {
-                case .openNewEvent:
-                    NewEventView()
+        .sheet(item: $selectedEvent) { flow in
+            if case .openEvent(let event) = flow {
+                EventFullSheetView(event: event)
             }
         }
         .onAppear {

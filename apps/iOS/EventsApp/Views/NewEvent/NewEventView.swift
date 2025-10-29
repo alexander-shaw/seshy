@@ -5,7 +5,7 @@
 //  Created by Шоу on 10/20/25.
 //
 
-// TODO: Event name should be focused.
+// TODO: Implement linear gradient on bottom buttons overlay.
 
 import SwiftUI
 import CoreDomain
@@ -29,78 +29,76 @@ struct NewEventView: View {
     }
 
     var body: some View {
-        ZStack {
-            VStack(alignment: .leading, spacing: theme.spacing.large) {
-                ScrollView(.vertical) {
-                    VStack(alignment: .leading, spacing: theme.spacing.medium) {
-                        HStack {
-                            // MARK: - EXIT:
-                            IconButton(icon: "minus") {
-                                if let tabManager = tabManager {
-                                    // Using the tabManager, go back to the last tab.
-                                    tabManager.select(tabManager.lastTab)
-                                } else {
-                                    dismiss()
-                                }
-                            }
-
-                            Spacer()
-
-                            // MARK: - DRAFTS:
-                            if hasDrafts {
-                                IconButton(icon: "doc.plaintext") {
-                                    dismiss()  // TODO: Show drafts as a context menu.
-                                }
+        VStack(spacing: 0) {
+            // Scrollable content.
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: theme.spacing.medium) {
+                    HStack {
+                        // MARK: - EXIT:
+                        IconButton(icon: "minus") {
+                            if let tabManager = tabManager {
+                                tabManager.select(tabManager.lastTab)
+                            } else {
+                                dismiss()
                             }
                         }
-                        .padding(.horizontal, theme.spacing.small)
 
-                        // MARK: - NAME:
-                        TextFieldView(
-                            placeholder: "Name",
-                            text: $viewModel.name
-                        )
+                        Spacer()
+
+                        // MARK: - DRAFTS:
+                        if hasDrafts {
+                            IconButton(icon: "doc.plaintext") {
+                                dismiss()  // TODO: Show drafts as a context menu.
+                            }
+                        }
+                    }
+                    .padding(.top, theme.spacing.large)
+                    .padding(.horizontal, theme.spacing.medium)
+
+                    // MARK: - NAME:
+                    TextFieldView(
+                        placeholder: "Name",
+                        text: $viewModel.name
+                    )
+                    .padding(.horizontal, theme.spacing.medium)
+
+                    // MARK: - COLOR:
+                    EventColorPicker(selectedColorHex: $viewModel.brandColor)
+
+                    // MARK: - STARTS / ENDS:
+                    EventStartEndView(startTime: $viewModel.startTime, endTime: $viewModel.endTime, durationMinutes: $viewModel.durationMinutes, isAllDay: $viewModel.isAllDay, selectedColorHex: $viewModel.brandColor)
                         .padding(.horizontal, theme.spacing.medium)
 
-                        // MARK: - COLOR:
-                        EventColorPicker(selectedColorHex: $viewModel.brandColor)  // No horizontal padding.
+                    // MARK: - LOCATION:
+                    HStack {
+                        Image(systemName: "location.fill")
+                            .iconStyle()
+                            .foregroundStyle(theme.colors.accent)
 
-                        // MARK: - STARTS / ENDS:
-                        EventStartEndView(startTime: $viewModel.startTime, endTime: $viewModel.endTime, durationMinutes: $viewModel.durationMinutes, isAllDay: $viewModel.isAllDay)
-                            .padding(.horizontal, theme.spacing.medium)
+                        Text(viewModel.location.name)
+                            .captionTitleStyle()
 
-                        // MARK: - PLACE:
-                        HStack {
-                            Image(systemName: "location.fill")
+                        Spacer()
+
+                        Button {
+                            showPlaceSelection = true
+                        } label: {
+                            Image(systemName: "chevron.right")
                                 .iconStyle()
-                                .foregroundStyle(theme.colors.accent)
-
-                            Text(viewModel.location.name)
-                                .captionTitleStyle()
-
-                            Spacer()
-
-                            Button {
-                                showPlaceSelection = true
-                            } label: {
-                                Image(systemName: "chevron.right")
-                                    .iconStyle()
-                            }
                         }
-                        .padding(.horizontal, theme.spacing.medium)
-                        .padding(.vertical, theme.spacing.small)
-                        .background(theme.colors.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .padding(.horizontal, theme.spacing.medium)
                     }
                     .padding(.vertical, theme.spacing.small)
+                    .padding(.horizontal, theme.spacing.medium)
+                    .frame(minHeight: theme.spacing.large)
+                    .background(theme.colors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal, theme.spacing.medium)
                 }
+                .padding(.vertical, theme.spacing.small)
+                .padding(.bottom, 100)  // Space for bottom buttons.
             }
-
-            VStack {
-                Spacer()
-
-                // MARK: - SAVE / SEND:
+            // MARK: Bottom Buttons Overlay.
+            .overlay(alignment: .bottom) {
                 HStack(spacing: theme.spacing.small) {
                     PrimaryButton(
                         title: "Save Draft",

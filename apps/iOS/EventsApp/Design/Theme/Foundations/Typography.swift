@@ -34,9 +34,9 @@ public struct Typography: Equatable {
     public static let primary = Typography(
         largeTitle: .system(size: 48, weight: .black),
         title: .system(size: 28, weight: .heavy),
-        headline: .system(size: 24, weight: .bold),
+        headline: .system(size: 24, weight: .heavy),
         icon: .system(size: 18, weight: .black),
-        body: .system(size: 15, weight: .regular),
-        caption: .system(size: 12, weight: .regular)
+        body: .system(size: 15, weight: .bold),
+        caption: .system(size: 12, weight: .bold)
     )
 }

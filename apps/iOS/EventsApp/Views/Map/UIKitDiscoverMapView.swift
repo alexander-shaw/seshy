@@ -2,7 +2,7 @@
 //  UIKitDiscoverMapView.swift
 //  EventsApp
 //
-//  Created on 10/25/25.
+//  Created by Шоу on 10/25/25.
 //
 
 import SwiftUI

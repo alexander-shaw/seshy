@@ -32,7 +32,7 @@ struct DiscoverMapView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Discover")
+            TitleView(titleText: "Map")
 
             // Dark-styled Mapbox map with hexagons for events.
             UIKitDiscoverMapView(events: events, style: .dark)
@@ -71,16 +71,16 @@ struct DiscoverMapView: View {
                 let fetchedEvents = try await repository.getPublishedEvents()
                 self.events = fetchedEvents
                 
-                print("✅ Fetched \(fetchedEvents.count) events")
+                print("Fetched \(fetchedEvents.count) events.")
                 for (idx, event) in fetchedEvents.enumerated() {
                     if let place = event.location {
-                        print("  Event \(idx): \(event.name ?? "nil") at (\(place.latitude), \(place.longitude)), color: \(event.brandColor ?? "none")")
+                        print("  Event \(idx): \(event.name) at (\(place.latitude), \(place.longitude)) with color: \(event.brandColor)")
                     } else {
-                        print("  Event \(idx): \(event.name ?? "nil") - no location")
+                        print("  Event \(idx): \(event.name) - no location")
                     }
                 }
             } catch {
-                print("Failed to fetch events: \(error)")
+                print("Failed to fetch events:  \(error)")
             }
         }
     }
