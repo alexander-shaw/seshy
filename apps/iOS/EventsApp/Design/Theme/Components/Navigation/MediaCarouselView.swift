@@ -44,6 +44,49 @@ struct MediaCarouselView: View {
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 .frame(width: imageWidth, height: imageHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Bottom blur gradient to improve text/dot contrast.
+                .overlay(alignment: .bottom) {
+                    LinearGradient(
+                        gradient: Gradient(colors: [.clear, theme.colors.background.opacity(0.80)]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: imageHeight / 3)
+                    .frame(maxWidth: .infinity, alignment: .bottom)
+                    .clipped()
+                }
+                .overlay {
+                    // Transparent tap zones overlay: left half -> previous, right half -> next.
+                    GeometryReader { geo in
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                                    .onEnded { value in
+                                        // Treat as a tap only if movement is tiny to avoid
+                                        // interfering with sheet dismissal (vertical drags).
+                                        let translation = value.translation
+                                        let movementMagnitude = sqrt(translation.width * translation.width + translation.height * translation.height)
+                                        let tapMovementThreshold: CGFloat = 10
+                                        guard movementMagnitude <= tapMovementThreshold else {
+                                            return
+                                        }
+
+                                        let width = geo.size.width
+                                        let tappedLeft = value.startLocation.x < width / 2
+                                        if tappedLeft {
+                                            if currentIndex > 0 {
+                                                currentIndex -= 1
+                                            }
+                                        } else {
+                                            if currentIndex < mediaItems.count - 1 {
+                                                currentIndex += 1
+                                            }
+                                        }
+                                    }
+                            )
+                    }
+                }
                 .onChange(of: mediaItems.count) { _, newCount in
                     if newCount > 0 && currentIndex >= newCount {
                         currentIndex = 0

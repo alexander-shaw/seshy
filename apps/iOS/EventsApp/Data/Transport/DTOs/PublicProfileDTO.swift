@@ -27,3 +27,4 @@ public struct PublicProfileDTO: Codable, Sendable, Equatable {
     public let schemaVersion: Int
 }
 
+

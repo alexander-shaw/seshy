@@ -74,16 +74,6 @@ struct EventFullSheetView: View {
                                 .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
                         }
                         
-                        // MARK: Bottom Blur.
-                        LinearGradient(
-                            gradient: Gradient(colors: [.clear, theme.colors.background.opacity(0.80)]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .frame(height: (theme.sizes.screenWidth * 5 / 4) / 3)
-                        .frame(maxWidth: .infinity, alignment: .bottom)
-                        .clipped()
-                        
                         // MARK: Content Overlay.
                         VStack(alignment: .leading, spacing: theme.spacing.small) {
                             Spacer()
