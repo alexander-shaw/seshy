@@ -2,70 +2,49 @@
 //  MediaMapping.swift
 //  EventsApp
 //
-//  Created by Шоу on 10/14/25.
+//  Created by Шоу on 10/29/25.
 //
 
 import CoreData
 
 // CoreData -> DTO (nonisolated by default; safe to call from background context).
 @inline(__always)
-public func mapEventMediaToDTO(_ obj: EventMedia) -> EventMediaDTO {
-    EventMediaDTO(
+public func mapMediaToDTO(_ obj: Media) -> MediaDTO {
+    // Determine which owner ID to include.
+    var eventID: UUID? = nil
+    var userProfileID: UUID? = nil
+    var publicProfileID: UUID? = nil
+    
+    if let event = obj.event {
+        eventID = event.id
+    } else if let userProfile = obj.userProfile {
+        userProfileID = userProfile.id
+    } else if let publicProfile = obj.publicProfile {
+        publicProfileID = publicProfile.id
+    }
+    
+    return MediaDTO(
         id: obj.id,
         url: obj.url,
         position: obj.position,
         mimeType: obj.mimeType,
         averageColorHex: obj.averageColorHex,
-        eventID: obj.event.id,
+        eventID: eventID,
+        userProfileID: userProfileID,
+        publicProfileID: publicProfileID,
         createdAt: obj.createdAt,
         updatedAt: obj.updatedAt,
         deletedAt: obj.deletedAt,
         syncStatusRaw: obj.syncStatusRaw,
         lastCloudSyncedAt: obj.lastCloudSyncedAt,
-        schemaVersion: 1
-    )
-}
-
-@inline(__always)
-public func mapUserMediaToDTO(_ obj: UserMedia) -> UserMediaDTO {
-    UserMediaDTO(
-        id: obj.id,
-        url: obj.url,
-        position: obj.position,
-        mimeType: obj.mimeType,
-        averageColorHex: obj.averageColorHex,
-        ownerProfileID: obj.ownerProfile.id,
-        createdAt: obj.createdAt,
-        updatedAt: obj.updatedAt,
-        deletedAt: obj.deletedAt,
-        syncStatusRaw: obj.syncStatusRaw,
-        lastCloudSyncedAt: obj.lastCloudSyncedAt,
-        schemaVersion: 1
-    )
-}
-
-@inline(__always)
-public func mapProfileMediaToDTO(_ obj: ProfileMedia) -> ProfileMediaDTO {
-    ProfileMediaDTO(
-        id: obj.id,
-        url: obj.url,
-        position: obj.position,
-        mimeType: obj.mimeType,
-        averageColorHex: obj.averageColorHex,
-        profileID: obj.profile.id,
-        createdAt: obj.createdAt,
-        updatedAt: obj.updatedAt,
-        deletedAt: obj.deletedAt,
-        syncStatusRaw: obj.syncStatusRaw,
-        lastCloudSyncedAt: obj.lastCloudSyncedAt,
-        schemaVersion: 1
+        schemaVersion: Int(obj.schemaVersion)
     )
 }
 
 // DTO -> CoreData (create or update within the SAME context).
-extension EventMedia {
+extension Media {
     // Apply values from a DTO (call inside the context's perform block).
-    func apply(_ dto: EventMediaDTO) {
+    func apply(_ dto: MediaDTO) {
         id = dto.id
         url = dto.url
         position = dto.position
@@ -76,64 +55,37 @@ extension EventMedia {
         deletedAt = dto.deletedAt
         syncStatusRaw = dto.syncStatusRaw
         lastCloudSyncedAt = dto.lastCloudSyncedAt
-        // Event relationship handled separately.
+        schemaVersion = Int16(dto.schemaVersion)
+        // Owner relationships handled separately via insert methods.
     }
-
-    // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: EventMediaDTO, event: UserEvent) -> EventMedia {
-        let obj = EventMedia(context: ctx)
+    
+    // Convenience for inserting new managed object from DTO with event owner.
+    static func insert(into ctx: NSManagedObjectContext, from dto: MediaDTO, event: UserEvent) -> Media {
+        let obj = Media(context: ctx)
         obj.apply(dto)
         obj.event = event
+        obj.userProfile = nil
+        obj.publicProfile = nil
         return obj
     }
-}
-
-extension UserMedia {
-    // Apply values from a DTO (call inside the context's perform block).
-    func apply(_ dto: UserMediaDTO) {
-        id = dto.id
-        url = dto.url
-        position = dto.position
-        mimeType = dto.mimeType
-        averageColorHex = dto.averageColorHex
-        createdAt = dto.createdAt
-        updatedAt = dto.updatedAt
-        deletedAt = dto.deletedAt
-        syncStatusRaw = dto.syncStatusRaw
-        lastCloudSyncedAt = dto.lastCloudSyncedAt
-        // OwnerProfile relationship handled separately.
-    }
-
-    // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: UserMediaDTO, profile: UserProfile) -> UserMedia {
-        let obj = UserMedia(context: ctx)
+    
+    // Convenience for inserting new managed object from DTO with userProfile owner.
+    static func insert(into ctx: NSManagedObjectContext, from dto: MediaDTO, userProfile: UserProfile) -> Media {
+        let obj = Media(context: ctx)
         obj.apply(dto)
-        obj.ownerProfile = profile
+        obj.userProfile = userProfile
+        obj.event = nil
+        obj.publicProfile = nil
         return obj
     }
-}
-
-extension ProfileMedia {
-    // Apply values from a DTO (call inside the context's perform block).
-    func apply(_ dto: ProfileMediaDTO) {
-        id = dto.id
-        url = dto.url
-        position = dto.position
-        mimeType = dto.mimeType
-        averageColorHex = dto.averageColorHex
-        createdAt = dto.createdAt
-        updatedAt = dto.updatedAt
-        deletedAt = dto.deletedAt
-        syncStatusRaw = dto.syncStatusRaw
-        lastCloudSyncedAt = dto.lastCloudSyncedAt
-        // Profile relationship handled separately.
-    }
-
-    // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: ProfileMediaDTO, profile: PublicProfile) -> ProfileMedia {
-        let obj = ProfileMedia(context: ctx)
+    
+    // Convenience for inserting new managed object from DTO with publicProfile owner.
+    static func insert(into ctx: NSManagedObjectContext, from dto: MediaDTO, publicProfile: PublicProfile) -> Media {
+        let obj = Media(context: ctx)
         obj.apply(dto)
-        obj.profile = profile
+        obj.publicProfile = publicProfile
+        obj.event = nil
+        obj.userProfile = nil
         return obj
     }
 }

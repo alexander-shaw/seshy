@@ -33,7 +33,7 @@ final class PublicProfileViewModel: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var profiles: [PublicProfile] = []
-    @Published private(set) var media: [ProfileMedia] = []
+    @Published private(set) var media: [Media] = []
     
     private let context: NSManagedObjectContext
     private let repository: PublicProfileRepository
@@ -224,8 +224,8 @@ final class PublicProfileViewModel: ObservableObject {
         guard let currentProfile = profile else { return }
         
         do {
-            let newMedia = try await mediaRepository.createProfileMedia(
-                for: currentProfile.id,
+            let newMedia = try await mediaRepository.createMedia(
+                publicProfileID: currentProfile.id,
                 url: url,
                 mimeType: mimeType,
                 position: position
@@ -236,9 +236,9 @@ final class PublicProfileViewModel: ObservableObject {
         }
     }
     
-    func removeMedia(_ mediaItem: ProfileMedia) async {
+    func removeMedia(_ mediaItem: Media) async {
         do {
-            try await mediaRepository.deleteProfileMedia(mediaItem.id)
+            try await mediaRepository.deleteMedia(mediaItem.id)
             media.removeAll { $0.url == mediaItem.url }
         } catch {
             errorMessage = "Failed to remove media:  \(error.localizedDescription)"
@@ -250,8 +250,7 @@ final class PublicProfileViewModel: ObservableObject {
     private func loadMedia(for profile: PublicProfile?) async {
         guard let profile = profile else { return }
         do {
-            let mediaDTOs = try await mediaRepository.getProfileMedia(for: profile.id, limit: nil)
-            // TODO: work with DTOs until repository is updated.
+            media = try await mediaRepository.getMedia(publicProfileID: profile.id, limit: nil)
         } catch {
             errorMessage = "Failed to load media:  \(error.localizedDescription)"
         }

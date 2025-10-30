@@ -5,6 +5,8 @@
 //  Created by Шоу on 10/26/25.
 //
 
+// TODO: First item in the HStack should be the average color of the media items!
+
 import SwiftUI
 import UIKit
 

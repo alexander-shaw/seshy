@@ -19,30 +19,60 @@ struct EventFullSheetView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     
-    @State private var eventAction: EventAction?  // TODO: Refactor.
+    @State private var eventAction: EventAction?  // TODO: Refactor and move to CoreDomain.
     @State private var showActionSheet = false
+    
+    // Materialized and sorted media items.
+    private var sortedMedia: [Media] {
+        guard let mediaSet = event.media, !mediaSet.isEmpty else {
+            print("📸 [EventFullSheetView] Event '\(event.name)' has NO media")
+            return []
+        }
+        
+        let sorted = Array(mediaSet).sorted(by: { $0.position < $1.position })
+        
+        // Forces materialization of properties and verify files exist.
+        for media in sorted {
+            let _ = media.id
+            let url = media.url
+            let _ = media.position
+            let _ = media.mimeType
+            
+            // Verifies the media file exists.
+            let source = MediaURLResolver.resolveURL(for: media)
+            switch source {
+                case .local(let fileURL):
+                    print("Media \(media.id) - Local file exists:  \(fileURL.path)")
+                case .remote:
+                    print("Media \(media.id) - Remote URL:  \(url)")
+                case .missing:
+                    print("Media \(media.id) - FILE MISSING! URL:  \(url)")
+            }
+        }
+        
+        print("Displaying \(sorted.count) media items.")
+        return sorted
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    // MARK: Hero Image.
-                    // TODO: Add carousel of images + videos + map.
+                    // MARK: Media Carousel.
                     ZStack(alignment: .bottom) {
-                        Group {
-                            if let firstMedia = event.previews?.first(where: { !$0.url.isEmpty }),
-                               !firstMedia.url.isEmpty {
-                                RemoteMediaImage(
-                                    urlString: firstMedia.url,
-                                    targetSize: CGSize(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
-                                )
-                            } else {
-                                Rectangle()
-                                    .fill(Color(hex: event.brandColor) ?? theme.colors.accent)
-                            }
+                        if !sortedMedia.isEmpty {
+                            MediaCarouselView(
+                                mediaItems: sortedMedia,
+                                imageWidth: theme.sizes.screenWidth
+                            )
+                            .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
+                        } else {
+                            // Fallback when no media.
+                            // TODO: If there is a location, show a full-width map view snapshot here.
+                            Rectangle()
+                                .fill(Color(hex: event.brandColor) ?? theme.colors.accent)
+                                .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
                         }
-                        .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
-                        .clipped()
                         
                         // MARK: Bottom Blur.
                         LinearGradient(
@@ -193,7 +223,6 @@ struct EventFullSheetView: View {
                 )
             )
         }
-        // .ignoresSafeArea()
         .sheet(isPresented: $showActionSheet) {
             if let action = eventAction {
                 EventActionView(event: event, action: action)

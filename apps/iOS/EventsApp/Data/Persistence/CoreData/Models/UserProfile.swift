@@ -38,7 +38,7 @@ extension UserProfile {
 
     // Relationships:
     @NSManaged public var user: DeviceUser
-    @NSManaged public var media: Set<UserMedia>?
+    @NSManaged public var media: Set<Media>?
     @NSManaged public var tags: Set<Tag>?
 }
 

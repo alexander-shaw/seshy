@@ -29,6 +29,9 @@ final class UserProfileViewModel: ObservableObject {
     @Published var showGender: Bool = false
     @Published var isVerified: Bool = false
     @Published var tags: Set<Tag> = []
+    
+    // Temporary media items selected but not yet uploaded
+    @Published var selectedMediaItems: [MediaItem] = []
 
     // Input properties for forms.
     @Published var displayNameInput: String = ""
@@ -44,11 +47,13 @@ final class UserProfileViewModel: ObservableObject {
 
     private let context: NSManagedObjectContext
     private let repository: UserProfileRepository
+    private let mediaRepository: MediaRepository
     private var userProfile: UserProfile?
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserProfileRepository = CoreDataUserProfileRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserProfileRepository = CoreDataUserProfileRepository(), mediaRepository: MediaRepository = CoreDataMediaRepository()) {
         self.context = context
         self.repository = repository
+        self.mediaRepository = mediaRepository
     }
 
     func loadProfile(for user: DeviceUser?) async {
@@ -133,9 +138,95 @@ final class UserProfileViewModel: ObservableObject {
             showGender = showGenderToggle
             
             evaluateCompletion()
+            
+            // Upload selected media after profile is created/updated
+            guard let profile = userProfile, !selectedMediaItems.isEmpty else { return }
+            try? await uploadSelectedMedia(for: profile.id)
         } catch {
             print("Failed to save UserProfile: \(error)")
         }
+    }
+    
+    // MARK: - SELECTED MEDIA ITEMS MANAGEMENT:
+    
+    func addSelectedMedia(_ mediaItem: MediaItem) {
+        if !selectedMediaItems.contains(where: { $0.id == mediaItem.id }) {
+            var item = mediaItem
+            item.position = Int16(selectedMediaItems.count)
+            selectedMediaItems.append(item)
+        }
+    }
+    
+    func removeSelectedMedia(at index: Int) {
+        guard index < selectedMediaItems.count else { return }
+        selectedMediaItems.remove(at: index)
+        updateSelectedMediaPositions()
+    }
+    
+    func moveSelectedMedia(from source: Int, to destination: Int) {
+        guard source < selectedMediaItems.count && destination < selectedMediaItems.count else { return }
+        let movedItem = selectedMediaItems.remove(at: source)
+        selectedMediaItems.insert(movedItem, at: destination)
+        updateSelectedMediaPositions()
+    }
+    
+    private func updateSelectedMediaPositions() {
+        var updatedItems: [MediaItem] = []
+        for (index, item) in selectedMediaItems.enumerated() {
+            var updatedItem = item
+            updatedItem.position = Int16(index)
+            updatedItems.append(updatedItem)
+        }
+        selectedMediaItems = updatedItems
+    }
+    
+    /// Uploads selected media items and creates Media records for user profiles
+    private func uploadSelectedMedia(for profileID: UUID) async throws {
+        for (index, item) in selectedMediaItems.enumerated() {
+            // Create Media record first to get the UUID
+            let placeholderURL = "placeholder://\(UUID().uuidString)"
+            let createdMedia = try await mediaRepository.createMedia(
+                userProfileID: profileID,
+                url: placeholderURL,
+                mimeType: item.mimeType,
+                position: Int16(index)
+            )
+            
+            // Extract the media ID immediately to avoid Core Data context issues
+            let mediaID = createdMedia.id
+            
+            // Verify we have data to save
+            guard item.imageData != nil || item.videoData != nil else {
+                // If no data, delete the created media record
+                try? await mediaRepository.deleteMedia(mediaID)
+                continue
+            }
+            
+            // Save media data to persistent storage using the created media ID
+            let fileURL: URL
+            do {
+                if let imageData = item.imageData {
+                    fileURL = try MediaStorageHelper.saveMediaData(imageData, mediaID: mediaID, isVideo: false)
+                } else if let videoData = item.videoData {
+                    fileURL = try MediaStorageHelper.saveMediaData(videoData, mediaID: mediaID, isVideo: true)
+                } else {
+                    // This shouldn't happen due to guard above, but handle it anyway
+                    try? await mediaRepository.deleteMedia(mediaID)
+                    continue
+                }
+            } catch {
+                // If saving fails, clean up the media record
+                print("Failed to save media file: \(error)")
+                try? await mediaRepository.deleteMedia(mediaID)
+                throw error
+            }
+            
+            // Update the media record with the actual file URL
+            try await mediaRepository.updateMediaURL(mediaID, url: fileURL.absoluteString)
+        }
+        
+        // Clear selected items after upload
+        selectedMediaItems.removeAll()
     }
 
     func evaluateCompletion() {
@@ -182,9 +273,7 @@ final class UserProfileViewModel: ObservableObject {
     }
     
     var hasAtLeastOneMedia: Bool {
-        // This would check if user has uploaded media.
-        // For now, return false as a placeholder.
-        false
+        return selectedMediaItems.count > 0 || (userProfile?.media?.count ?? 0) > 0
     }
     
     var isProfileComplete: Bool {

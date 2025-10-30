@@ -38,8 +38,8 @@ extension UserEvent {
     @NSManaged public var inviteLink: String?
 
     // Relationships:
-    @NSManaged public var media: Set<UserMedia>?  // Durable, official gallery.
-    @NSManaged public var previews: Set<EventMedia>?  // Evictable cache thumbnails.
+    @NSManaged public var media: Set<Media>?  // Durable, official gallery.
+    @NSManaged public var previews: Set<Media>?  // Evictable cache thumbnails.
     @NSManaged public var tags: Set<Tag>?  // Highly encouraged.
     @NSManaged public var members: Set<Member>  // One or more.  Host, at minimum.
 }

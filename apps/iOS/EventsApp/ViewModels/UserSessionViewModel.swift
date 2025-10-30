@@ -133,6 +133,55 @@ final class UserSessionViewModel: ObservableObject {
             errorMessage = "Failed to sign out:  \(error.localizedDescription)"
         }
     }
+
+    // Signs out the user and deletes all locally stored user data.
+    // Removes the DeviceUser and directly owned records (login, profile, settings),
+    // and clears on-disk media cache/directories to ensure privacy.
+    func signOutAndDeleteLocalData() async {
+        await MainActor.run { isLoading = true; errorMessage = nil }
+
+        do {
+            let context = CoreDataStack.shared.viewContext
+
+            // Fetch the most recently logged-in user.
+            let req: NSFetchRequest<DeviceUser> = DeviceUser.fetchRequest()
+            req.predicate = NSPredicate(format: "login.lastLoginAt != nil")
+            req.sortDescriptors = [NSSortDescriptor(key: "login.lastLoginAt", ascending: false)]
+            req.fetchLimit = 1
+
+            if let user = try context.fetch(req).first {
+                // Manually delete related objects to avoid orphans due to Nullify rules.
+                if let settings = user.settings { context.delete(settings) }
+                if let profile = user.profile { context.delete(profile) }
+                if let login = user.login { context.delete(login) }
+
+                // Finally delete the user object.
+                context.delete(user)
+                try context.save()
+            }
+
+            // Best-effort: remove local media directory (images/videos) to clear cached user media.
+            do {
+                let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                let mediaDir = documents.appendingPathComponent("Media", isDirectory: true)
+                if FileManager.default.fileExists(atPath: mediaDir.path) {
+                    try FileManager.default.removeItem(at: mediaDir)
+                }
+            } catch {
+                // Non-fatal; log and continue.
+                print("⚠️ signOutAndDeleteLocalData: Failed to remove Media directory: \(error)")
+            }
+
+            // Reset session state.
+            currentUser = nil
+            isAuthenticated = false
+            appPhase = .welcome
+        } catch {
+            await MainActor.run { errorMessage = "Failed to sign out: \(error.localizedDescription)" }
+        }
+
+        await MainActor.run { isLoading = false }
+    }
     
     func setCurrentUser(_ user: DeviceUser) async {
         do {

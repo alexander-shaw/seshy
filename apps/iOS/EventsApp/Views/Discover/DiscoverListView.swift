@@ -66,6 +66,10 @@ struct DiscoverListView: View {
             }
         }
         .background(theme.colors.background)
+        .refreshable {
+            // Pull to refresh.
+            await fetchEventsAsync()
+        }
         .sheet(item: $selectedEvent) { flow in
             if case .openEvent(let event) = flow {
                 EventFullSheetView(event: event)
@@ -74,16 +78,58 @@ struct DiscoverListView: View {
         .onAppear {
             fetchEvents()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave)) { _ in
+            // Refresh when Core Data changes occur (after creating events or uploading media).
+            fetchEvents()
+        }
     }
 
     private func fetchEvents() {
         Task { @MainActor in
-            do {
-                let fetchedEvents = try await repository.getPublishedEvents()
-                self.events = fetchedEvents
-            } catch {
-                print("Failed to fetch events in list view:  \(error)")
+            await fetchEventsAsync()
+        }
+    }
+    
+    @MainActor
+    private func fetchEventsAsync() async {
+        do {
+            print("Fetching published events.")
+            let fetchedEvents = try await repository.getPublishedEvents()
+            print("Fetched \(fetchedEvents.count) events.")
+
+            // Log media info for each event.
+            for event in fetchedEvents {
+                if let mediaSet = event.media {
+                    print("Event \(event.name) has \(mediaSet.count) media items.")
+                    for media in mediaSet {
+                        // Check if file exists using MediaURLResolver logic.
+                        let filePath: String
+                        if media.url.hasPrefix("file://") {
+                            if let url = URL(string: media.url) {
+                                filePath = url.path
+                            } else {
+                                filePath = String(media.url.dropFirst(7))
+                            }
+                        } else {
+                            filePath = media.url
+                        }
+                        let exists = FileManager.default.fileExists(atPath: filePath)
+                        let expectedPath = MediaStorageHelper.getMediaFileURL(mediaID: media.id, isVideo: media.isVideo).path
+                        let expectedExists = FileManager.default.fileExists(atPath: expectedPath)
+                        print("Media ID: \(media.id)")
+                        print("URL: '\(media.url)'")
+                        print("File exists (from URL):  \(exists) at \(filePath)")
+                        print("Expected path (by ID):  \(expectedPath)")
+                        print("File exists (by ID):  \(expectedExists)")
+                    }
+                } else {
+                    print("Event \(event.name) has NO media.")
+                }
             }
+            
+            self.events = fetchedEvents
+        } catch {
+            print("Failed to fetch events:  \(error)")
         }
     }
 }

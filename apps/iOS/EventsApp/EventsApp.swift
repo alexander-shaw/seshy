@@ -68,6 +68,7 @@ struct EventsApp: App {
             }
             .theme(theme)
             .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
+            .environmentObject(userSession)
         }
     }
     

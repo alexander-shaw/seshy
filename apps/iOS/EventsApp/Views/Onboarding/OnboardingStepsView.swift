@@ -52,6 +52,12 @@ struct OnboardingStepsView: View {
             ),
 
             OnboardingStep(
+                id: "profilePictures",
+                view: AnyView(ProfilePicturesStepView(userSession: userSession)),
+                isAccessible: { userSession.userProfileViewModel.hasAtLeastOneMedia }
+            ),
+
+            OnboardingStep(
                 id: "tags",
                 view: AnyView(
                     TagSelectionView()

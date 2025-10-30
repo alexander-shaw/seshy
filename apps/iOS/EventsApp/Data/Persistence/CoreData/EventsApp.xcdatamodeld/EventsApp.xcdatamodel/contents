@@ -34,13 +34,21 @@
         <relationship name="profile" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserProfile" inverseName="user" inverseEntity="UserProfile"/>
         <relationship name="settings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserSettings" inverseName="user" inverseEntity="UserSettings"/>
     </entity>
-    <entity name="EventMedia" representedClassName="EventMedia" parentEntity="MediaBase" syncable="YES"/>
-    <entity name="EventMediaCache" representedClassName="EventMediaCache" parentEntity="MediaBase" syncable="YES"/>
-    <entity name="MediaBase" representedClassName="MediaBase" isAbstract="YES" syncable="YES">
+    <entity name="Media" representedClassName="Media" codegenType="manual" syncable="YES">
         <attribute name="averageColorHex" optional="YES" attributeType="String"/>
         <attribute name="mimeType" optional="YES" attributeType="String"/>
         <attribute name="position" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="url" attributeType="String"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="media" inverseEntity="UserEvent"/>
+        <relationship name="userProfile" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserProfile" inverseName="media" inverseEntity="UserProfile"/>
+        <relationship name="publicProfile" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PublicProfile" inverseName="media" inverseEntity="PublicProfile"/>
     </entity>
     <entity name="Member" representedClassName="Member" syncable="YES">
         <attribute name="avatarURL" optional="YES" attributeType="String"/>
@@ -56,7 +64,23 @@
         <attribute name="username" optional="YES" attributeType="String"/>
         <relationship name="event" maxCount="1" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="members" inverseEntity="UserEvent"/>
     </entity>
-    <entity name="OwnedMedia" representedClassName="OwnedMedia" parentEntity="MediaBase" syncable="YES"/>
+    <entity name="PublicProfile" representedClassName="PublicProfile" codegenType="manual" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="avatarURL" optional="YES" attributeType="String"/>
+        <attribute name="username" optional="YES" attributeType="String"/>
+        <attribute name="displayName" attributeType="String"/>
+        <attribute name="bio" optional="YES" attributeType="String"/>
+        <attribute name="ageYears" optional="YES" attributeType="Integer 32" usesScalarValueType="YES"/>
+        <attribute name="gender" optional="YES" attributeType="String"/>
+        <attribute name="isVerified" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Media" inverseName="publicProfile" inverseEntity="Media"/>
+    </entity>
     <entity name="Place" representedClassName="Place" codegenType="manual" syncable="YES">
         <attribute name="city" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
@@ -77,7 +101,6 @@
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserEvent" inverseName="location" inverseEntity="UserEvent"/>
     </entity>
-    <entity name="ProfileMedia" representedClassName="ProfileMedia" parentEntity="MediaBase" syncable="YES"/>
     <entity name="Tag" representedClassName="Tag" syncable="YES">
         <attribute name="categoryRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
@@ -112,9 +135,9 @@
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="visibilityRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Place" inverseName="events" inverseEntity="Place"/>
-        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserMedia"/>
+        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Media" inverseName="event" inverseEntity="Media"/>
         <relationship name="members" toMany="YES" deletionRule="Nullify" destinationEntity="Member" inverseName="event" inverseEntity="Member"/>
-        <relationship name="previews" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EventMedia"/>
+        <relationship name="previews" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Media"/>
         <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="events" inverseEntity="Tag"/>
     </entity>
     <entity name="UserLogin" representedClassName="UserLogin" syncable="YES">
@@ -132,9 +155,6 @@
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="login" inverseEntity="DeviceUser"/>
     </entity>
-    <entity name="UserMedia" representedClassName="UserMedia" parentEntity="MediaBase" syncable="YES">
-        <relationship name="ownerProfile" maxCount="1" deletionRule="Nullify" destinationEntity="UserProfile" inverseName="media" inverseEntity="UserProfile"/>
-    </entity>
     <entity name="UserProfile" representedClassName="UserProfile" syncable="YES">
         <attribute name="bio" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
@@ -151,7 +171,7 @@
         <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="wasVerifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserMedia" inverseName="ownerProfile" inverseEntity="UserMedia"/>
+        <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Media" inverseName="userProfile" inverseEntity="Media"/>
         <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag"/>
         <relationship name="user" maxCount="1" deletionRule="Nullify" destinationEntity="DeviceUser" inverseName="profile" inverseEntity="DeviceUser"/>
     </entity>

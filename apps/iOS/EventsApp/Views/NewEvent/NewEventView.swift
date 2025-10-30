@@ -31,7 +31,7 @@ struct NewEventView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Scrollable content.
-            ScrollView(.vertical) {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: theme.spacing.medium) {
                     HStack {
                         // MARK: - EXIT:
@@ -52,7 +52,16 @@ struct NewEventView: View {
                             }
                         }
                     }
-                    .padding(.top, theme.spacing.large)
+                    .padding(.top, theme.spacing.small)
+                    .padding(.horizontal, theme.spacing.medium)
+
+                    // MARK: - MEDIA:
+                    MediaGridPicker(
+                        mediaItems: $viewModel.selectedMediaItems,
+                        maxItems: 4,
+                        title: nil,
+                        subtitle: nil
+                    )
                     .padding(.horizontal, theme.spacing.medium)
 
                     // MARK: - NAME:

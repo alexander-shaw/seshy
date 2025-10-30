@@ -36,10 +36,13 @@ final class UserEventViewModel: ObservableObject {
     @Published var tags: [Tag] = []
     @Published var selectedTags: [Tag] = []
     @Published var members: [Member] = []
-    @Published var media: [UserMedia] = []
-    @Published var previewPhotos: [EventMedia] = []
+    @Published var media: [Media] = []
+    @Published var previewPhotos: [Media] = []
     @Published var invitedUsers: [UserProfile] = []
     @Published var selectedTicket: String?
+    
+    // Temporary media items selected but not yet uploaded
+    @Published var selectedMediaItems: [MediaItem] = []
     
     @Published private(set) var isSaving: Bool = false
     @Published private(set) var isLoading: Bool = false
@@ -47,11 +50,13 @@ final class UserEventViewModel: ObservableObject {
     
     private let context: NSManagedObjectContext
     private let repository: UserEventRepository
+    private let mediaRepository: MediaRepository
     private var userEvent: UserEvent?
     
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserEventRepository = CoreDataUserEventRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserEventRepository = CoreDataUserEventRepository(), mediaRepository: MediaRepository = CoreDataMediaRepository()) {
         self.context = context
         self.repository = repository
+        self.mediaRepository = mediaRepository
 
         // Initialize with a default place, which will need to be set before creating an event.
         self.location = Place(context: context)
@@ -137,6 +142,11 @@ final class UserEventViewModel: ObservableObject {
             
             userEvent = event
             populateFromEvent(event)
+            
+            // Upload selected media
+            if !selectedMediaItems.isEmpty {
+                try await uploadSelectedMedia(for: event.id)
+            }
         } catch {
             errorMessage = "Failed to save event: \(error.localizedDescription)"
         }
@@ -175,6 +185,17 @@ final class UserEventViewModel: ObservableObject {
             
             userEvent = event
             populateFromEvent(event)
+            
+            // Upload selected media
+            if !selectedMediaItems.isEmpty {
+                try await uploadSelectedMedia(for: event.id)
+                
+                // Refresh the event to pick up media relationships
+                if let refreshedEvent = try await repository.getEvent(by: event.id) {
+                    userEvent = refreshedEvent
+                    populateFromEvent(refreshedEvent)
+                }
+            }
             
             // FUTURE: Sync to cloud after publishing locally.
         } catch {
@@ -271,24 +292,166 @@ final class UserEventViewModel: ObservableObject {
         members.removeAll { $0.id == member.id }
     }
     
-    func addMedia(_ media: UserMedia) {
+    func addMedia(_ media: Media) {
         if !self.media.contains(where: { $0.url == media.url }) {
             self.media.append(media)
         }
     }
     
-    func removeMedia(_ media: UserMedia) {
+    func removeMedia(_ media: Media) {
         self.media.removeAll { $0.url == media.url }
     }
     
-    func addPreviewPhoto(_ photo: EventMedia) {
+    func addPreviewPhoto(_ photo: Media) {
         if !self.previewPhotos.contains(where: { $0.url == photo.url }) {
             self.previewPhotos.append(photo)
         }
     }
     
-    func removePreviewPhoto(_ photo: EventMedia) {
+    func removePreviewPhoto(_ photo: Media) {
         self.previewPhotos.removeAll { $0.url == photo.url }
+    }
+    
+    // MARK: - SELECTED MEDIA ITEMS MANAGEMENT:
+    
+    func addSelectedMedia(_ mediaItem: MediaItem) {
+        if !selectedMediaItems.contains(where: { $0.id == mediaItem.id }) {
+            var item = mediaItem
+            item.position = Int16(selectedMediaItems.count)
+            selectedMediaItems.append(item)
+        }
+    }
+    
+    func removeSelectedMedia(at index: Int) {
+        guard index < selectedMediaItems.count else { return }
+        selectedMediaItems.remove(at: index)
+        updateSelectedMediaPositions()
+    }
+    
+    func moveSelectedMedia(from source: Int, to destination: Int) {
+        guard source < selectedMediaItems.count && destination < selectedMediaItems.count else { return }
+        let movedItem = selectedMediaItems.remove(at: source)
+        selectedMediaItems.insert(movedItem, at: destination)
+        updateSelectedMediaPositions()
+    }
+    
+    private func updateSelectedMediaPositions() {
+        var updatedItems: [MediaItem] = []
+        for (index, item) in selectedMediaItems.enumerated() {
+            var updatedItem = item
+            updatedItem.position = Int16(index)
+            updatedItems.append(updatedItem)
+        }
+        selectedMediaItems = updatedItems
+    }
+    
+    /// Uploads selected media items and creates Media records for events
+    private func uploadSelectedMedia(for eventID: UUID) async throws {
+        for (index, item) in selectedMediaItems.enumerated() {
+            // Verify we have data to save before creating the record
+            guard item.imageData != nil || item.videoData != nil else {
+                continue // Skip items without data
+            }
+            
+            // Create Media record first to get the UUID
+            let placeholderURL = "placeholder://\(UUID().uuidString)"
+            let createdMedia = try await mediaRepository.createMedia(
+                eventID: eventID,
+                url: placeholderURL,
+                mimeType: item.mimeType,
+                position: Int16(index)
+            )
+            
+            // Extract the media ID - this is now safe as the object is from view context
+            let mediaID = createdMedia.id
+            
+            // Verify we still have data (defensive check)
+            guard item.imageData != nil || item.videoData != nil else {
+                // If no data, delete the created media record
+                try? await mediaRepository.deleteMedia(mediaID)
+                continue
+            }
+            
+            // Save media data to persistent storage using the created media ID
+            let fileURL: URL
+            do {
+                if let imageData = item.imageData {
+                    fileURL = try MediaStorageHelper.saveMediaData(imageData, mediaID: mediaID, isVideo: false)
+                    print("💾 [UserEventViewModel] Saved image to: \(fileURL.path)")
+                    print("💾 [UserEventViewModel] File URL absoluteString: \(fileURL.absoluteString)")
+                } else if let videoData = item.videoData {
+                    fileURL = try MediaStorageHelper.saveMediaData(videoData, mediaID: mediaID, isVideo: true)
+                    print("💾 [UserEventViewModel] Saved video to: \(fileURL.path)")
+                    print("💾 [UserEventViewModel] File URL absoluteString: \(fileURL.absoluteString)")
+                } else {
+                    // This shouldn't happen due to guard above, but handle it anyway
+                    try? await mediaRepository.deleteMedia(mediaID)
+                    continue
+                }
+                
+                // Verify file was actually saved
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    print("✅ [UserEventViewModel] File verified to exist at: \(fileURL.path)")
+                } else {
+                    print("❌ [UserEventViewModel] File NOT found after save at: \(fileURL.path)")
+                }
+            } catch {
+                // If saving fails, clean up the media record
+                print("❌ [UserEventViewModel] Failed to save media file: \(error)")
+                try? await mediaRepository.deleteMedia(mediaID)
+                throw error
+            }
+            
+            // Update the media record with the actual file URL (always use file:// format for consistency)
+            print("🔄 [UserEventViewModel] Updating media URL to: \(fileURL.absoluteString)")
+            try await mediaRepository.updateMediaURL(mediaID, url: fileURL.absoluteString)
+            
+            // Verify the update
+            if let updatedMedia = try? await mediaRepository.getMedia(eventID: eventID, limit: nil).first(where: { $0.id == mediaID }) {
+                print("✅ [UserEventViewModel] Media URL updated successfully: '\(updatedMedia.url)'")
+                
+                // Verify file exists at the stored URL
+                let resolver = MediaURLResolver.resolveURL(for: updatedMedia)
+                switch resolver {
+                case .local:
+                    print("✅ [UserEventViewModel] Media file confirmed to exist (local)")
+                case .remote:
+                    print("⚠️ [UserEventViewModel] Media resolved as remote (unexpected for local file)")
+                case .missing:
+                    print("❌ [UserEventViewModel] Media file NOT FOUND after update!")
+                }
+            }
+        }
+        
+        // Clear selected items after upload
+        selectedMediaItems.removeAll()
+        
+        // CRITICAL: Refetch the event from Core Data to ensure media relationship is loaded
+        // The background context saves have now merged into the view context
+        // This ensures the event object has the media relationship fully loaded
+        do {
+            if let refreshedEvent = try await repository.getEvent(by: eventID) {
+                await MainActor.run {
+                    userEvent = refreshedEvent
+                    populateFromEvent(refreshedEvent)
+                    
+                    // Force materialization of media relationship
+                    if let mediaSet = refreshedEvent.media {
+                        print("✅ [UserEventViewModel] Event refreshed: \(mediaSet.count) media items")
+                        for media in mediaSet {
+                            let _ = media.id
+                            let _ = media.url
+                        }
+                    } else {
+                        print("⚠️ [UserEventViewModel] Event refreshed but media relationship is nil")
+                    }
+                }
+            } else {
+                print("❌ [UserEventViewModel] Could not refetch event after media upload")
+            }
+        } catch {
+            print("❌ [UserEventViewModel] Error refetching event after media upload: \(error)")
+        }
     }
     
     // MARK: - DATE/TIME HELPER METHODS:
@@ -470,6 +633,7 @@ final class UserEventViewModel: ObservableObject {
         previewPhotos = []
         invitedUsers = []
         selectedTicket = nil
+        selectedMediaItems = []
     }
     
     // MARK: - SCHEDULING METHODS

@@ -14,6 +14,7 @@ struct SettingsView: View {
     @StateObject private var viewModel: UserSettingsViewModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
+    @EnvironmentObject private var userSession: UserSessionViewModel
 
     // Local state for tracking changes.
     @State private var originalAppearanceMode: AppearanceMode
@@ -35,7 +36,7 @@ struct SettingsView: View {
             TitleView(
                 titleText: "Settings",
                 canGoBack: true,
-                backIcon: "xmark",
+                backIcon: "minus",
                 onBack: {
                     // Revert changes.
                     viewModel.appearanceMode = originalAppearanceMode
@@ -59,7 +60,13 @@ struct SettingsView: View {
                     appearanceSection
 
                     unitsSection
+
+                    Divider()
+                        .foregroundStyle(theme.colors.surface)
+
+                    logoutSection
                 }
+                .padding(.vertical, theme.spacing.small)
                 .padding(.horizontal, theme.spacing.medium)
             }
 
@@ -134,6 +141,23 @@ struct SettingsView: View {
             if viewModel.preferredUnits != viewModel.systemMeasurementDefault {
                 Text("Currently using \(viewModel.preferredUnits == .imperial ? "Imperial" : "Metric") units")
                     .font(.caption2)
+            }
+        }
+    }
+
+    // MARK: - LOG OUT:
+    private var logoutSection: some View {
+        Section("Account") {
+            Button(role: .destructive) {
+                Task { @MainActor in
+                    await userSession.signOutAndDeleteLocalData()
+                    dismiss()
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                    Text("Log Out")
+                }
             }
         }
     }

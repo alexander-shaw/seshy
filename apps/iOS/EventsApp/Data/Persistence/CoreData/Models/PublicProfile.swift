@@ -30,7 +30,7 @@ extension PublicProfile {
     @NSManaged public var isVerified: Bool
 
     // Read-only, evictable profile gallery (ordered by position).
-    @NSManaged var media: Set<ProfileMedia>?
+    @NSManaged public var media: Set<Media>?
 }
 
 // Local & Cloud Storage:

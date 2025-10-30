@@ -70,13 +70,29 @@ final class CoreDataUserEventRepository: UserEventRepository {
     }
     
     func getEvent(by id: UUID) async throws -> UserEvent? {
-        return try await coreDataStack.performBackgroundTask { context in
+        // Fetch from view context to ensure we get a main-thread-safe object
+        return try await coreDataStack.viewContext.perform {
             let request: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
             request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
             request.fetchLimit = 1
+            // Prefetch media relationship to ensure it's loaded
+            request.relationshipKeyPathsForPrefetching = ["media"]
             
-            let events = try context.fetch(request)
-            return events.first
+            let event = try self.coreDataStack.viewContext.fetch(request).first
+            
+            // Force materialization of media relationship
+            if let event = event, let mediaSet = event.media {
+                let _ = mediaSet.count
+                for media in mediaSet {
+                    let _ = media.id
+                    let _ = media.url
+                }
+                print("✅ [PartyEventRepository] getEvent: Event '\(event.name)' has \(mediaSet.count) media items")
+            } else if let event = event {
+                print("⚠️ [PartyEventRepository] getEvent: Event '\(event.name)' has no media (nil)")
+            }
+            
+            return event
         }
     }
     
@@ -99,18 +115,29 @@ final class CoreDataUserEventRepository: UserEventRepository {
                     request.predicate = NSPredicate(format: "scheduleStatusRaw != %d AND location != nil", UserEventStatus.draft.rawValue)
                     request.sortDescriptors = [NSSortDescriptor(keyPath: \UserEvent.startTime, ascending: true)]
                     
-                    // Prefetch location relationship to avoid faults
-                    request.relationshipKeyPathsForPrefetching = ["location"]
+                    // Prefetch relationships to avoid faults
+                    request.relationshipKeyPathsForPrefetching = ["location", "media"]
                     
                     let events = try self.coreDataStack.viewContext.fetch(request)
                     
-                    // Force fault resolution for location objects to ensure they're fully loaded
+                    // Force fault resolution for location and media objects to ensure they're fully loaded
                     for event in events {
                         if let place = event.location {
                             let _ = place.objectID
                             let _ = place.latitude
                             let _ = place.longitude
                             let _ = place.name
+                        }
+                        if let mediaSet = event.media {
+                            let _ = mediaSet.count
+                            // Access each media item to force fault resolution
+                            for media in mediaSet {
+                                let _ = media.id
+                                let _ = media.url
+                                let _ = media.position
+                                let _ = media.mimeType
+                            }
+                            print("📦 [PartyEventRepository] Prefetched \(mediaSet.count) media items for event '\(event.name)'")
                         }
                     }
                     

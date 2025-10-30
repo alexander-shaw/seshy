@@ -53,8 +53,7 @@ public struct TitleView<Trailing: View>: View {
 
             trailing()
         }
-        .padding(.vertical, theme.spacing.small)
-        .padding(.trailing, theme.spacing.small)
+        .padding([.vertical, .trailing], theme.spacing.small)
         .overlay(alignment: .bottom) {
             Divider()
                 .foregroundStyle(theme.colors.surface)
