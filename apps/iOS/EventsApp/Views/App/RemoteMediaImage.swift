@@ -154,13 +154,13 @@ struct RemoteMediaImage: View {
         Rectangle()
             .fill(theme.colors.surface)
             .frame(width: targetSize.width, height: targetSize.height)
-            .overlay {
-                Image(systemName: "photo")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(theme.colors.offText.opacity(0.5))
-                    .frame(width: min(targetSize.width, targetSize.height) * 0.2)
-            }
+//            .overlay {
+//                Image(systemName: "photo")
+//                    .resizable()
+//                    .scaledToFit()
+//                    .foregroundStyle(theme.colors.offText.opacity(0.5))
+//                    .frame(width: min(targetSize.width, targetSize.height) * 0.2)
+//            }
     }
     
     private func constructFileURL(from urlString: String) -> URL? {

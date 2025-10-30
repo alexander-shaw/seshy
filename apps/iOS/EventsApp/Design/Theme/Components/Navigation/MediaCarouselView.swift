@@ -27,19 +27,12 @@ struct MediaCarouselView: View {
                 .frame(width: imageWidth, height: imageHeight)
             
             if mediaItems.isEmpty {
-                // Placeholder when no media - show rectangle fallback
+                // Placeholder when no media; show rectangle fallback.
                 Rectangle()
                     .fill(theme.colors.surface)
                     .frame(width: imageWidth, height: imageHeight)
-                    .overlay {
-                        Image(systemName: "photo")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundStyle(theme.colors.offText.opacity(0.5))
-                            .frame(width: imageWidth * 0.20, height: imageWidth * 0.20)
-                    }
             } else {
-                // Carousel of media items
+                // Carousel of media items.
                 TabView(selection: $currentIndex) {
                     ForEach(0..<mediaItems.count, id: \.self) { index in
                         MediaItemView(media: mediaItems[index], targetSize: CGSize(width: imageWidth, height: imageHeight))
@@ -59,47 +52,32 @@ struct MediaCarouselView: View {
                     }
                 }
                 .onAppear {
-                    // Reset to first item when view appears
+                    // Reset to first item when view appears.
                     if !mediaItems.isEmpty {
                         currentIndex = 0
                     }
                 }
                 
-                // Custom indicator dots (only show if more than 1 item)
+                // MARK: Indicator Dots:
+                // Only show if more than 1 item.
                 if mediaItems.count > 1 {
                     VStack {
                         Spacer()
-                        HStack(spacing: 6) {
+
+                        // TODO: Replace theme.colors.accent with event.brandColor.
+                        HStack(spacing: theme.spacing.small / 2) {
                             ForEach(0..<mediaItems.count, id: \.self) { index in
                                 Circle()
-                                    .frame(width: currentIndex == index ? 6 : 4,
-                                           height: currentIndex == index ? 6 : 4)
-                                    .foregroundStyle(currentIndex == index ? theme.colors.accent : theme.colors.offText.opacity(0.5))
+                                    .frame(width: currentIndex == index ? 6 : 4, height: currentIndex == index ? 6 : 4)
+                                    .foregroundStyle(currentIndex == index ? theme.colors.mainText : theme.colors.offText)
                                     .animation(.easeInOut(duration: 0.2), value: currentIndex)
                             }
                         }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(theme.colors.surface.opacity(0.8))
+                        .padding(.vertical, theme.spacing.small / 2)
+                        .padding(.horizontal, theme.spacing.small)
+                        .background(theme.colors.surface)
                         .clipShape(Capsule())
-                        .padding(.bottom, 12)
-                    }
-                    
-                    // Count indicator
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Text("\(currentIndex + 1) / \(mediaItems.count)")
-                                .font(theme.typography.caption)
-                                .foregroundStyle(theme.colors.offText)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(theme.colors.surface.opacity(0.8))
-                                .clipShape(Capsule())
-                                .padding(.top, 12)
-                                .padding(.trailing, 12)
-                        }
-                        Spacer()
+                        .padding(.bottom, theme.spacing.small)
                     }
                 }
             }
@@ -108,7 +86,6 @@ struct MediaCarouselView: View {
     }
 }
 
-// MARK: - Media Item View
 struct MediaItemView: View {
     let media: Media
     let targetSize: CGSize
@@ -117,7 +94,7 @@ struct MediaItemView: View {
     
     var body: some View {
         Group {
-            // Force materialization of media properties before resolving
+            // Force materialization of media properties before resolving.
             let _ = {
                 let _ = media.id
                 let _ = media.url
@@ -130,11 +107,10 @@ struct MediaItemView: View {
                 targetSize: targetSize
             )
             .overlay(alignment: .center) {
+                // MARK: Video Play Indicator.
                 if media.isVideo {
-                    // Video play indicator
                     Image(systemName: "play.circle.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.white.opacity(0.9))
+                        .iconStyle()
                 }
             }
         }
@@ -143,15 +119,7 @@ struct MediaItemView: View {
         .clipped()
         .contentShape(Rectangle())
         .onAppear {
-            print("🖼️ [MediaItemView] Displaying media \(media.id), URL: '\(media.url)', mimeType: '\(media.mimeType ?? "nil")'")
+            print("Displaying media \(media.id); URL:  \(media.url); mimeType:  \(media.mimeType ?? "nil")")
         }
     }
 }
-
-#Preview {
-    MediaCarouselView(
-        mediaItems: [],
-        imageWidth: UIScreen.main.bounds.width
-    )
-}
-

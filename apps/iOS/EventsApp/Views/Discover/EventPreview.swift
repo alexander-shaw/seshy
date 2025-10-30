@@ -87,20 +87,20 @@ struct EventPreview: View {
             VStack {
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        theme.colors.background.opacity(0.5),
+                        theme.colors.background.opacity(0.80),
                         Color.clear
                     ]),
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: (theme.sizes.screenWidth * 5 / 4) / 3)
+                .frame(height: (theme.sizes.screenWidth * 5 / 4) / 6)
 
                 Spacer()
                 
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color.clear,
-                        theme.colors.background.opacity(0.5)
+                        theme.colors.background.opacity(0.80)
                     ]),
                     startPoint: .top,
                     endPoint: .bottom
@@ -114,20 +114,24 @@ struct EventPreview: View {
                 HStack(alignment: .top, spacing: theme.spacing.small / 2) {
                     if let place = event.location {
                         Image(systemName: "location")
-                            .bodyTextStyle()
+                            .foregroundStyle(theme.colors.mainText)
+                            .captionTextStyle()
 
                         Text(place.name)
-                            .bodyTextStyle()
+                            .foregroundStyle(theme.colors.mainText)
+                            .captionTextStyle()
                     }
                     
                     Spacer()
                     
                     if let startTime = event.startTime {
                         Image(systemName: "calendar")
-                            .bodyTextStyle()
+                            .foregroundStyle(theme.colors.mainText)
+                            .captionTextStyle()
 
                         Text(startTime.formatted(date: .abbreviated, time: .omitted))
-                            .bodyTextStyle()
+                            .foregroundStyle(theme.colors.mainText)
+                            .captionTextStyle()
                     }
                 }
                 .padding([.top, .horizontal], theme.spacing.medium)
@@ -138,8 +142,8 @@ struct EventPreview: View {
                 HStack(alignment: .bottom, spacing: theme.spacing.medium) {
                     VStack(alignment: .leading, spacing: theme.spacing.small) {
                         Text(event.name)
-                            .titleStyle()
-                            .lineLimit(2)
+                            .headlineStyle()
+                            .lineLimit(4)
                     }
                     
                     Spacer()

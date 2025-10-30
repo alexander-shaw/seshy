@@ -96,9 +96,8 @@ struct NewEventView: View {
                                 .iconStyle()
                         }
                     }
-                    .padding(.vertical, theme.spacing.small)
                     .padding(.horizontal, theme.spacing.medium)
-                    .frame(minHeight: theme.spacing.large)
+                    .frame(minHeight: theme.sizes.iconButton * 1.33)
                     .background(theme.colors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal, theme.spacing.medium)
@@ -140,6 +139,7 @@ struct NewEventView: View {
                 }
                 .padding(.horizontal, theme.spacing.medium)
                 .padding(.bottom, theme.spacing.small)
+                .ignoresSafeArea()  // Prevents it from rising with the keyboard.
             }
         }
         .background(theme.colors.background)

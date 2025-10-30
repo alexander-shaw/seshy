@@ -13,7 +13,7 @@ struct NotificationsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Recent")
+            TitleView(titleText: "Recents")
 
             Spacer(minLength: 0)
         }

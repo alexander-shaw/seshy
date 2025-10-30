@@ -31,7 +31,7 @@ struct DiscoverListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Discover")
+            TitleView(titleText: "Explore")
 
             // TODO: Date Picker Button.
             // Tap: Cycles through a short list: 2d -> 2w -> 1m -> 6m -> All.
@@ -42,11 +42,8 @@ struct DiscoverListView: View {
             if events.isEmpty {
                 VStack {
                     Spacer()
-
-                    Text("Requesting new events.")
-                        .captionTextStyle()
-                        .padding(.horizontal, theme.spacing.medium)
-
+                    AnimatedRingView()
+                        .padding(.bottom, theme.spacing.large)
                     Spacer()
                 }
             } else {

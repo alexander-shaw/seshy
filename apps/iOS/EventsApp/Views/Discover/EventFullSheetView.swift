@@ -76,11 +76,11 @@ struct EventFullSheetView: View {
                         
                         // MARK: Bottom Blur.
                         LinearGradient(
-                            gradient: Gradient(colors: [.clear, theme.colors.background.opacity(0.33)]),
+                            gradient: Gradient(colors: [.clear, theme.colors.background.opacity(0.80)]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
-                        .frame(height: theme.sizes.screenWidth / 3)
+                        .frame(height: (theme.sizes.screenWidth * 5 / 4) / 3)
                         .frame(maxWidth: .infinity, alignment: .bottom)
                         .clipped()
                         
@@ -91,17 +91,18 @@ struct EventFullSheetView: View {
                             HStack {
                                 Text(event.name)
                                     .titleStyle()
-                                    .lineLimit(2)
+                                    .lineLimit(4)
                                     .truncationMode(.tail)
 
                                 Spacer()
                             }
                         }
-                        .padding([.bottom, .horizontal], theme.spacing.medium)
+                        .padding(.horizontal, theme.spacing.medium)
+                        .padding(.bottom, theme.spacing.large)
                     }
                     .shadow(radius: theme.spacing.small)
                     
-                    // MARK: Event Details.
+                    // MARK: Event Details:
                     VStack(alignment: .leading, spacing: theme.spacing.medium) {
                         // Date/s & Time/s.
                         if let startTime = event.startTime {

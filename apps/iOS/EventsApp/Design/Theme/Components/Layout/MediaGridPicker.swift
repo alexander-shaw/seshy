@@ -102,23 +102,22 @@ struct MediaGridPicker: View {
     }
     
     private func calculateGridHeight() -> CGFloat {
-        // Calculate grid height based on number of media items
-        let spacing: CGFloat = 6
-        let padding: CGFloat = theme.spacing.medium * 2
-        let totalSpacing = spacing * 1 // 1 gap between 2 items
-        let itemSide = (UIScreen.main.bounds.width - padding - totalSpacing) / 2
-        
+        // Calculate grid height based on number of media items.
+        let spacing: CGFloat = 12
+        let padding: CGFloat = 12
+        let totalSpacing = spacing * 1  // 1 gap between 2 items.
+        let itemSide = (theme.sizes.screenWidth - padding - totalSpacing) / 2
+
         // If 2 or fewer media items, use 1 row. Otherwise, use 2 rows.
-        if mediaItems.count <= 2 {
-            return itemSide // 1 row
+        if mediaItems.count <= 1 {
+            return itemSide  // 1 row.
         } else {
-            return itemSide * 2 + spacing // 2 rows + gap
+            return itemSide * 2 + spacing  // 2 rows + gap.
         }
     }
 }
 
-// MARK: - Draggable Grid using UIKit
-
+// MARK: Draggable Grid using UIKit:
 struct DraggableMediaGrid: UIViewRepresentable {
     @Binding var mediaItems: [MediaItem]
     let maxItems: Int
@@ -170,15 +169,15 @@ struct DraggableMediaGrid: UIViewRepresentable {
         }
         
         func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            // Check if this is the add button cell
+            // Check if this is the add button cell.
             let isAddButton = indexPath.item == mediaItems.count && mediaItems.count < parent.maxItems
             
             if isAddButton {
                 return collectionView.dequeueReusableCell(withReuseIdentifier: "AddMediaCell", for: indexPath)
             } else {
-                // Ensure we have a valid index
+                // Ensure we have a valid index.
                 guard indexPath.item < mediaItems.count else {
-                    // Fallback to empty cell if index is out of bounds
+                    // Fallback to empty cell if index is out of bounds.
                     return collectionView.dequeueReusableCell(withReuseIdentifier: "MediaCell", for: indexPath)
                 }
                 
@@ -191,9 +190,9 @@ struct DraggableMediaGrid: UIViewRepresentable {
         }
         
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-            let spacing: CGFloat = 6
-            let padding: CGFloat = 32 // Horizontal padding
-            let totalSpacing = spacing * 1 // 1 gap between 2 items
+            let spacing: CGFloat = 12
+            let padding: CGFloat = 12  // Horizontal padding.
+            let totalSpacing = spacing * 1  // 1 gap between 2 items.
             let side = (collectionView.frame.width - padding - totalSpacing) / 2
             return CGSize(width: side, height: side)
         }
@@ -204,8 +203,7 @@ struct DraggableMediaGrid: UIViewRepresentable {
             }
         }
         
-        // MARK: - Drag & Drop
-        
+        // MARK: Drag & Drop:
         func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
             guard indexPath.item < mediaItems.count else { return [] }
             
@@ -226,31 +224,31 @@ struct DraggableMediaGrid: UIViewRepresentable {
                   source.item < mediaItems.count,
                   destination.item < mediaItems.count else { return }
             
-            // Update data source atomically within batch updates to prevent snap-back
+            // Update data source atomically within batch updates to prevent snap-back.
             collectionView.performBatchUpdates({
-                // Update data source
+                // Update data source.
                 let movedItem = mediaItems.remove(at: source.item)
                 
-                // Calculate correct insertion index
+                // Calculate correct insertion index.
                 var insertIndex = destination.item
                 if source.item < destination.item {
-                    // No adjustment needed when moving forward
+                    // No adjustment needed when moving forward.
                     insertIndex = destination.item
                 }
                 
                 mediaItems.insert(movedItem, at: insertIndex)
                 
-                // Update collection view - this happens atomically with data source update
+                // Update collection view - this happens atomically with data source update.
                 collectionView.moveItem(at: source, to: destination)
             }, completion: { finished in
                 if finished {
-                    // Update positions and notify parent after visual update completes
+                    // Update positions and notify parent after visual update completes.
                     self.updateMediaPositions()
                     self.parent.onMoveMedia(source.item, destination.item)
                 }
             })
             
-            // Complete the drop operation
+            // Complete the drop operation.
             coordinator.drop(dragItem.dragItem, toItemAt: destination)
         }
         
@@ -270,19 +268,18 @@ struct DraggableMediaGrid: UIViewRepresentable {
         
         func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destination: IndexPath?) -> UICollectionViewDropProposal {
             if let destination = destination {
-                // Don't allow dropping on the add button
+                // Do not allow dropping on the add button.
                 if destination.item >= mediaItems.count {
                     return UICollectionViewDropProposal(operation: .forbidden)
                 }
             }
-            // Use .insertAtDestinationIndexPath for immediate visual feedback
+            // Use .insertAtDestinationIndexPath for immediate visual feedback.
             return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
         }
     }
 }
 
-// MARK: - Media Cell
-
+// MARK: Media Cell:
 class MediaCell: UICollectionViewCell {
     private let imageView = UIImageView()
     private let videoIndicator = UIImageView()
@@ -299,12 +296,12 @@ class MediaCell: UICollectionViewCell {
     private func setupUI() {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 8
+        imageView.layer.cornerRadius = 12
         contentView.addSubview(imageView)
         
-        // Video indicator
+        // Video Indicator.
         let videoIcon = UIImage(systemName: "play.fill")?.withConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
+            UIImage.SymbolConfiguration(pointSize: 18, weight: .black)
         )
         videoIndicator.image = videoIcon
         videoIndicator.tintColor = .white
@@ -314,14 +311,14 @@ class MediaCell: UICollectionViewCell {
         videoIndicator.isHidden = true
         contentView.addSubview(videoIndicator)
         
-        // Delete button
+        // Delete Button.
         let icon = UIImage(systemName: "xmark")?.withConfiguration(
             UIImage.SymbolConfiguration(pointSize: 10, weight: .bold)
         )
         deleteButton.setImage(icon, for: .normal)
         deleteButton.tintColor = .black
         deleteButton.backgroundColor = .white
-        deleteButton.layer.cornerRadius = 10
+        deleteButton.layer.cornerRadius = 12
         deleteButton.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
         contentView.addSubview(deleteButton)
         
@@ -359,11 +356,10 @@ class MediaCell: UICollectionViewCell {
     }
 }
 
-// MARK: - Add Media Cell
-
+// MARK: Add Media Cell:
 class AddMediaCell: UICollectionViewCell {
     private let iconView: UIImageView = {
-        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .black)
         let image = UIImage(systemName: "plus", withConfiguration: config)
         let imageView = UIImageView(image: image)
         imageView.contentMode = .center
@@ -382,9 +378,8 @@ class AddMediaCell: UICollectionViewCell {
             iconView.heightAnchor.constraint(equalToConstant: 32)
         ])
         contentView.backgroundColor = UIColor.secondarySystemFill
-        contentView.layer.cornerRadius = 8
+        contentView.layer.cornerRadius = 12
     }
     
     required init?(coder: NSCoder) { fatalError() }
 }
-

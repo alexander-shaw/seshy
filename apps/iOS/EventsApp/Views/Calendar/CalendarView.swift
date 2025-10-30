@@ -13,7 +13,7 @@ struct CalendarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Next")
+            TitleView(titleText: "Calendar")
 
             Spacer(minLength: 0)
         }

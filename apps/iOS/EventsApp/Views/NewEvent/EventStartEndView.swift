@@ -45,9 +45,8 @@ struct EventStartEndView: View {
                     .labelsHidden()
                     .tint(Color(hex: selectedColorHex))
             }
-            .padding(.vertical, theme.spacing.small)
             .padding(.horizontal, theme.spacing.medium)
-            .frame(minHeight: theme.spacing.large)
+            .frame(minHeight: theme.sizes.iconButton * 1.33)
 
             Divider()
                 .foregroundStyle(theme.colors.surface)
@@ -66,7 +65,7 @@ struct EventStartEndView: View {
                 onTimeChange: { updateStartTime(timeComponent: $0) },
                 showTimeFields: !isAllDay
             )
-            .frame(minHeight: theme.spacing.large)
+            .frame(minHeight: theme.sizes.iconButton * 1.33)
 
             Divider()
                 .foregroundStyle(theme.colors.surface)
@@ -95,7 +94,7 @@ struct EventStartEndView: View {
                     },
                     showTimeFields: !isAllDay
                 )
-                .frame(minHeight: theme.spacing.large)
+                .frame(minHeight: theme.sizes.iconButton * 1.33)
             }
         }
         .background(theme.colors.surface)
@@ -246,7 +245,6 @@ struct EventStartEndView: View {
     }
 }
 
-// MARK: DateTimePickerRow Component:
 private struct DateTimePickerRow: View {
     @Environment(\.theme) private var theme
     
@@ -300,7 +298,6 @@ private struct DateTimePickerRow: View {
                     .hapticFeedback(.soft)
                 }
             }
-            .padding(.vertical, theme.spacing.small)
             .padding(.horizontal, theme.spacing.medium)
             
             // Inline Pickers (Expandable).
