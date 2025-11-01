@@ -34,6 +34,7 @@ struct WelcomeView: View {
                 Spacer()
 
                 Text(termsText())
+                    .fontWeight(.regular)
                     .captionTextStyle()
                     .multilineTextAlignment(.center)
             }

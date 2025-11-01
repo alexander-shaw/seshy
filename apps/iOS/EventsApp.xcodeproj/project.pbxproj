@@ -7,19 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F908F5572EA08CD20020B6A7 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = F908F5562EA08CD20020B6A7 /* MapboxMaps */; };
-		F978191E2EA1BE5E000C8B1A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */; };
-		F97819202EA1BE5E000C8B1A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F978191F2EA1BE5E000C8B1A /* FirebaseAuth */; };
-		F97819222EA1BE5E000C8B1A /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F97819212EA1BE5E000C8B1A /* FirebaseCore */; };
-		F97819242EA1BE5E000C8B1A /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = F97819232EA1BE5E000C8B1A /* FirebaseCrashlytics */; };
-		F97819262EA1BE5E000C8B1A /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = F97819252EA1BE5E000C8B1A /* FirebaseMessaging */; };
-		F97819282EA1BE5E000C8B1A /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = F97819272EA1BE5E000C8B1A /* FirebasePerformance */; };
-		F978192A2EA1BE5E000C8B1A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = F97819292EA1BE5E000C8B1A /* FirebaseRemoteConfig */; };
-		F978192C2EA1BE5E000C8B1A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F978192B2EA1BE5E000C8B1A /* FirebaseStorage */; };
-		F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9999CDA2E9988D7008AE0E2 /* H3 */; };
-		F999A1D72E9C8B12008AE0E2 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F999A1D62E9C8B12008AE0E2 /* Kingfisher */; };
-		F999A2142E9D7EB4008AE0E2 /* CoreDomain in Frameworks */ = {isa = PBXBuildFile; productRef = F999A2132E9D7EB4008AE0E2 /* CoreDomain */; };
-		F9A504522E9963390009812A /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9A504512E9963390009812A /* H3 */; };
+		F976FA942EB6A35E00B2D32D /* CoreDomain in Frameworks */ = {isa = PBXBuildFile; productRef = F976FA932EB6A35E00B2D32D /* CoreDomain */; };
+		F976FA972EB6A37900B2D32D /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F976FA962EB6A37900B2D32D /* H3 */; };
+		F976FA9A2EB6A4B000B2D32D /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = F976FA992EB6A4B000B2D32D /* MapboxMaps */; };
+		F976FA9D2EB6A4C500B2D32D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F976FA9C2EB6A4C500B2D32D /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,29 +43,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F97819282EA1BE5E000C8B1A /* FirebasePerformance in Frameworks */,
-				F999A1D72E9C8B12008AE0E2 /* Kingfisher in Frameworks */,
-				F9A504522E9963390009812A /* H3 in Frameworks */,
-				F978192A2EA1BE5E000C8B1A /* FirebaseRemoteConfig in Frameworks */,
-				F97819262EA1BE5E000C8B1A /* FirebaseMessaging in Frameworks */,
-				F978191E2EA1BE5E000C8B1A /* FirebaseAnalytics in Frameworks */,
-				F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */,
-				F999A2142E9D7EB4008AE0E2 /* CoreDomain in Frameworks */,
-				F978192C2EA1BE5E000C8B1A /* FirebaseStorage in Frameworks */,
-				F97819202EA1BE5E000C8B1A /* FirebaseAuth in Frameworks */,
-				F97819242EA1BE5E000C8B1A /* FirebaseCrashlytics in Frameworks */,
-				F97819222EA1BE5E000C8B1A /* FirebaseCore in Frameworks */,
-				F908F5572EA08CD20020B6A7 /* MapboxMaps in Frameworks */,
+				F976FA9D2EB6A4C500B2D32D /* Kingfisher in Frameworks */,
+				F976FA9A2EB6A4B000B2D32D /* MapboxMaps in Frameworks */,
+				F976FA942EB6A35E00B2D32D /* CoreDomain in Frameworks */,
+				F976FA972EB6A37900B2D32D /* H3 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F963DFF92EB5B19A0018536B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		F969709A2E8B5049007AE897 = {
 			isa = PBXGroup;
 			children = (
 				F96970A52E8B504A007AE897 /* EventsApp */,
+				F963DFF92EB5B19A0018536B /* Frameworks */,
 				F96970A42E8B504A007AE897 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -107,19 +97,10 @@
 			);
 			name = EventsApp;
 			packageProductDependencies = (
-				F9A504512E9963390009812A /* H3 */,
-				F9999CDA2E9988D7008AE0E2 /* H3 */,
-				F999A1D62E9C8B12008AE0E2 /* Kingfisher */,
-				F999A2132E9D7EB4008AE0E2 /* CoreDomain */,
-				F908F5562EA08CD20020B6A7 /* MapboxMaps */,
-				F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */,
-				F978191F2EA1BE5E000C8B1A /* FirebaseAuth */,
-				F97819212EA1BE5E000C8B1A /* FirebaseCore */,
-				F97819232EA1BE5E000C8B1A /* FirebaseCrashlytics */,
-				F97819252EA1BE5E000C8B1A /* FirebaseMessaging */,
-				F97819272EA1BE5E000C8B1A /* FirebasePerformance */,
-				F97819292EA1BE5E000C8B1A /* FirebaseRemoteConfig */,
-				F978192B2EA1BE5E000C8B1A /* FirebaseStorage */,
+				F976FA932EB6A35E00B2D32D /* CoreDomain */,
+				F976FA962EB6A37900B2D32D /* H3 */,
+				F976FA992EB6A4B000B2D32D /* MapboxMaps */,
+				F976FA9C2EB6A4C500B2D32D /* Kingfisher */,
 			);
 			productName = EventsApp;
 			productReference = F96970A32E8B504A007AE897 /* EventsApp.app */;
@@ -150,11 +131,10 @@
 			mainGroup = F969709A2E8B5049007AE897;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */,
-				F999A1D52E9C8B12008AE0E2 /* XCLocalSwiftPackageReference "../../packages/Kingfisher" */,
-				F999A2122E9D7EB4008AE0E2 /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */,
-				F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
-				F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				F976FA922EB6A35E00B2D32D /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */,
+				F976FA952EB6A37900B2D32D /* XCLocalSwiftPackageReference "../../packages/H3" */,
+				F976FA982EB6A4B000B2D32D /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
+				F976FA9B2EB6A4C500B2D32D /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F96970A42E8B504A007AE897 /* Products */;
@@ -406,22 +386,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../packages/H3;
-		};
-		F999A1D52E9C8B12008AE0E2 /* XCLocalSwiftPackageReference "../../packages/Kingfisher" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../packages/Kingfisher;
-		};
-		F999A2122E9D7EB4008AE0E2 /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */ = {
+		F976FA922EB6A35E00B2D32D /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../packages/CoreDomain;
+		};
+		F976FA952EB6A37900B2D32D /* XCLocalSwiftPackageReference "../../packages/H3" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../packages/H3;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */ = {
+		F976FA982EB6A4B000B2D32D /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mapbox/mapbox-maps-ios.git";
 			requirement = {
@@ -429,77 +405,34 @@
 				minimumVersion = 11.0.0;
 			};
 		};
-		F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+		F976FA9B2EB6A4C500B2D32D /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 12.4.0;
+				minimumVersion = 8.6.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F908F5562EA08CD20020B6A7 /* MapboxMaps */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
-			productName = MapboxMaps;
-		};
-		F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
-		};
-		F978191F2EA1BE5E000C8B1A /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		F97819212EA1BE5E000C8B1A /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
-		};
-		F97819232EA1BE5E000C8B1A /* FirebaseCrashlytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCrashlytics;
-		};
-		F97819252EA1BE5E000C8B1A /* FirebaseMessaging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseMessaging;
-		};
-		F97819272EA1BE5E000C8B1A /* FirebasePerformance */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebasePerformance;
-		};
-		F97819292EA1BE5E000C8B1A /* FirebaseRemoteConfig */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseRemoteConfig;
-		};
-		F978192B2EA1BE5E000C8B1A /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
-		};
-		F9999CDA2E9988D7008AE0E2 /* H3 */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = H3;
-		};
-		F999A1D62E9C8B12008AE0E2 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Kingfisher;
-		};
-		F999A2132E9D7EB4008AE0E2 /* CoreDomain */ = {
+		F976FA932EB6A35E00B2D32D /* CoreDomain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CoreDomain;
 		};
-		F9A504512E9963390009812A /* H3 */ = {
+		F976FA962EB6A37900B2D32D /* H3 */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = H3;
+		};
+		F976FA992EB6A4B000B2D32D /* MapboxMaps */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F976FA982EB6A4B000B2D32D /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
+			productName = MapboxMaps;
+		};
+		F976FA9C2EB6A4C500B2D32D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F976FA9B2EB6A4C500B2D32D /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

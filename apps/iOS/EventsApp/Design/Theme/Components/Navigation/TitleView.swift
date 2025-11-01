@@ -41,7 +41,7 @@ public struct TitleView<Trailing: View>: View {
             }
 
             Text(titleText)
-                .headlineStyle()
+                .titleStyle()
                 .lineLimit(1)
                 .minimumScaleFactor(0.9)
                 .allowsTightening(false)

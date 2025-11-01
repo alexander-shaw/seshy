@@ -67,16 +67,49 @@ public struct TextFieldView: View {
                     .font(theme.typography.title)
                     .minimumScaleFactor(0.67)
                     .foregroundStyle(isFocused ? theme.colors.mainText : theme.colors.offText)
-                    .keyboardType(.numberPad)
+                    .keyboardType(.phonePad)
                     .focused($isFocused)
-                    .onChange(of: displayedText) {
-                        let digits = displayedText.filter(\.isNumber)
-                        if digits != text { text = digits }
-                        let formatted = formatPhoneNumber(digits)
-                        if formatted != displayedText { displayedText = formatted }
+                    .onChange(of: displayedText) { oldValue, newValue in
+                        // Preserve + and digits for autofill parsing (parent will parse country code).
+                        // Remove everything except + and digits.
+                        let cleaned = newValue.replacingOccurrences(of: "[^+0-9]", with: "", options: .regularExpression)
+                        
+                        // If the input contains a country code with digits, pass it to parent immediately.
+                        // Don't update text binding if cleaned is empty - parent will handle formatting.
+                        if !cleaned.isEmpty && cleaned != text {
+                            // Update text binding so parent can parse it.
+                            text = cleaned
+                            // Parent will parse and update phoneInputText with formatted local number.
+                            // We'll sync displayedText when parent updates via onChange(of: text).
+                        } else if cleaned.isEmpty && !newValue.isEmpty {
+                            // If cleaning removed everything but we had input, something went wrong.
+                            // Don't update text binding with empty - preserve current value.
+                            return
+                        } else if cleaned == text {
+                            // No change needed.
+                            return
+                        }
+                    }
+                    .onChange(of: text) { oldValue, newValue in
+                        // Immediately sync displayedText when parent updates (e.g., after parsing/formatting).
+                        // This ensures formatted local number (without country code) is shown immediately.
+                        // Always update if the value is different and doesn't contain a country code.
+                        if newValue != displayedText {
+                            // Only show if it doesn't have a country code (parent handles that).
+                            // If it's empty or just digits/formatted, show it.
+                            if !newValue.hasPrefix("+") || newValue.isEmpty {
+                                displayedText = newValue
+                            }
+                        }
                     }
                     .onAppear {
-                        displayedText = formatPhoneNumber(text)
+                        // Always sync displayedText with text binding on appear.
+                        // This ensures the phone number is visible when returning to the view.
+                        if !text.hasPrefix("+") {
+                            displayedText = text
+                        } else if text.isEmpty {
+                            displayedText = ""
+                        }
                     }
             }
         }
@@ -92,7 +125,9 @@ public struct TextFieldView: View {
         .onAppear { isFocused = autofocus }
         .onSubmit { onSubmit?() }
     }
-
+    
+    // Format up to 10 digits as local number: "000 000 0000".
+    // Parent handles parsing country code and ensures only local number digits are passed here.
     private func formatPhoneNumber(_ digits: String) -> String {
         let clipped = String(digits.prefix(10))
         var formatted = ""
