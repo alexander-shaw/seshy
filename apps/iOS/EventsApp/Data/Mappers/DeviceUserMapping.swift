@@ -12,7 +12,6 @@ import CoreData
 public func mapDeviceUserToDTO(_ obj: DeviceUser) -> DeviceUserDTO {
     DeviceUserDTO(
         id: obj.id,
-        username: obj.username,
         updatedAt: obj.updatedAt,
         schemaVersion: 1
     )
@@ -23,7 +22,6 @@ extension DeviceUser {
     // Apply values from a DTO (call inside the context's perform block).
     func apply(_ dto: DeviceUserDTO) {
         id = dto.id
-        username = dto.username
         updatedAt = dto.updatedAt
         // createdAt / deletedAt / syncStatus handled by your sync flow.
     }

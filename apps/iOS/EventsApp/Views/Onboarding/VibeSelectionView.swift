@@ -1,5 +1,5 @@
 //
-//  TagSelectionView.swift
+//  VibeSelectionView.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/18/25.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct TagSelectionView: View {
+struct VibeSelectionView: View {
     @EnvironmentObject var userProfileViewModel: UserProfileViewModel
-    @StateObject private var tagViewModel = TagViewModel()
+    @StateObject private var vibeViewModel = VibeViewModel()
     @Environment(\.theme) private var theme
 
     var body: some View {
@@ -22,12 +22,12 @@ struct TagSelectionView: View {
 
             ScrollView(.vertical) {
                 WrapAroundLayout {
-                    ForEach(tagViewModel.displayTags, id: \.id) { tag in
-                        TagCapsule(
-                            tag: tag,
-                            isSelected: tagViewModel.selectedTags.contains(tag)
+                    ForEach(vibeViewModel.displayVibes, id: \.id) { vibe in
+                        VibeCapsule(
+                            vibe: vibe,
+                            isSelected: vibeViewModel.selectedVibes.contains(vibe)
                         ) {
-                            tagViewModel.toggleTagSelection(tag)
+                            vibeViewModel.toggleVibeSelection(vibe)
                         }
                     }
                 }
@@ -38,10 +38,10 @@ struct TagSelectionView: View {
         }
         .background(theme.colors.background)
         .onAppear {
-            tagViewModel.selectedTags = userProfileViewModel.tags  // Sync selected tags with user profile.
+            vibeViewModel.selectedVibes = userProfileViewModel.vibes  // Sync selected vibes with user profile.
         }
-        .onChange(of: tagViewModel.selectedTags) { _, newTags in
-            userProfileViewModel.tags = newTags  // Update user profile when tags change.
+        .onChange(of: vibeViewModel.selectedVibes) { _, newVibes in
+            userProfileViewModel.vibes = newVibes  // Update user profile when vibes change.
         }
     }
 }

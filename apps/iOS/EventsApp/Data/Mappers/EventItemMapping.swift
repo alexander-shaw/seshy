@@ -1,5 +1,5 @@
 //
-//  UserEventMapping.swift
+//  EventItemMapping.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/14/25.
@@ -9,8 +9,8 @@ import CoreData
 
 // CoreData -> DTO (nonisolated by default; safe to call from background context).
 @inline(__always)
-public func mapUserEventToDTO(_ obj: UserEvent) -> UserEventDTO {
-    UserEventDTO(
+public func mapUserEventToDTO(_ obj: EventItem) -> EventItemDTO {
+    EventItemDTO(
         id: obj.id,
         scheduleStatusRaw: obj.scheduleStatusRaw,
         name: obj.name,
@@ -21,7 +21,7 @@ public func mapUserEventToDTO(_ obj: UserEvent) -> UserEventDTO {
         durationMinutes: obj.durationMinutes?.int64Value,
         isAllDay: obj.isAllDay,
         locationID: obj.location?.id ?? {
-            fatalError("Data integrity issue: UserEvent must have a location.")
+            fatalError("Data integrity issue: EventItem must have a location.")
         }(),
         maxCapacity: obj.maxCapacity,
         visibilityRaw: obj.visibilityRaw,
@@ -36,9 +36,9 @@ public func mapUserEventToDTO(_ obj: UserEvent) -> UserEventDTO {
 }
 
 // DTO -> CoreData (create or update within the SAME context).
-extension UserEvent {
+extension EventItem {
     // Apply values from a DTO (call inside the context's perform block).
-    func apply(_ dto: UserEventDTO) {
+    func apply(_ dto: EventItemDTO) {
         id = dto.id
         scheduleStatusRaw = dto.scheduleStatusRaw
         name = dto.name
@@ -56,12 +56,11 @@ extension UserEvent {
         deletedAt = dto.deletedAt
         syncStatusRaw = dto.syncStatusRaw
         lastCloudSyncedAt = dto.lastCloudSyncedAt
-        // Location relationship handled separately.
     }
 
     // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: UserEventDTO, location: Place) -> UserEvent {
-        let obj = UserEvent(context: ctx)
+    static func insert(into ctx: NSManagedObjectContext, from dto: EventItemDTO, location: Place) -> EventItem {
+        let obj = EventItem(context: ctx)
         obj.apply(dto)
         obj.location = location
         return obj

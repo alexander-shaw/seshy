@@ -10,7 +10,7 @@ import MapboxMaps
 
 struct UIKitDiscoverMapView: UIViewControllerRepresentable {
     
-    let events: [UserEvent]
+    let events: [EventItem]
     let style: StyleURI
     
     func makeUIViewController(context: Context) -> DiscoverMapViewController {

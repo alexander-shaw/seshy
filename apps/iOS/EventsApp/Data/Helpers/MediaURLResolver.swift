@@ -21,8 +21,6 @@ public enum MediaSource {
 public enum MediaURLResolver {
     
     // Resolves the media source (local file preferred, remote fallback).
-    // Parameter:
-    //  - media: The Media Core Data object.
     // Returns: MediaSource indicating local file, remote URL, or missing.
     public static func resolveURL(for media: Media) -> MediaSource {
         let urlString = media.url

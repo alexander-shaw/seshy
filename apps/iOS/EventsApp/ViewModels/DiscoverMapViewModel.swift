@@ -5,6 +5,8 @@
 //  Created on 10/25/25.
 //
 
+// TODO: Merge this code into UserSettingsViewModel.
+
 import Foundation
 import CoreLocation
 import Combine
@@ -16,63 +18,47 @@ import UIKit
 @MainActor
 final class DiscoverMapViewModel: ObservableObject {
     
-    // MARK: - Published State
-    
+    // MARK: Published State:
     @Published var center: CLLocationCoordinate2D
     @Published var zoom: Double
     @Published var bearing: Double
-    
+    // TODO: Add pitch and other attributes.
+
     @Published var endMode: EndMode = .all
     @Published var showingDatePicker = false
     
-    // MARK: - End Mode
-    
+    // MARK: End Mode:
     enum EndMode: Hashable {
         case rollingDays(Int)
         case absolute(Date)
         case all
     }
     
-    // MARK: - Dependencies
-    
+    // MARK: Dependencies:
     private let repository: UserSettingsRepository
     private let themeManager: ThemeManager
     
-    // MARK: - Private State
-    
+    // MARK: Private State:
     private var cancellables = Set<AnyCancellable>()
     private var persistenceWorkItem: DispatchWorkItem?
     private let persistenceDelay: TimeInterval = 0.7
     
-    // MARK: - Computed Properties
-    
+    // MARK: Computed Properties:
     var mapStyle: StyleURI {
-        // Determine based on theme manager's current theme
-        // For now, simple check based on theme name or colors
-        let theme = themeManager.currentTheme
-        
-        // Check if dark theme by looking at background color
-        // Using a simple heuristic: if background is closer to black/very dark
-        #if os(iOS)
-        if let colors = theme.colors as? Colors, colors == Colors.darkMode {
-            return .dark
-        }
-        #endif
-        
+        // TODO: Implement this.
         return .standard
     }
     
-    // MARK: - Initialization
-    
+    // MARK: Initialization:
     init(
-        repository: UserSettingsRepository = CoreDataUserSettingsRepository(),
+        repository: UserSettingsRepository = CoreUserSettingsRepository(),
         themeManager: ThemeManager? = nil,
         deviceUser: DeviceUser? = nil
     ) {
         self.repository = repository
         self.themeManager = themeManager ?? ThemeManager(initialTheme: .darkTheme)
         
-        // Load last state or use defaults
+        // Load last state:
         let (defaultCenter, defaultZoom, defaultBearing) = Self.defaultMapState()
         
         self.center = defaultCenter
@@ -82,23 +68,18 @@ final class DiscoverMapViewModel: ObservableObject {
         if let deviceUser = deviceUser {
             loadLastState(for: deviceUser)
         }
-        
-        setupThemeObserver()
     }
     
-    // MARK: - Static Defaults
-    
+    // MARK: Static Defaults:
     static func defaultMapState() -> (center: CLLocationCoordinate2D, zoom: Double, bearing: Double) {
-        // Default to a reasonable location (can be overridden by loadLastState)
         let center = CLLocationCoordinate2D(
-            latitude: 46.7319,  // Washington State University
+            latitude: 46.7319,  // Washington State University.
             longitude: -117.1542
         )
         return (center, 15.0, 0.0)
     }
     
-    // MARK: - Public Intents
-    
+    // MARK: Public Intents:
     func onMapRegionChanged(center: CLLocationCoordinate2D, zoom: Double, bearing: Double) {
         self.center = center
         self.zoom = zoom
@@ -124,24 +105,23 @@ final class DiscoverMapViewModel: ObservableObject {
         persist()
     }
     
-    // MARK: - Private Methods
-    
+    // MARK: Private Methods:
     private func cycleDateMode() {
         switch endMode {
         case .all:
             endMode = .rollingDays(2)
         case .rollingDays(2):
-            endMode = .rollingDays(14)  // 2 weeks
+            endMode = .rollingDays(14)  // 2 weeks.
         case .rollingDays(14):
-            endMode = .rollingDays(30)  // 1 month
+            endMode = .rollingDays(30)  // 1 month.
         case .rollingDays(30):
-            endMode = .rollingDays(180)  // 6 months
+            endMode = .rollingDays(180)  // 6 months.
         case .rollingDays(180):
             endMode = .all
         case .absolute:
             endMode = .all
         case .rollingDays(let days):
-            // Handle any other rolling days values
+            // Handle any other rolling days values.
             switch days {
             case ...1:
                 endMode = .rollingDays(2)
@@ -170,7 +150,7 @@ final class DiscoverMapViewModel: ObservableObject {
                     zoom = Double(settings.mapZoomLevel)
                     bearing = settings.mapBearingDegrees
                     
-                    // Determine end mode
+                    // Determine end mode.
                     if let endDate = settings.mapEndDate {
                         endMode = .absolute(endDate)
                     } else if let rollingDays = settings.mapEndRollingDays?.intValue {
@@ -180,7 +160,7 @@ final class DiscoverMapViewModel: ObservableObject {
                     }
                 }
             } catch {
-                print("Failed to load map state: \(error)")
+                print("Failed to load map state:  \(error)")
             }
         }
     }
@@ -223,32 +203,18 @@ final class DiscoverMapViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + persistenceDelay, execute: workItem)
     }
     
-    private func setupThemeObserver() {
-        // Observe theme changes to update map style
-        themeManager.$currentTheme
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-    }
-    
     private func triggerLightHaptic() {
-        #if os(iOS)
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-        #endif
     }
     
     private func triggerMediumHaptic() {
-        #if os(iOS)
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-        #endif
     }
 }
 
-// MARK: - End Mode Description
-
+// MARK: End Mode Description:
 extension DiscoverMapViewModel.EndMode {
     var description: String {
         switch self {
@@ -273,4 +239,3 @@ extension DiscoverMapViewModel.EndMode {
         }
     }
 }
-

@@ -60,10 +60,10 @@ struct OnboardingStepsView: View {
             OnboardingStep(
                 id: "tags",
                 view: AnyView(
-                    TagSelectionView()
+                    VibeSelectionView()
                         .environmentObject(userSession.userProfileViewModel)
                 ),
-                isAccessible: { userSession.userProfileViewModel.isValidTags }
+                isAccessible: { userSession.userProfileViewModel.isValidVibes }
             )
 
             // TODO: Add other onboarding steps...

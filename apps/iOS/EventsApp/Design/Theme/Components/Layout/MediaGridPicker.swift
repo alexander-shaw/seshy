@@ -52,6 +52,7 @@ struct MediaGridPicker: View {
             DraggableMediaGrid(
                 mediaItems: $mediaItems,
                 maxItems: maxItems,
+                spacing: theme.spacing.small,
                 onAddMedia: { showPhotoPicker = true },
                 onDeleteMedia: { index in
                     if index < mediaItems.count {
@@ -103,10 +104,9 @@ struct MediaGridPicker: View {
     
     private func calculateGridHeight() -> CGFloat {
         // Calculate grid height based on number of media items.
-        let spacing: CGFloat = 12
-        let padding: CGFloat = 12
+        let spacing = theme.spacing.small
         let totalSpacing = spacing * 1  // 1 gap between 2 items.
-        let itemSide = (theme.sizes.screenWidth - padding - totalSpacing) / 2
+        let itemSide = (theme.sizes.screenWidth - totalSpacing) / 2
 
         // If 2 or fewer media items, use 1 row. Otherwise, use 2 rows.
         if mediaItems.count <= 1 {
@@ -121,6 +121,7 @@ struct MediaGridPicker: View {
 struct DraggableMediaGrid: UIViewRepresentable {
     @Binding var mediaItems: [MediaItem]
     let maxItems: Int
+    let spacing: CGFloat
     var onAddMedia: () -> Void
     var onDeleteMedia: (Int) -> Void
     var onMoveMedia: (Int, Int) -> Void
@@ -131,7 +132,6 @@ struct DraggableMediaGrid: UIViewRepresentable {
     
     func makeUIView(context: Context) -> UICollectionView {
         let layout = UICollectionViewFlowLayout()
-        let spacing: CGFloat = 6
         layout.minimumInteritemSpacing = spacing
         layout.minimumLineSpacing = spacing
         
@@ -190,10 +190,9 @@ struct DraggableMediaGrid: UIViewRepresentable {
         }
         
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-            let spacing: CGFloat = 12
-            let padding: CGFloat = 12  // Horizontal padding.
+            let spacing = parent.spacing
             let totalSpacing = spacing * 1  // 1 gap between 2 items.
-            let side = (collectionView.frame.width - padding - totalSpacing) / 2
+            let side = (collectionView.frame.width - totalSpacing) / 2
             return CGSize(width: side, height: side)
         }
         
@@ -224,12 +223,12 @@ struct DraggableMediaGrid: UIViewRepresentable {
                   source.item < mediaItems.count,
                   destination.item < mediaItems.count else { return }
             
-            // Update data source atomically within batch updates to prevent snap-back.
+            // Updates data source atomically within batch updates to prevent snap-back.
             collectionView.performBatchUpdates({
-                // Update data source.
+                // Updates data source.
                 let movedItem = mediaItems.remove(at: source.item)
                 
-                // Calculate correct insertion index.
+                // Calculates correct insertion index.
                 var insertIndex = destination.item
                 if source.item < destination.item {
                     // No adjustment needed when moving forward.
@@ -238,17 +237,17 @@ struct DraggableMediaGrid: UIViewRepresentable {
                 
                 mediaItems.insert(movedItem, at: insertIndex)
                 
-                // Update collection view - this happens atomically with data source update.
+                // Updates collection view - this happens atomically with data source update.
                 collectionView.moveItem(at: source, to: destination)
             }, completion: { finished in
                 if finished {
-                    // Update positions and notify parent after visual update completes.
+                    // Updates positions and notify parent after visual update completes.
                     self.updateMediaPositions()
                     self.parent.onMoveMedia(source.item, destination.item)
                 }
             })
             
-            // Complete the drop operation.
+            // Completes the drop operation.
             coordinator.drop(dragItem.dragItem, toItemAt: destination)
         }
         
@@ -273,7 +272,7 @@ struct DraggableMediaGrid: UIViewRepresentable {
                     return UICollectionViewDropProposal(operation: .forbidden)
                 }
             }
-            // Use .insertAtDestinationIndexPath for immediate visual feedback.
+            // Uses .insertAtDestinationIndexPath for immediate visual feedback.
             return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
         }
     }

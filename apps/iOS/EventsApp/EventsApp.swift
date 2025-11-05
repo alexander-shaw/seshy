@@ -1,5 +1,5 @@
 //
-//  EventsAppApp.swift
+//  EventsApp.swift
 //  EventsApp
 //
 //  Created by Шоу on 9/29/25.
@@ -9,6 +9,7 @@ import SwiftUI
 import Combine  // Required for @Published and ObservableObject.
 import CoreData
 import CoreDomain
+import UIKit  // Required for UIApplication notifications.
 
 @main
 struct EventsApp: App {
@@ -24,10 +25,24 @@ struct EventsApp: App {
     @State private var notificationsPath = NavigationPath()
     @State private var profilePath = NavigationPath()
     
+    // Sync engine for data synchronization.
+    private let sync: SyncContainer
+    
     init() {
         _userSession = StateObject(
             wrappedValue: UserSessionViewModel()
         )
+        
+        // Initialize sync engine with API client and repositories.
+        let coreData = CoreDataStack.shared
+        let api = HTTPAPIClient()
+        let repos = Repos(
+            publicProfileRepo: CorePublicProfileRepository(coreDataStack: coreData),
+            settingsRepo: CoreUserSettingsRepository(coreDataStack: coreData),
+            loginRepo: CoreUserLoginRepository(coreDataStack: coreData),
+            stack: coreData
+        )
+        self.sync = SyncContainer(api: api, repos: repos)
     }
     
     var body: some Scene {
@@ -37,7 +52,8 @@ struct EventsApp: App {
                     case .splash:
                         SplashView()
                             .onAppear {
-                                // Add a small delay for splash screen
+                                // A small delay for splash screen.
+                                // TODO: Should be based on real data loading and caching.
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                     Task {
                                         await userSession.evaluateSessionState()
@@ -69,6 +85,15 @@ struct EventsApp: App {
             .theme(theme)
             .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
             .environmentObject(userSession)
+            .onAppear {
+                sync.engine.start()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                sync.engine.kick(reason: "foreground")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                sync.engine.stop()
+            }
         }
     }
     

@@ -20,8 +20,8 @@ protocol UserLoginRepository {
     func verifyEmail(for user: DeviceUser) async throws
 }
 
-final class CoreDataUserLoginRepository: UserLoginRepository {
-    private let coreDataStack: CoreDataStack
+final class CoreUserLoginRepository: UserLoginRepository {
+    let coreDataStack: CoreDataStack
     
     init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
         self.coreDataStack = coreDataStack
@@ -38,9 +38,9 @@ final class CoreDataUserLoginRepository: UserLoginRepository {
         request.fetchLimit = 1
         
         let users = try context.fetch(request)
-        print("getCurrentUser: Found \(users.count) users with lastLoginAt")
+        print("getCurrentUser | Found \(users.count) users with lastLoginAt:")
         if let user = users.first {
-            print("getCurrentUser: Current user ID: \(user.id), lastLoginAt: \(user.login?.lastLoginAt?.description ?? "nil")")
+            print("Current user ID: \(user.id) and lastLoginAt:  \(user.login?.lastLoginAt?.description ?? "nil").")
         }
         return users.first
     }
@@ -125,11 +125,12 @@ final class CoreDataUserLoginRepository: UserLoginRepository {
     func updateLastLogin(for user: DeviceUser) async throws {
         try await coreDataStack.performBackgroundTask { context in
             // Core Data entities can be updated directly.
+            // TODO: lastLoginAt should not be local-only.
             user.login?.lastLoginAt = Date()
             user.login?.updatedAt = Date()
-            user.login?.syncStatus = .pending
+            // TODO: Set syncStatus = .pending.
             user.updatedAt = Date()
-            user.syncStatus = .pending
+            // TODO: Set user.syncStatus = .pending.
             try context.save()
         }
     }

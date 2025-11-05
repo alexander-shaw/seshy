@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages place/location data for events.
-// Provides a reactive interface for SwiftUI views to work with places including:
-// - Place creation and editing;
-// - Location search and validation;
-// - Address management and geocoding; and
-// - Integration with Core Data persistence layer.
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -30,8 +23,8 @@ final class PlaceViewModel: ObservableObject {
     @Published var latitude: Double = 0.0
     @Published var longitude: Double = 0.0
     @Published var radius: Double = 10.0
-    @Published var maxCapacity: Int64 = 100
-    
+    @Published var maxCapacity: Int64 = 1000
+
     @Published private(set) var isSaving: Bool = false
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var errorMessage: String?
@@ -42,7 +35,7 @@ final class PlaceViewModel: ObservableObject {
     }
     
     private var repository: PlaceRepository {
-        CoreDataPlaceRepository()
+        CorePlaceRepository()
     }
     private var place: Place?
     
@@ -65,7 +58,7 @@ final class PlaceViewModel: ObservableObject {
                 populateFromPlace(loadedPlace)
             }
         } catch {
-            errorMessage = "Failed to load place: \(error.localizedDescription)"
+            errorMessage = "Failed to load place:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -92,7 +85,7 @@ final class PlaceViewModel: ObservableObject {
             place = newPlace
             populateFromPlace(newPlace)
         } catch {
-            errorMessage = "Failed to create place: \(error.localizedDescription)"
+            errorMessage = "Failed to create place:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -106,7 +99,7 @@ final class PlaceViewModel: ObservableObject {
         
         do {
             // Update the existing place directly.
-            currentPlace.name = name.isEmpty ? "Unnamed Location" : name
+            currentPlace.name = name.isEmpty ? "Location" : name
             currentPlace.details = details.isEmpty ? nil : details
             currentPlace.streetAddress = streetAddress.isEmpty ? nil : streetAddress
             currentPlace.city = city.isEmpty ? nil : city
@@ -122,7 +115,7 @@ final class PlaceViewModel: ObservableObject {
             place = try await repository.updatePlace(currentPlace)
             populateFromPlace(place!)
         } catch {
-            errorMessage = "Failed to update place: \(error.localizedDescription)"
+            errorMessage = "Failed to update place:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -139,7 +132,7 @@ final class PlaceViewModel: ObservableObject {
             place = nil
             resetForm()
         } catch {
-            errorMessage = "Failed to delete place: \(error.localizedDescription)"
+            errorMessage = "Failed to delete place:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -156,12 +149,12 @@ final class PlaceViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            print("PlaceViewModel: Searching for places with query: '\(query)'")
+            print("PlaceViewModel | Searching for places with query:  \(query)")
             places = try await repository.searchPlaces(query: query.trimmingCharacters(in: .whitespacesAndNewlines))
-            print("PlaceViewModel: Found \(places.count) places")
+            print("PlaceViewModel | Found \(places.count) places.")
         } catch {
-            print("PlaceViewModel: Search error: \(error)")
-            errorMessage = "Failed to search places: \(error.localizedDescription)"
+            print("PlaceViewModel | Search error:  \(error)")
+            errorMessage = "Failed to search places:  \(error.localizedDescription)"
             places = []
         }
         
@@ -179,7 +172,7 @@ final class PlaceViewModel: ObservableObject {
                 radius: radius
             )
         } catch {
-            errorMessage = "Failed to find nearby places: \(error.localizedDescription)"
+            errorMessage = "Failed to find nearby places:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -192,7 +185,7 @@ final class PlaceViewModel: ObservableObject {
         do {
             places = try await repository.getAllPlaces()
         } catch {
-            errorMessage = "Failed to load places: \(error.localizedDescription)"
+            errorMessage = "Failed to load places:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -234,7 +227,6 @@ final class PlaceViewModel: ObservableObject {
     }
     
     // MARK: - INTERACTIVE PLACE CREATION METHODS:
-    
     func createPlaceAtCoordinate(_ coordinate: CLLocationCoordinate2D, radius: Double = 10.0) {
         setLocationFromCoordinate(coordinate)
         self.radius = radius
@@ -255,7 +247,6 @@ final class PlaceViewModel: ObservableObject {
     }
     
     // MARK: - COMPUTED PROPERTIES:
-
     var coordinate: CLLocationCoordinate2D {
         return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
@@ -272,7 +263,7 @@ final class PlaceViewModel: ObservableObject {
         } else if !city.isEmpty {
             return city
         } else {
-            return "Unknown Location"
+            return "Unknown"
         }
     }
     
@@ -326,7 +317,7 @@ final class PlaceViewModel: ObservableObject {
         latitude = place.latitude
         longitude = place.longitude
         radius = place.radius
-        maxCapacity = place.maxCapacity?.int64Value ?? 100
+        maxCapacity = place.maxCapacity?.int64Value ?? 1000
     }
     
     private func resetForm() {

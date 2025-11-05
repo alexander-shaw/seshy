@@ -1,23 +1,23 @@
 //
-//  UserEvent.swift
+//  EventItem.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/4/25.
 //
 
-// This file defines the Core Data entity for events.
+// Defines the Core Data entity for events.
 // It includes event details, scheduling, location, members, and media.
 
 import Foundation
 import CoreData
 import CoreDomain
 
-@objc(UserEvent)
-public class UserEvent: NSManagedObject {}
+@objc(EventItem)
+public class EventItem: NSManagedObject {}
 
-extension UserEvent {
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<UserEvent> {
-        NSFetchRequest<UserEvent>(entityName: "UserEvent")
+extension EventItem {
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<EventItem> {
+        NSFetchRequest<EventItem>(entityName: "EventItem")
     }
 
     @NSManaged public var id: UUID  // MARK: Unique.
@@ -39,19 +39,18 @@ extension UserEvent {
 
     // Relationships:
     @NSManaged public var media: Set<Media>?  // Durable, official gallery.
-    @NSManaged public var previews: Set<Media>?  // Evictable cache thumbnails.
-    @NSManaged public var tags: Set<Tag>?  // Highly encouraged.
+    @NSManaged public var vibes: Set<Vibe>?  // Highly encouraged.
     @NSManaged public var members: Set<Member>  // One or more.  Host, at minimum.
 }
 
-extension UserEvent {
-    public var scheduleStatus: UserEventStatus {
-        get { UserEventStatus(rawValue: scheduleStatusRaw) ?? .upcoming }
+extension EventItem {
+    public var scheduleStatus: EventStatus {
+        get { EventStatus(rawValue: scheduleStatusRaw) ?? .upcoming }
         set { scheduleStatusRaw = newValue.rawValue }
     }
 
-    public var visibility: UserEventVisibility {
-        get { UserEventVisibility(rawValue: visibilityRaw) ?? .requiresApproval }
+    public var visibility: EventVisibility {
+        get { EventVisibility(rawValue: visibilityRaw) ?? .requiresApproval }
         set { visibilityRaw = newValue.rawValue }
     }
 
@@ -79,7 +78,7 @@ extension UserEvent {
     }
 }
 
-extension UserEvent {
+extension EventItem {
     public var currentCapacity: Int {
         return members.count
     }
@@ -98,7 +97,7 @@ extension UserEvent {
 }
 
 // Local & Cloud Storage:
-extension UserEvent: SyncTrackable {
+extension EventItem: SyncTrackable {
     @NSManaged public var createdAt: Date
     @NSManaged public var updatedAt: Date
     @NSManaged public var deletedAt: Date?

@@ -1,5 +1,5 @@
 //
-//  UserEvents.swift
+//  EventItems.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/25/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum UserEventStatus: Int16 {
+public enum EventStatus: Int16 {
     case draft = 0
     case upcoming = 1  // Published and happening in the future.
     case live = 2  // Happening now.
@@ -27,7 +27,7 @@ public enum UserEventStatus: Int16 {
     }
 }
 
-public enum UserEventVisibility: Int16 {
+public enum EventVisibility: Int16 {
     case onlyUser = 0  // An event only visible to the user.
     case directInvites = 1  // Invite specific users.
     case requiresApproval = 2  // Invite specific users and anyone else can request to join.

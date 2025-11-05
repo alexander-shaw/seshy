@@ -18,15 +18,14 @@ public protocol DeviceFingerprintRepository: Sendable {
     func isDeviceLockedOut() async throws -> (locked: Bool, until: Date?, fingerprint: DeviceFingerprintDTO?)
 }
 
-final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
+final class CoreDeviceFingerprintRepository: DeviceFingerprintRepository {
     private let coreDataStack: CoreDataStack
 
     init(coreDataStack: CoreDataStack = .shared) {
         self.coreDataStack = coreDataStack
     }
 
-    // MARK: - Public API:
-
+    // MARK: - PUBLIC API:
     func getCurrentFingerprint() async throws -> DeviceFingerprintDTO? {
         let deviceId = await currentDeviceIdentifier()
         return try await coreDataStack.performBackgroundTask { ctx in
@@ -37,6 +36,15 @@ final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
     func createOrUpdateFingerprint() async throws -> DeviceFingerprintDTO {
         let env = await currentEnvironmentSnapshot()
         return try await coreDataStack.performBackgroundTask { ctx in
+            // Verify the context has a persistent store coordinator with stores
+            guard let coordinator = ctx.persistentStoreCoordinator, !coordinator.persistentStores.isEmpty else {
+                throw NSError(
+                    domain: "DeviceFingerprintRepository",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Persistent store coordinator has no stores.  Store may not be loaded yet."]
+                )
+            }
+            
             let fp = try self.fetchCurrent(in: ctx, deviceId: env.deviceId) ?? DeviceFingerprint(context: ctx)
 
             // Check if this is a new entity by seeing if it has a deviceIdentifier set.
@@ -50,6 +58,7 @@ final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
                 fp.loginAttemptCount = 0
                 fp.isLockedOut = false
                 fp.lockoutUntil = nil
+                fp.schemaVersion = 1
             }
 
             // Upsert common fields.
@@ -62,7 +71,20 @@ final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
             fp.timezone = env.timezone
             fp.languageCode = env.languageCode
 
-            try ctx.save()
+            do {
+                try ctx.save()
+            } catch {
+                print("Error saving DeviceFingerprint: \(error)")
+                if let nsError = error as NSError? {
+                    print("  Domain:  \(nsError.domain)")
+                    print("  Code:  \(nsError.code)")
+                    print("  UserInfo:  \(nsError.userInfo)")
+                    if coordinator.persistentStores.isEmpty {
+                        print("  Persistent store coordinator has no stores!")
+                    }
+                }
+                throw error
+            }
             return mapDeviceFingerprintToDTO(fp)
         }
     }
@@ -117,7 +139,7 @@ final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
         return try await coreDataStack.performBackgroundTask { ctx in
             guard let fp = try self.fetchCurrent(in: ctx, deviceId: deviceId) else { return (false, nil, nil) }
 
-            // Expire lockout if needed
+            // Expire lockout if needed.
             if fp.isLockedOut, let until = fp.lockoutUntil, until <= Date() {
                 fp.isLockedOut = false
                 fp.lockoutUntil = nil
@@ -129,8 +151,7 @@ final class CoreDataDeviceFingerprintRepository: DeviceFingerprintRepository {
         }
     }
 
-    // MARK: - Private:
-
+    // MARK: - PRIVATE:
     private func fetchCurrent(in ctx: NSManagedObjectContext, deviceId: String) throws -> DeviceFingerprint? {
         let req: NSFetchRequest<DeviceFingerprint> = DeviceFingerprint.fetchRequest()
         req.predicate = NSPredicate(format: "deviceIdentifier == %@", deviceId)

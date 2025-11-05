@@ -10,7 +10,7 @@ import CoreData
 import CoreDomain
 
 enum DiscoverListFlow: Identifiable {
-    case openEvent(event: UserEvent)
+    case openEvent(event: EventItem)
 
     var id: String {
         switch self {
@@ -25,9 +25,9 @@ struct DiscoverListView: View {
     @Environment(\.theme) private var theme
 
     @State private var selectedEvent: DiscoverListFlow?
-    @State private var events: [UserEvent] = []
-    
-    private let repository: UserEventRepository = CoreDataUserEventRepository()
+    @State private var events: [EventItem] = []
+
+    private let repository: EventItemRepository = CoreEventItemRepository()
 
     var body: some View {
         VStack(spacing: 0) {

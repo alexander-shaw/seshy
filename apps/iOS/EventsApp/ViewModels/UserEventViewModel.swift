@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages user event creation, editing, and display.
-// Provides a reactive interface for SwiftUI views to work with events including:
-// - Event CRUD operations (create, read, update, delete);
-// - Event scheduling and status management;
-// - Location and tag association; and
-// - Member and media management.
-
 import Foundation
 import Combine
 import CoreData
@@ -28,20 +21,20 @@ final class UserEventViewModel: ObservableObject {
     @Published var durationMinutes: Int64?
     @Published var isAllDay: Bool = false
     @Published var maxCapacity: Int64 = 50
-    @Published var visibility: UserEventVisibility = .requiresApproval
+    @Published var visibility: EventVisibility = .requiresApproval
     @Published var inviteLink: String?
-    @Published var scheduleStatus: UserEventStatus = .upcoming
+    @Published var scheduleStatus: EventStatus = .upcoming
     
     @Published var location: Place
-    @Published var tags: [Tag] = []
-    @Published var selectedTags: [Tag] = []
+    @Published var tags: [Vibe] = []
+    @Published var selectedTags: [Vibe] = []
     @Published var members: [Member] = []
     @Published var media: [Media] = []
     @Published var previewPhotos: [Media] = []
     @Published var invitedUsers: [UserProfile] = []
     @Published var selectedTicket: String?
     
-    // Temporary media items selected but not yet uploaded
+    // Temporary media items selected but not yet uploaded.
     @Published var selectedMediaItems: [MediaItem] = []
     
     @Published private(set) var isSaving: Bool = false
@@ -49,11 +42,11 @@ final class UserEventViewModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     
     private let context: NSManagedObjectContext
-    private let repository: UserEventRepository
+    private let repository: EventItemRepository
     private let mediaRepository: MediaRepository
-    private var userEvent: UserEvent?
-    
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserEventRepository = CoreDataUserEventRepository(), mediaRepository: MediaRepository = CoreDataMediaRepository()) {
+    private var userEvent: EventItem?
+
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: EventItemRepository = CoreEventItemRepository(), mediaRepository: MediaRepository = CoreMediaRepository()) {
         self.context = context
         self.repository = repository
         self.mediaRepository = mediaRepository
@@ -69,7 +62,7 @@ final class UserEventViewModel: ObservableObject {
         self.location.latitude = 0.0
         self.location.longitude = 0.0
         self.location.radius = 10.0
-        self.location.maxCapacity = NSNumber(value: 100)
+        self.location.maxCapacity = NSNumber(value: 1000)
         self.location.createdAt = Date()
         self.location.updatedAt = Date()
         self.location.syncStatus = .pending
@@ -85,7 +78,7 @@ final class UserEventViewModel: ObservableObject {
                 populateFromEvent(event)
             }
         } catch {
-            errorMessage = "Failed to load event: \(error.localizedDescription)"
+            errorMessage = "Failed to load event:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -114,7 +107,7 @@ final class UserEventViewModel: ObservableObject {
             userEvent = event
             populateFromEvent(event)
         } catch {
-            errorMessage = "Failed to create event: \(error.localizedDescription)"
+            errorMessage = "Failed to create event:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -143,12 +136,12 @@ final class UserEventViewModel: ObservableObject {
             userEvent = event
             populateFromEvent(event)
             
-            // Upload selected media
+            // Upload selected media.
             if !selectedMediaItems.isEmpty {
                 try await uploadSelectedMedia(for: event.id)
             }
         } catch {
-            errorMessage = "Failed to save event: \(error.localizedDescription)"
+            errorMessage = "Failed to save event:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -186,20 +179,20 @@ final class UserEventViewModel: ObservableObject {
             userEvent = event
             populateFromEvent(event)
             
-            // Upload selected media
+            // Upload selected media.
             if !selectedMediaItems.isEmpty {
                 try await uploadSelectedMedia(for: event.id)
                 
-                // Refresh the event to pick up media relationships
+                // Refresh the event to pick up media relationships.
                 if let refreshedEvent = try await repository.getEvent(by: event.id) {
                     userEvent = refreshedEvent
                     populateFromEvent(refreshedEvent)
                 }
             }
             
-            // FUTURE: Sync to cloud after publishing locally.
+            // TODO: Sync to cloud after publishing locally.
         } catch {
-            errorMessage = "Failed to publish event: \(error.localizedDescription)"
+            errorMessage = "Failed to publish event:  \(error.localizedDescription)"
         }
         
         isSaving = false
@@ -258,7 +251,7 @@ final class UserEventViewModel: ObservableObject {
         isSaving = false
     }
     
-    func updateStatus(_ status: UserEventStatus) async {
+    func updateStatus(_ status: EventStatus) async {
         guard let event = userEvent else { return }
         
         do {
@@ -272,13 +265,13 @@ final class UserEventViewModel: ObservableObject {
         }
     }
     
-    func addTag(_ tag: Tag) {
+    func addTag(_ tag: Vibe) {
         if !tags.contains(where: { $0.id == tag.id }) {
             tags.append(tag)
         }
     }
     
-    func removeTag(_ tag: Tag) {
+    func removeTag(_ tag: Vibe) {
         tags.removeAll { $0.id == tag.id }
     }
     
@@ -344,15 +337,15 @@ final class UserEventViewModel: ObservableObject {
         selectedMediaItems = updatedItems
     }
     
-    /// Uploads selected media items and creates Media records for events
+    // Uploads selected media items and creates Media records for events.
     private func uploadSelectedMedia(for eventID: UUID) async throws {
         for (index, item) in selectedMediaItems.enumerated() {
-            // Verify we have data to save before creating the record
+            // Verify we have data to save before creating the record.
             guard item.imageData != nil || item.videoData != nil else {
                 continue // Skip items without data
             }
             
-            // Create Media record first to get the UUID
+            // Create Media record first to get the UUID.
             let placeholderURL = "placeholder://\(UUID().uuidString)"
             let createdMedia = try await mediaRepository.createMedia(
                 eventID: eventID,
@@ -376,12 +369,12 @@ final class UserEventViewModel: ObservableObject {
             do {
                 if let imageData = item.imageData {
                     fileURL = try MediaStorageHelper.saveMediaData(imageData, mediaID: mediaID, isVideo: false)
-                    print("Saved image to: \(fileURL.path)")
-                    print("File URL absoluteString: \(fileURL.absoluteString)")
+                    print("Saved image to:  \(fileURL.path)")
+                    print("File URL absoluteString:  \(fileURL.absoluteString)")
                 } else if let videoData = item.videoData {
                     fileURL = try MediaStorageHelper.saveMediaData(videoData, mediaID: mediaID, isVideo: true)
-                    print("Saved video to: \(fileURL.path)")
-                    print("File URL absoluteString: \(fileURL.absoluteString)")
+                    print("Saved video to:  \(fileURL.path)")
+                    print("File URL absoluteString:  \(fileURL.absoluteString)")
                 } else {
                     // This should not happen due to guard above but handle it anyway.
                     try? await mediaRepository.deleteMedia(mediaID)
@@ -390,9 +383,9 @@ final class UserEventViewModel: ObservableObject {
                 
                 // Verify file was actually saved.
                 if FileManager.default.fileExists(atPath: fileURL.path) {
-                    print("File verified to exist at: \(fileURL.path)")
+                    print("File verified to exist at:  \(fileURL.path)")
                 } else {
-                    print("File NOT found after save at: \(fileURL.path)")
+                    print("File NOT found after save at:  \(fileURL.path)")
                 }
             } catch {
                 // If saving fails, clean up the media record.
@@ -559,7 +552,7 @@ final class UserEventViewModel: ObservableObject {
     }
     
     // MARK: - PRIVATE METHODS:
-    private func populateFromEvent(_ event: UserEvent) {
+    private func populateFromEvent(_ event: EventItem) {
         name = event.name
         details = event.details ?? ""
         brandColor = event.brandColor
@@ -568,9 +561,9 @@ final class UserEventViewModel: ObservableObject {
         durationMinutes = event.durationMinutes?.int64Value
         isAllDay = event.isAllDay
         maxCapacity = event.maxCapacity
-        visibility = UserEventVisibility(rawValue: event.visibilityRaw) ?? .requiresApproval
+        visibility = EventVisibility(rawValue: event.visibilityRaw) ?? .requiresApproval
         inviteLink = event.inviteLink
-        scheduleStatus = UserEventStatus(rawValue: event.scheduleStatusRaw) ?? .upcoming
+        scheduleStatus = EventStatus(rawValue: event.scheduleStatusRaw) ?? .upcoming
         location = event.location ?? {
             // Create a temporary place if event has no location.
             let tempPlace = Place(context: context)
@@ -583,15 +576,12 @@ final class UserEventViewModel: ObservableObject {
             tempPlace.latitude = 0.0
             tempPlace.longitude = 0.0
             tempPlace.radius = 10.0
-            tempPlace.maxCapacity = NSNumber(value: 100)
+            tempPlace.maxCapacity = NSNumber(value: 1000)
             tempPlace.createdAt = Date()
             tempPlace.updatedAt = Date()
             tempPlace.syncStatus = .pending
             return tempPlace
         }()
-
-        // TODO: Tags, members, media, previewPhotos would need to be loaded separately.
-        // They are relationships that are not included in the DTO.
     }
     
     private func resetForm() {
@@ -617,7 +607,7 @@ final class UserEventViewModel: ObservableObject {
         location.latitude = 0.0
         location.longitude = 0.0
         location.radius = 10.0
-        location.maxCapacity = NSNumber(value: 100)
+        location.maxCapacity = NSNumber(value: 1000)
         location.createdAt = Date()
         location.updatedAt = Date()
         location.syncStatus = .pending

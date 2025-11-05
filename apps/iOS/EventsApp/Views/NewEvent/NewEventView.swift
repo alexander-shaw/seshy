@@ -20,10 +20,10 @@ struct NewEventView: View {
     @State private var showPlaceSelection = false
     @State private var showTagSelector = false
     @State private var hasDrafts: Bool = false
-    @State private var drafts: [UserEvent] = []
-    
-    private let repository: UserEventRepository = CoreDataUserEventRepository()
-    
+    @State private var drafts: [EventItem] = []
+
+    private let repository: EventItemRepository = CoreEventItemRepository()
+
     init(tabManager: TabManager? = nil) {
         self.tabManager = tabManager
     }

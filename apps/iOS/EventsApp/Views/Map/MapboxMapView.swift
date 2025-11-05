@@ -14,7 +14,7 @@ import CoreData
 struct MapboxMapView: UIViewRepresentable {
     @Binding var centerCoordinate: CLLocationCoordinate2D
     @Binding var zoomLevel: Double
-    var events: [UserEvent] = []
+    var events: [EventItem] = []
 
     var styleURI: StyleURI = .standard
 

@@ -29,7 +29,7 @@ extension Invite {
     @NSManaged public var expiresAt: Date?
 
     // Relationships:
-    @NSManaged public var event: UserEvent
+    @NSManaged public var event: EventItem
 }
 
 extension Invite {

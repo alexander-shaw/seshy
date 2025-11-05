@@ -5,8 +5,9 @@
 //  Created by Шоу on 10/8/25.
 //
 
-// Read-only cache to render full public profiles.
-// Evictable and refreshable.
+// Public-facing profile synced with cloud.
+// Derived from UserProfile but can be updated independently (username, avatarURL).
+// What others see when viewing this user's profile.
 
 import Foundation
 import CoreData
@@ -25,12 +26,15 @@ extension PublicProfile {
     @NSManaged public var username: String?
     @NSManaged public var displayName: String
     @NSManaged public var bio: String?
-    @NSManaged public var ageYears: NSNumber?
-    @NSManaged public var gender: String?
+    @NSManaged public var ageYears: NSNumber?  // Nil means showAge is false.
+    @NSManaged public var gender: String?  // Nil means showGender is false.
     @NSManaged public var isVerified: Bool
 
     // Read-only, evictable profile gallery (ordered by position).
     @NSManaged public var media: Set<Media>?
+    
+    // Relationship back to UserProfile (one-to-one)
+    @NSManaged public var userProfile: UserProfile?
 }
 
 // Local & Cloud Storage:

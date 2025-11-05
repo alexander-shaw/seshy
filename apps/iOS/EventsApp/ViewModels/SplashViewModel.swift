@@ -5,14 +5,7 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// MARK: - SplashViewModel
-// Manages the app startup and splash screen logic.
-// Provides a reactive interface for SwiftUI views to handle app initialization including:
-// - Startup sequence coordination;
-// - Data loading and caching;
-// - User session state determination; and
-// - Transition to appropriate app phase.
-
+// TODO: Data loading and caching.
 // TODO: Animated ring could be affected by inertial data!
 
 import Foundation
@@ -43,7 +36,7 @@ final class SplashViewModel: ObservableObject {
 
         await userSessionVM.evaluateSessionState()
 
-        // Mirror the userSessionVM phase after evaluation.
+        // Mirrors the userSessionVM phase after evaluation.
         nextPhase = userSessionVM.appPhase
         isLoading = false
     }

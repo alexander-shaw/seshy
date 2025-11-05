@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages user authentication and login flow.
-// Provides a reactive interface for SwiftUI views to handle authentication including:
-// - Phone number verification;
-// - SMS code verification;
-// - User session management; and
-// - Integration with Core Data persistence layer.
-
 import Foundation
 import Combine
 import CoreData
@@ -29,7 +22,7 @@ final class UserLoginViewModel: ObservableObject {
     private let context: NSManagedObjectContext
     private let userLoginRepository: UserLoginRepository
     
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, userLoginRepository: UserLoginRepository = CoreDataUserLoginRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, userLoginRepository: UserLoginRepository = CoreUserLoginRepository()) {
         self.context = context
         self.userLoginRepository = userLoginRepository
         
@@ -125,7 +118,7 @@ final class UserLoginViewModel: ObservableObject {
                 // Success: creates a user; proceeds to onboarding.
                 try await createUserAfterVerification()
             } else {
-                throw NSError(domain: "InvalidCode", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid verification code"])
+                throw NSError(domain: "InvalidCode", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid verification code."])
             }
         } catch {
             errorMessage = "Failed to verify OTP:  \(error.localizedDescription)"
@@ -146,7 +139,7 @@ final class UserLoginViewModel: ObservableObject {
         // Set as current user.
         try await userLoginRepository.setCurrentUser(newUser)
         
-        print("User created successfully, transitioning to onboarding phase")
+        print("User created successfully.  Transitioning to onboarding phase.")
     }
     
     func clearError() {

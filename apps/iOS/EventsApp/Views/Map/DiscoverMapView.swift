@@ -26,9 +26,9 @@ struct DiscoverMapView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @State private var discoverMapFlow: DiscoverMapFlow?
-    @State private var events: [UserEvent] = []
+    @State private var events: [EventItem] = []
 
-    private let repository: UserEventRepository = CoreDataUserEventRepository()
+    private let repository: EventItemRepository = CoreEventItemRepository()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -61,7 +61,7 @@ struct DiscoverMapView: View {
     }
 
     private func loadMapPreferences() {
-        // TODO: Integrate with UserSettingsViewModel
+        // TODO: Integrate with UserSettingsViewModel.
         // Keeping defaults for now.
     }
     

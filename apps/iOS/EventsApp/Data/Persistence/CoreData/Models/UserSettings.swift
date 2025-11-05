@@ -23,8 +23,7 @@ extension UserSettings {
 
     @NSManaged public var id: UUID
     
-    @NSManaged public var appearanceModeRaw: Int16  // Light or dark mode.  Default is system.
-    @NSManaged public var preferredUnitsRaw: Int16
+    @NSManaged public var appearanceModeRaw: Int16  // Default is system.
 
     // Map Preferences:
     // TODO: Center Coordinate Preference Priority:
@@ -37,8 +36,10 @@ extension UserSettings {
     @NSManaged public var mapZoomLevel: Int16
     @NSManaged public var mapBearingDegrees: Double  // Course; degrees clockwise from true north.
     @NSManaged public var mapPitchDegrees: Double  // Tilt; vertical from ground.
+    @NSManaged public var mapStartDate: Date?  // Nil is now.  If start < now, then set to nil.
     @NSManaged public var mapEndRollingDays: NSNumber?  // Rolling.  Nil means All.
     @NSManaged public var mapEndDate: Date?  // Hard set.  If nil, use mapEndRollingDays.
+    @NSManaged public var mapMaxDistance: NSNumber?  // Maximum distance in meters.  Nil means show all results worldwide.
 
     // Relationships
     @NSManaged public var user: DeviceUser
@@ -48,28 +49,6 @@ extension UserSettings {
     public var appearanceMode: AppearanceMode {
         get { AppearanceMode(rawValue: appearanceModeRaw) ?? .system }
         set { appearanceModeRaw = newValue.rawValue }
-    }
-
-    public var preferredUnits: Units {
-        get {
-            // Use saved value if present.
-            if let saved = Units(rawValue: preferredUnitsRaw) {
-                return saved
-            }
-            // Fallback to device setting.
-            switch Locale.current.measurementSystem {
-                case .metric:
-                    return .metric
-                // Treat UK/US as imperial for distance.
-                case .uk, .us:
-                    return .imperial
-                default:
-                    return .metric
-            }
-        }
-        set {
-            preferredUnitsRaw = newValue.rawValue
-        }
     }
     
     public var mapStyle: MapStyle {

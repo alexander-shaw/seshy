@@ -14,18 +14,22 @@ enum EventAction {
 }
 
 struct EventFullSheetView: View {
-    let event: UserEvent
-    
+    let event: EventItem
+
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     
     @State private var eventAction: EventAction?  // TODO: Refactor and move to CoreDomain.
     @State private var showActionSheet = false
-    
+
+    private var screenHeight: CGFloat {
+        theme.sizes.screenWidth * 1.25
+    }
+
     // Materialized and sorted media items.
     private var sortedMedia: [Media] {
         guard let mediaSet = event.media, !mediaSet.isEmpty else {
-            print("📸 [EventFullSheetView] Event '\(event.name)' has NO media")
+            print("EventFullSheetView | Event \(event.name) has no media.")
             return []
         }
         
@@ -65,13 +69,13 @@ struct EventFullSheetView: View {
                                 mediaItems: sortedMedia,
                                 imageWidth: theme.sizes.screenWidth
                             )
-                            .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
+                            .frame(width: theme.sizes.screenWidth, height: screenHeight)
                         } else {
                             // Fallback when no media.
                             // TODO: If there is a location, show a full-width map view snapshot here.
                             Rectangle()
                                 .fill(Color(hex: event.brandColor) ?? theme.colors.accent)
-                                .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
+                                .frame(width: theme.sizes.screenWidth, height: screenHeight)
                         }
                         
                         // MARK: Content Overlay.
@@ -81,14 +85,14 @@ struct EventFullSheetView: View {
                             HStack {
                                 Text(event.name)
                                     .titleStyle()
-                                    .lineLimit(4)
+                                    .lineLimit(2)
                                     .truncationMode(.tail)
 
                                 Spacer()
                             }
                         }
                         .padding(.horizontal, theme.spacing.medium)
-                        .padding(.bottom, theme.spacing.large)
+                        .padding(.bottom, theme.spacing.medium)
                     }
                     .shadow(radius: theme.spacing.small)
                     
@@ -158,11 +162,11 @@ struct EventFullSheetView: View {
                         .padding(theme.spacing.medium)
 
                     // Tags.
-                    if let tags = event.tags, !tags.isEmpty {
+                    if let vibes = event.vibes, !vibes.isEmpty {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: theme.spacing.small) {
-                                ForEach(Array(tags), id: \.objectID) { tag in
-                                    Text(tag.name)
+                                ForEach(Array(vibes), id: \.objectID) { vibe in
+                                    Text(vibe.name)
                                         .font(theme.typography.caption)
                                         .foregroundStyle(theme.colors.offText)
                                         .padding(.vertical, theme.spacing.small / 2)

@@ -10,15 +10,19 @@ import CoreData
 import CoreDomain
 
 struct EventPreview: View {
-    let event: UserEvent
+    let event: EventItem
     
     @Environment(\.theme) private var theme
-    
+
+    private var screenHeight: CGFloat {
+        theme.sizes.screenWidth * 1.33
+    }
+
     // Materialized and sorted media items.
     private var sortedMedia: [Media] {
         // Access the media relationship to force fault resolution.
         guard let mediaSet = event.media, !mediaSet.isEmpty else {
-            print("Event \(event.name) has NO media.")
+            print("Event \(event.name) has no media.")
             return []
         }
         
@@ -54,11 +58,11 @@ struct EventPreview: View {
             let source = MediaURLResolver.resolveURL(for: media)
             switch source {
                 case .local(let fileURL):
-                    print("Displaying first media (LOCAL): \(media.id); file:  \(fileURL.path)")
+                    print("Displaying first media (LOCAL): \(media.id) and file:  \(fileURL.path)")
                 case .remote(let url):
-                    print("Displaying first media (REMOTE): \(media.id); URL:  \(url)")
+                    print("Displaying first media (REMOTE): \(media.id) and URL:  \(url)")
                 case .missing:
-                    print("First media FILE MISSING: \(media.id); stored URL:  \(media.url)")
+                    print("First media FILE MISSING: \(media.id) and stored URL:  \(media.url)")
             }
         } else {
             print("No valid media found (all have empty URLs).")
@@ -73,28 +77,18 @@ struct EventPreview: View {
                 if let media = firstMedia {
                     RemoteMediaImage(
                         media: media,
-                        targetSize: CGSize(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
+                        targetSize: CGSize(width: theme.sizes.screenWidth, height: screenHeight)
                     )
                 } else {
                     // Fallback rectangle when no media.
                     Rectangle()
                         .fill(theme.colors.surface)
-                        .frame(width: theme.sizes.screenWidth, height: theme.sizes.screenWidth * 5 / 4)
+                        .frame(width: theme.sizes.screenWidth, height: screenHeight)
                 }
             }
 
             // MARK: Bottom Blur Gradient.
             VStack {
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        theme.colors.background.opacity(0.80),
-                        Color.clear
-                    ]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: (theme.sizes.screenWidth * 5 / 4) / 6)
-
                 Spacer()
                 
                 LinearGradient(
@@ -105,47 +99,57 @@ struct EventPreview: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: (theme.sizes.screenWidth * 5 / 4) / 3)
+                .frame(height: screenHeight / 3)
             }
             
             // MARK: Content Overlay.
             VStack(alignment: .leading, spacing: theme.spacing.small) {
-                // Top: Location and Time.
-                HStack(alignment: .top, spacing: theme.spacing.small / 2) {
+                Spacer()
+                
+                // Event Name.
+                HStack(alignment: .bottom, spacing: theme.spacing.medium) {
+                    Spacer()
+
+                    Text(event.name)
+                        .titleStyle()
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+
+                    Spacer()
+                }
+                .padding(.horizontal, theme.spacing.medium)
+                .padding(.bottom, theme.spacing.small)
+
+                // Location and Time.
+                HStack(alignment: .center, spacing: theme.spacing.small / 2) {
+                    Spacer()
+
                     if let place = event.location {
                         Image(systemName: "location")
                             .foregroundStyle(theme.colors.mainText)
-                            .captionTextStyle()
+                            .captionTitleStyle()
 
                         Text(place.name)
                             .foregroundStyle(theme.colors.mainText)
                             .captionTextStyle()
                     }
-                    
-                    Spacer()
-                    
+
+                    if let place = event.location, let startTime = event.startTime {
+                        Text("•")
+                            .foregroundStyle(theme.colors.mainText)
+                            .captionTitleStyle()
+                    }
+
                     if let startTime = event.startTime {
                         Image(systemName: "calendar")
                             .foregroundStyle(theme.colors.mainText)
-                            .captionTextStyle()
+                            .captionTitleStyle()
 
                         Text(startTime.formatted(date: .abbreviated, time: .omitted))
                             .foregroundStyle(theme.colors.mainText)
                             .captionTextStyle()
                     }
-                }
-                .padding([.top, .horizontal], theme.spacing.medium)
-                
-                Spacer()
-                
-                // Bottom: Title.
-                HStack(alignment: .bottom, spacing: theme.spacing.medium) {
-                    VStack(alignment: .leading, spacing: theme.spacing.small) {
-                        Text(event.name)
-                            .headlineStyle()
-                            .lineLimit(4)
-                    }
-                    
+
                     Spacer()
                 }
                 .padding([.horizontal, .bottom], theme.spacing.medium)

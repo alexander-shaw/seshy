@@ -1,5 +1,5 @@
 //
-//  TagDTO.swift
+//  VibeDTO.swift
 //  EventsApp
 //
 //  Created by Шоу on 10/14/25.
@@ -9,7 +9,7 @@ import Foundation
 
 // Transport/Domain shape.
 // Safe to cross actors and send to cloud.
-public struct TagDTO: Codable, Sendable, Equatable, Hashable {
+public struct VibeDTO: Codable, Sendable, Equatable, Hashable {
     public let id: UUID
     public let name: String
     public let slug: String

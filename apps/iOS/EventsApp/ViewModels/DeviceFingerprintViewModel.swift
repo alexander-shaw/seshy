@@ -29,14 +29,40 @@ final class DeviceFingerprintViewModel: ObservableObject {
 
     init(context: NSManagedObjectContext? = nil, repository: DeviceFingerprintRepository? = nil) {
         self.context = context ?? CoreDataStack.shared.viewContext
-        self.repository = repository ?? CoreDataDeviceFingerprintRepository()
+        self.repository = repository ?? CoreDeviceFingerprintRepository()
 
         Task {
-            await load()
+            // Wait for Core Data store to be ready before attempting any operations.
+            do {
+                try await CoreDataStack.shared.waitForStore()
+                await load()
+            } catch {
+                print("Failed to wait for Core Data store:  \(error)")
+                // Retry once after a short delay.
+                try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+                do {
+                    try await CoreDataStack.shared.waitForStore()
+                    await load()
+                } catch {
+                    print("Failed to load DeviceFingerprint after retry:  \(error)")
+                }
+            }
         }
     }
 
     func load() async {
+        // Verify that store is ready before proceeding.
+        if !CoreDataStack.shared.isStoreReady {
+            print("Core Data store not ready, deferring DeviceFingerprint load.")
+            // Tries to wait for store and retry.
+            do {
+                try await CoreDataStack.shared.waitForStore()
+            } catch {
+                print("Store still not ready:  \(error)")
+                return
+            }
+        }
+        
         do {
             if let existing = try await repository.getCurrentFingerprint() {
                 deviceFingerprint = existing
@@ -58,6 +84,12 @@ final class DeviceFingerprintViewModel: ObservableObject {
             }
         } catch {
             print("Failed to fetch DeviceFingerprint:  ", error)
+            // If error is related to store not ready, log it specifically
+            if let nsError = error as NSError?,
+               nsError.domain == "NSPersistentStoreCoordinatorErrorDomain" ||
+               nsError.localizedDescription.contains("no persistent stores") {
+                print("This error may indicate the store is not fully loaded yet.")
+            }
         }
     }
 

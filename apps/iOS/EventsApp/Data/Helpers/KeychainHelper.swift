@@ -1,14 +1,14 @@
 //
 //  KeychainHelper.swift
-//  Optify
+//  EventsApp
 //
-//  Created by Шоу on 6/21/25.
+//  Created by Шоу on 11/4/25.
 //
 
 import Foundation
 import CryptoKit
 
-enum KeychainHelper {
+public enum KeychainHelper {
     static func save(key: String, data: Data, accessible: CFString = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassKey,
@@ -45,7 +45,7 @@ enum KeychainHelper {
     }
 
     // String helpers.
-    static func get(key: String) -> String? {
+    public static func get(key: String) -> String? {
         guard let data = try? load(key: key) else { return nil }
         return String(data: data, encoding: .utf8)
     }

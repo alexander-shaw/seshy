@@ -5,8 +5,7 @@
 //  Created by Шоу on 10/18/25.
 //
 
-// MARK: - RepositoryError:
-// This file defines common errors that can occur in repository operations.
+// Defines common errors that can occur in repository operations.
 // Used across all repositories for consistent error handling.
 
 import Foundation
@@ -65,11 +64,9 @@ public enum RepositoryError: Error, LocalizedError {
         case .syncFailed:
             return "Failed to sync data"
         case .networkError(let message):
-            return "Network error: \(message)"
+            return "Network error:  \(message)"
         case .unknown(let error):
-            return "Unknown error: \(error.localizedDescription)"
+            return "Unknown error:  \(error.localizedDescription)"
         }
     }
 }
-
-

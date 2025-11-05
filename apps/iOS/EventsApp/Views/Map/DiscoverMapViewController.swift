@@ -16,7 +16,7 @@ class DiscoverMapViewController: UIViewController {
     private var mapView: MapboxMaps.MapView!
     private var hasAppeared = false
     
-    var pendingEvents: [UserEvent] = []
+    var pendingEvents: [EventItem] = []
     var pendingStyle: StyleURI = .dark
     
     override func viewDidLoad() {
@@ -52,7 +52,7 @@ class DiscoverMapViewController: UIViewController {
         }
     }
     
-    func configure(events: [UserEvent], style: StyleURI) {
+    func configure(events: [EventItem], style: StyleURI) {
         self.pendingEvents = events
         self.pendingStyle = style
         
@@ -98,7 +98,7 @@ class DiscoverMapViewController: UIViewController {
         
         // Add 3D buildings.
         // All-or-nothing 3D buildings by zoom threshold.
-        let buildingsVisibleFrom: Double = 15.5 // tweak to 16.0 if you want a harder snap
+        let buildingsVisibleFrom: Double = 15.5 // 16.0 for a harder snap.
 
         // Hide any default building layers the style may include.
         hideDefaultBuildingLayers()
@@ -146,7 +146,7 @@ class DiscoverMapViewController: UIViewController {
         
         print("Rendering \(pendingEvents.count) events on map.")
 
-        // Generate hexagons for events (with colors)
+        // Generate hexagons for events (with colors).
         let hexFeatures = geoJSONHexagons(from: pendingEvents)
         
         guard !hexFeatures.features.isEmpty else {
@@ -165,7 +165,7 @@ class DiscoverMapViewController: UIViewController {
         
         var hexLayer = FillLayer(id: "events-hexes-layer", source: "events-hexes-source")
         
-        // Use data-driven colors from feature properties
+        // Use data-driven colors from feature properties.
         hexLayer.fillColor = .expression(
             Exp(.toColor) {
                 Exp(.get) { "color" }
@@ -174,7 +174,7 @@ class DiscoverMapViewController: UIViewController {
         
         hexLayer.fillOpacity = .constant(0.4)
         
-        // Outline matches fill color
+        // Outline matches fill color.
         hexLayer.fillOutlineColor = .expression(
             Exp(.toColor) {
                 Exp(.get) { "color" }
@@ -189,7 +189,7 @@ class DiscoverMapViewController: UIViewController {
         }
     }
     
-    private func geoJSONHexagons(from events: [UserEvent]) -> FeatureCollection {
+    private func geoJSONHexagons(from events: [EventItem]) -> FeatureCollection {
         print("Generating hexagons for \(events.count) events.")
 
         let features = events.compactMap { event -> Feature? in
@@ -198,9 +198,9 @@ class DiscoverMapViewController: UIViewController {
                 return nil
             }
             
-            print("Event: \(event.name), Place: \(place.name) at (\(place.latitude), \(place.longitude)) with radius \(place.radius)m, color: \(event.brandColor)")
-            
-            // Validate coordinates
+            print("Event: \(event.name), Place: \(place.name) at (\(place.latitude), \(place.longitude)) with radius \(place.radius) meters [\(event.brandColor)]")
+
+            // Validate coordinates.
             guard place.latitude != 0 || place.longitude != 0 else {
                 print("Skipping event with invalid place coordinates.")
                 return nil
@@ -212,18 +212,18 @@ class DiscoverMapViewController: UIViewController {
                 radiusMeters: place.radius
             )
             
-            print("Hex center: (\(center.latitude), \(center.longitude)); boundary points: \(boundary.count)")
-            
-            // Close the polygon if needed
+            print("Hex center: (\(center.latitude), \(center.longitude)) and boundary points: \(boundary.count)")
+
+            // Close the polygon if needed.
             var coords = boundary
             if let first = coords.first, let last = coords.last, first != last {
                 coords.append(first)
             }
             
-            // Create feature with event-specific properties
+            // Create feature with event-specific properties.
             var feature = Feature(geometry: .polygon(Polygon([coords])))
             
-            // Set color property for this event
+            // Set color property for this event.
             feature.properties = ["color": JSONValue.string(event.brandColor)]
 
             return feature

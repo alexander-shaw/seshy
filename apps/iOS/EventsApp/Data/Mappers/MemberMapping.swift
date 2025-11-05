@@ -46,7 +46,7 @@ extension Member {
     }
 
     // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: MemberDTO, event: UserEvent) -> Member {
+    static func insert(into ctx: NSManagedObjectContext, from dto: MemberDTO, event: EventItem) -> Member {
         let obj = Member(context: ctx)
         obj.apply(dto)
         obj.event = event

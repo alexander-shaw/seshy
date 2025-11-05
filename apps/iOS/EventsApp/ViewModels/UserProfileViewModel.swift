@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages user profile data and onboarding flow.
-// Provides a reactive interface for SwiftUI views to work with user profiles including:
-// - Profile creation and editing;
-// - Onboarding completion tracking;
-// - Tag management for user interests; and
-// - Integration with Core Data persistence layer.
-
 import Foundation
 import Combine
 import CoreData
@@ -28,9 +21,9 @@ final class UserProfileViewModel: ObservableObject {
     @Published var genderIdentity: String = ""
     @Published var showGender: Bool = false
     @Published var isVerified: Bool = false
-    @Published var tags: Set<Tag> = []
-    
-    // Temporary media items selected but not yet uploaded
+    @Published var vibes: Set<Vibe> = []
+
+    // Temporary media items selected but not yet uploaded.
     @Published var selectedMediaItems: [MediaItem] = []
 
     // Input properties for forms.
@@ -50,7 +43,7 @@ final class UserProfileViewModel: ObservableObject {
     private let mediaRepository: MediaRepository
     private var userProfile: UserProfile?
 
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserProfileRepository = CoreDataUserProfileRepository(), mediaRepository: MediaRepository = CoreDataMediaRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: UserProfileRepository = CoreUserProfileRepository(), mediaRepository: MediaRepository = CoreMediaRepository()) {
         self.context = context
         self.repository = repository
         self.mediaRepository = mediaRepository
@@ -70,8 +63,8 @@ final class UserProfileViewModel: ObservableObject {
                 genderIdentity = profile.genderIdentity ?? ""
                 showGender = profile.showGender
                 isVerified = profile.isVerified
-                tags = profile.tags ?? []
-                
+                vibes = profile.vibes ?? []
+
                 // Update input properties.
                 displayNameInput = profile.displayName
                 bioInput = profile.bio ?? ""
@@ -86,7 +79,7 @@ final class UserProfileViewModel: ObservableObject {
                 userProfile = nil
             }
         } catch {
-            print("Failed to load profile: \(error)")
+            print("Failed to load profile:  \(error)")
         }
     }
 
@@ -139,16 +132,15 @@ final class UserProfileViewModel: ObservableObject {
             
             evaluateCompletion()
             
-            // Upload selected media after profile is created/updated
+            // Upload selected media after profile is created/updated.
             guard let profile = userProfile, !selectedMediaItems.isEmpty else { return }
             try? await uploadSelectedMedia(for: profile.id)
         } catch {
-            print("Failed to save UserProfile: \(error)")
+            print("Failed to save UserProfile:  \(error)")
         }
     }
     
     // MARK: - SELECTED MEDIA ITEMS MANAGEMENT:
-    
     func addSelectedMedia(_ mediaItem: MediaItem) {
         if !selectedMediaItems.contains(where: { $0.id == mediaItem.id }) {
             var item = mediaItem
@@ -180,10 +172,10 @@ final class UserProfileViewModel: ObservableObject {
         selectedMediaItems = updatedItems
     }
     
-    /// Uploads selected media items and creates Media records for user profiles
+    // Uploads selected media items and creates Media records for user profiles.
     private func uploadSelectedMedia(for profileID: UUID) async throws {
         for (index, item) in selectedMediaItems.enumerated() {
-            // Create Media record first to get the UUID
+            // Create Media record first to get the UUID.
             let placeholderURL = "placeholder://\(UUID().uuidString)"
             let createdMedia = try await mediaRepository.createMedia(
                 userProfileID: profileID,
@@ -192,17 +184,17 @@ final class UserProfileViewModel: ObservableObject {
                 position: Int16(index)
             )
             
-            // Extract the media ID immediately to avoid Core Data context issues
+            // Extract the media ID immediately to avoid Core Data context issues.
             let mediaID = createdMedia.id
             
             // Verify we have data to save
             guard item.imageData != nil || item.videoData != nil else {
-                // If no data, delete the created media record
+                // If no data, delete the created media record.
                 try? await mediaRepository.deleteMedia(mediaID)
                 continue
             }
             
-            // Save media data to persistent storage using the created media ID
+            // Save media data to persistent storage using the created media ID.
             let fileURL: URL
             do {
                 if let imageData = item.imageData {
@@ -210,18 +202,18 @@ final class UserProfileViewModel: ObservableObject {
                 } else if let videoData = item.videoData {
                     fileURL = try MediaStorageHelper.saveMediaData(videoData, mediaID: mediaID, isVideo: true)
                 } else {
-                    // This shouldn't happen due to guard above, but handle it anyway
+                    // This shouldn't happen due to guard above, but handle it anyway.
                     try? await mediaRepository.deleteMedia(mediaID)
                     continue
                 }
             } catch {
-                // If saving fails, clean up the media record
+                // If saving fails, clean up the media record.
                 print("Failed to save media file: \(error)")
                 try? await mediaRepository.deleteMedia(mediaID)
                 throw error
             }
             
-            // Update the media record with the actual file URL
+            // Update the media record with the actual file URL.
             try await mediaRepository.updateMediaURL(mediaID, url: fileURL.absoluteString)
         }
         
@@ -242,7 +234,7 @@ final class UserProfileViewModel: ObservableObject {
         genderIdentity = ""
         showGender = false
         isVerified = false
-        tags = Set<Tag>()
+        vibes = Set<Vibe>()
         isOnboardingComplete = false
         
         // Reset input properties.
@@ -255,7 +247,6 @@ final class UserProfileViewModel: ObservableObject {
     }
     
     // MARK: - COMPUTED PROPERTIES EXPECTED BY VIEWS:
-
     var isValidDisplayName: Bool {
         !displayNameInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -268,8 +259,8 @@ final class UserProfileViewModel: ObservableObject {
         genderCategorySelection != .unknown
     }
     
-    var isValidTags: Bool {
-        tags.count >= 0
+    var isValidVibes: Bool {
+        vibes.count >= 0
     }
     
     var hasAtLeastOneMedia: Bool {
@@ -277,6 +268,6 @@ final class UserProfileViewModel: ObservableObject {
     }
     
     var isProfileComplete: Bool {
-        isValidDisplayName && isValidDateOfBirth && isValidTags
+        isValidDisplayName && isValidDateOfBirth && isValidVibes
     }
 }

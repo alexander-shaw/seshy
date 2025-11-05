@@ -22,14 +22,14 @@ protocol PlaceRepository {
     func findOrCreatePlace(name: String?, details: String?, streetAddress: String?, city: String?, stateRegion: String?, roomNumber: String?, latitude: Double, longitude: Double, radius: Double, maxCapacity: Int64) async throws -> Place
 }
 
-final class CoreDataPlaceRepository: PlaceRepository {
+final class CorePlaceRepository: PlaceRepository {
     private let coreDataStack: CoreDataStack
     
     init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
         self.coreDataStack = coreDataStack
     }
     
-    func createPlace(name: String? = nil, details: String? = nil, streetAddress: String? = nil, city: String? = nil, stateRegion: String? = nil, roomNumber: String? = nil, latitude: Double, longitude: Double, radius: Double = 10.0, maxCapacity: Int64 = 100) async throws -> Place {
+    func createPlace(name: String? = nil, details: String? = nil, streetAddress: String? = nil, city: String? = nil, stateRegion: String? = nil, roomNumber: String? = nil, latitude: Double, longitude: Double, radius: Double = 10.0, maxCapacity: Int64 = 1000) async throws -> Place {
         return try await withCheckedThrowingContinuation { continuation in
             coreDataStack.viewContext.perform {
                 do {
@@ -41,7 +41,7 @@ final class CoreDataPlaceRepository: PlaceRepository {
                     
                     place.createdAt = Date()
                     place.updatedAt = Date()
-                    place.name = name ?? "Unnamed Location"
+                    place.name = name ?? "Location"
                     place.details = details
                     place.streetAddress = streetAddress
                     place.city = city
@@ -93,7 +93,7 @@ final class CoreDataPlaceRepository: PlaceRepository {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Place> = Place.fetchRequest()
             
-            // Create predicate with proper nil handling - search across all relevant fields.
+            // Create predicate with proper nil handling; search across all relevant fields.
             request.predicate = NSPredicate(format: "(name != nil AND name CONTAINS[cd] %@) OR (details != nil AND details CONTAINS[cd] %@) OR (streetAddress != nil AND streetAddress CONTAINS[cd] %@) OR (city != nil AND city CONTAINS[cd] %@) OR (stateRegion != nil AND stateRegion CONTAINS[cd] %@)", trimmedQuery, trimmedQuery, trimmedQuery, trimmedQuery, trimmedQuery)
             request.sortDescriptors = [NSSortDescriptor(keyPath: \Place.name, ascending: true)]
             
@@ -160,7 +160,7 @@ final class CoreDataPlaceRepository: PlaceRepository {
         }
     }
     
-    func findOrCreatePlace(name: String? = nil, details: String? = nil, streetAddress: String? = nil, city: String? = nil, stateRegion: String? = nil, roomNumber: String? = nil, latitude: Double, longitude: Double, radius: Double = 10.0, maxCapacity: Int64 = 100) async throws -> Place {
+    func findOrCreatePlace(name: String? = nil, details: String? = nil, streetAddress: String? = nil, city: String? = nil, stateRegion: String? = nil, roomNumber: String? = nil, latitude: Double, longitude: Double, radius: Double = 10.0, maxCapacity: Int64 = 1000) async throws -> Place {
         // First, try to find an existing place at the same coordinates.
         let existingPlace = try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Place> = Place.fetchRequest()

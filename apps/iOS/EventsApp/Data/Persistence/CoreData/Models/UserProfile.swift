@@ -5,9 +5,10 @@
 //  Created by Шоу on 10/4/25.
 //
 
-// Editable profile for the local user.
+// Local-only editable profile for the local user.
 // One-to-one with DeviceUser (root).
-// Other users are represented by PublicProfile.
+// Changes automatically sync to PublicProfile locally, which then syncs to cloud.
+// UserProfile itself never syncs to cloud directly.
 
 import Foundation
 import CoreData
@@ -38,8 +39,9 @@ extension UserProfile {
 
     // Relationships:
     @NSManaged public var user: DeviceUser
+    @NSManaged public var publicProfile: PublicProfile?
     @NSManaged public var media: Set<Media>?
-    @NSManaged public var tags: Set<Tag>?
+    @NSManaged public var vibes: Set<Vibe>?
 }
 
 public extension UserProfile {
@@ -50,8 +52,11 @@ public extension UserProfile {
 }
 
 extension UserProfile {
+    // NOTE: Could depend on subscription tier!
+    // Free: up to 4 images.
+    // Paid: up to 9 images & videos.
     public var maxMediaUploads: Int {
-        return 4  // TODO: Should depend on subscription tier!
+        return 4
     }
 
     public var currentMediaCount: Int {
@@ -74,7 +79,12 @@ extension UserProfile: SyncTrackable {
     @NSManaged public var deletedAt: Date?
     @NSManaged public var syncStatusRaw: Int16
     @NSManaged public var lastCloudSyncedAt: Date?
-    @NSManaged public var schemaVersion: Int16
+    // Note: UserProfile doesn't have schemaVersion in Core Data model since it's local-only
+    // Computed property to satisfy SyncTrackable protocol (always returns 1)
+    public var schemaVersion: Int16 {
+        get { 1 }
+        set { /* No-op: UserProfile is local-only and doesn't sync */ }
+    }
 
     // Computed:
     public var syncStatus: SyncStatus {

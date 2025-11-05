@@ -23,7 +23,7 @@ struct ProfileView: View {
     
     @State private var profileFlow: ProfileFlow?
     @StateObject private var settingsViewModel = UserSettingsViewModel(
-        repository: CoreDataUserSettingsRepository()
+        repository: CoreUserSettingsRepository()
     )
 
     var body: some View {
@@ -36,7 +36,12 @@ struct ProfileView: View {
                 }
             )
 
-            Spacer(minLength: 0)
+            VStack {
+                Spacer()
+                AnimatedRingView()
+                    .padding(.bottom, theme.spacing.large)
+                Spacer()
+            }
         }
         .background(theme.colors.background)
         .fullScreenCover(item: $profileFlow) { flow in

@@ -17,8 +17,8 @@ public extension DeviceUser {
         NSFetchRequest<DeviceUser>(entityName: "DeviceUser")
     }
 
-    @NSManaged var id: UUID  // MARK: Unique.
-    @NSManaged var username: String?
+    @NSManaged var id: UUID  // MARK: Unique. Used as primary key both locally and in cloud DB.
+    @NSManaged var cloudUserID: String?  // Optional.  Auth provider ID: Firebase Auth UID.  Separate from DB primary key for easier migration, if needed.
 
     // Relationships:
     @NSManaged var fingerprint: DeviceFingerprint?  // One-to-one.

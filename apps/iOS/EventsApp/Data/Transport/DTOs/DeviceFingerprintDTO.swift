@@ -22,6 +22,7 @@ public struct DeviceFingerprintDTO: Codable, Sendable, Equatable {
     public let loginAttemptCount: Int
     public let isLockedOut: Bool
     public let lockoutUntil: Date?
+    
     public let updatedAt: Date
     public let schemaVersion: Int
 }

@@ -30,7 +30,7 @@ extension Member {
     @NSManaged public var avatarURL: String?
 
     // Relationships:
-    @NSManaged public var event: UserEvent
+    @NSManaged public var event: EventItem
 }
 
 extension Member {

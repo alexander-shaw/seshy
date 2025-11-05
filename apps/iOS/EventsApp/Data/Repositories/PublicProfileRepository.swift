@@ -23,8 +23,8 @@ public protocol PublicProfileRepository: Sendable {
     func cleanupOldProfiles(olderThan date: Date) async throws -> Int
 }
 
-final class CoreDataPublicProfileRepository: PublicProfileRepository {
-    private let coreDataStack: CoreDataStack
+final class CorePublicProfileRepository: PublicProfileRepository {
+    let coreDataStack: CoreDataStack
     
     init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
         self.coreDataStack = coreDataStack

@@ -29,7 +29,7 @@ final class InviteViewModel: ObservableObject {
     private var invite: Invite?
     private var eventID: UUID?
     
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: InviteRepository = CoreDataInviteRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: InviteRepository = CoreInviteRepository()) {
         self.context = context
         self.repository = repository
     }
@@ -57,7 +57,7 @@ final class InviteViewModel: ObservableObject {
         
         do {
             let inviteDTOs = try await repository.getInvites(for: eventID)
-            // TODO: Work with DTOs until repository is updated.
+            // TODO: Update repository implementation -- do not use DTOs here.
         } catch {
             errorMessage = "Failed to load invites:  \(error.localizedDescription)"
         }
@@ -191,7 +191,6 @@ final class InviteViewModel: ObservableObject {
     }
     
     // MARK: - COMPUTED PROPERTIES:
-
     var pendingInvites: [Invite] {
         return invites.filter { $0.statusRaw == InviteStatus.pending.rawValue }
     }
@@ -242,7 +241,6 @@ final class InviteViewModel: ObservableObject {
     }
     
     // MARK: - PRIVATE METHODS:
-
     private func populateFromInviteDTO(_ inviteDTO: InviteDTO) {
         userID = inviteDTO.userID
         type = InviteType(rawValue: inviteDTO.typeRaw) ?? .invite

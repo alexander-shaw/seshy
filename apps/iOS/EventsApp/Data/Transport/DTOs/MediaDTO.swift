@@ -16,12 +16,12 @@ public struct MediaDTO: Codable, Sendable, Equatable {
     public let mimeType: String?
     public let averageColorHex: String?
     
-    // Polymorphic owner reference (exactly one should be set)
+    // Polymorphic owner reference (exactly one should be set).
     public let eventID: UUID?
     public let userProfileID: UUID?
     public let publicProfileID: UUID?
     
-    // Sync fields
+    // Sync fields.
     public let createdAt: Date
     public let updatedAt: Date
     public let deletedAt: Date?

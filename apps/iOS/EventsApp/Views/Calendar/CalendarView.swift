@@ -12,7 +12,7 @@ import CoreData
 import CoreDomain
 
 enum CalendarFlow: Identifiable {
-    case openEvent(event: UserEvent)
+    case openEvent(event: EventItem)
 
     var id: String {
         switch self {
@@ -27,21 +27,21 @@ struct CalendarView: View {
     @Environment(\.theme) private var theme
 
     @State private var selectedEvent: CalendarFlow?
-    @State private var events: [UserEvent] = []
+    @State private var events: [EventItem] = []
     
-    private let repository: UserEventRepository = CoreDataUserEventRepository()
-    
+    private let repository: EventItemRepository = CoreEventItemRepository()
+
     // Separate events with and without startTime.
-    private var eventsWithDates: [UserEvent] {
+    private var eventsWithDates: [EventItem] {
         events.filter { $0.startTime != nil }
     }
     
-    private var eventsWithoutDates: [UserEvent] {
+    private var eventsWithoutDates: [EventItem] {
         events.filter { $0.startTime == nil }
     }
     
     // Group events by date (using startTime).
-    private var eventsByDate: [Date: [UserEvent]] {
+    private var eventsByDate: [Date: [EventItem]] {
         let grouped = Dictionary(grouping: eventsWithDates) { event in
             // Group by calendar day (ignoring time).
             Calendar.current.startOfDay(for: event.startTime!)
@@ -132,8 +132,8 @@ struct CalendarView: View {
 
 private struct DateSection: View {
     let date: Date
-    let events: [UserEvent]
-    let onEventTap: (UserEvent) -> Void
+    let events: [EventItem]
+    let onEventTap: (EventItem) -> Void
     
     @Environment(\.theme) private var theme
 
@@ -195,16 +195,15 @@ private struct DateSection: View {
 }
 
 // MARK: - COMPACT PREVIEW:
-
 private struct CalendarEventRow: View {
-    let event: UserEvent
+    let event: EventItem
     
     @Environment(\.theme) private var theme
     
-    // Format start time
+    // Format start time.
     private var formattedTime: String {
         guard let startTime = event.startTime else {
-            return "?"
+            return ""
         }
 
         let formatter = DateFormatter()
@@ -218,7 +217,7 @@ private struct CalendarEventRow: View {
             // Time:
             Text(formattedTime)
                 .captionTitleStyle()
-                .frame(minWidth: 60, alignment: .leading)
+                .frame(minWidth: 60, alignment: .trailing)
 
             Divider()
                 .foregroundStyle(theme.colors.surface)

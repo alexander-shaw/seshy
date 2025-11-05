@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import CoreDomain
 
 // CoreData -> DTO (nonisolated by default; safe to call from background context).
 @inline(__always)
@@ -52,5 +53,75 @@ extension PublicProfile {
         let obj = PublicProfile(context: ctx)
         obj.apply(dto)
         return obj
+    }
+}
+
+// MARK: - CONFLICT RESOLUTION:
+// Upsert PublicProfile with conflict resolution.
+public func upsertPublicProfile(
+    from dto: PublicProfileDTO,
+    policy: ConflictRule,
+    in ctx: NSManagedObjectContext,
+    user: DeviceUser
+) throws {
+    // Find existing PublicProfile by ID or by user relationship.
+    let request: NSFetchRequest<PublicProfile> = PublicProfile.fetchRequest()
+    request.predicate = NSPredicate(format: "id == %@ OR userProfile.user == %@", dto.id as CVarArg, user)
+    request.fetchLimit = 1
+    
+    let existing = try ctx.fetch(request).first
+    
+    if let existing = existing {
+        // Update existing with conflict resolution.
+        switch policy {
+        case .serverWins:
+            // Always use server values.
+            existing.apply(dto)
+            existing.createdAt = existing.createdAt  // Preserve original createdAt.
+            existing.lastCloudSyncedAt = Date()
+            existing.syncStatus = .synced
+            
+        case .clientWins:
+            // Keep existing values if conflict detected.
+            if existing.updatedAt > dto.updatedAt {
+                // Client is newer, keep existing.
+                existing.lastCloudSyncedAt = Date()
+                existing.syncStatus = .synced
+            } else {
+                // Server is newer or equal, but policy says client wins - keep existing.
+                existing.lastCloudSyncedAt = Date()
+                existing.syncStatus = .synced
+            }
+            
+        case .lastWriteWins:
+            // Compare updatedAt timestamps.
+            if dto.updatedAt >= existing.updatedAt {
+                // Server is newer or equal, use server values.
+                existing.apply(dto)
+                existing.createdAt = existing.createdAt  // Preserve original createdAt.
+            }
+            // If client is newer, keep existing values.
+            existing.lastCloudSyncedAt = Date()
+            existing.syncStatus = .synced
+        }
+    } else {
+        // Create new PublicProfile.
+        let profile = PublicProfile(context: ctx)
+        profile.id = dto.id
+        profile.apply(dto)
+        profile.createdAt = Date()
+        
+        // Try to find associated UserProfile.
+        let userProfileRequest: NSFetchRequest<UserProfile> = UserProfile.fetchRequest()
+        userProfileRequest.predicate = NSPredicate(format: "id == %@ OR user == %@", dto.id as CVarArg, user)
+        userProfileRequest.fetchLimit = 1
+        if let userProfile = try ctx.fetch(userProfileRequest).first {
+            profile.userProfile = userProfile
+            userProfile.publicProfile = profile
+        }
+        
+        profile.lastCloudSyncedAt = Date()
+        profile.syncStatus = .synced
+        profile.schemaVersion = 1
     }
 }

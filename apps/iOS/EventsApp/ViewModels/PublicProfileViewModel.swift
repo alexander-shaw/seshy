@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages public profile data for user discovery.
-// Provides a reactive interface for SwiftUI views to work with public profiles including:
-// - Profile creation and editing;
-// - Public profile discovery and search;
-// - Media management for profile photos; and
-// - Integration with Core Data persistence layer.
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -40,7 +33,7 @@ final class PublicProfileViewModel: ObservableObject {
     private let mediaRepository: MediaRepository
     private var profile: PublicProfile?
     
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: PublicProfileRepository = CoreDataPublicProfileRepository(), mediaRepository: MediaRepository = CoreDataMediaRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: PublicProfileRepository = CorePublicProfileRepository(), mediaRepository: MediaRepository = CoreMediaRepository()) {
         self.context = context
         self.repository = repository
         self.mediaRepository = mediaRepository
@@ -118,7 +111,7 @@ final class PublicProfileViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            // Update the existing profile directly
+            // Update the existing profile directly.
             currentProfile.avatarURL = avatarURL.isEmpty ? nil : avatarURL
             currentProfile.username = username.isEmpty ? nil : username
             currentProfile.displayName = displayName
@@ -246,7 +239,6 @@ final class PublicProfileViewModel: ObservableObject {
     }
     
     // MARK: - PRIVATE METHODS:
-    
     private func loadMedia(for profile: PublicProfile?) async {
         guard let profile = profile else { return }
         do {
@@ -291,7 +283,6 @@ final class PublicProfileViewModel: ObservableObject {
     }
     
     // MARK: - COMPUTED PROPERTIES:
-
     var verifiedProfiles: [PublicProfile] {
         return profiles.filter { $0.isVerified }
     }

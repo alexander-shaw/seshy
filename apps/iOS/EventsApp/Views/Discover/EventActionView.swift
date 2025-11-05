@@ -10,7 +10,7 @@
 import SwiftUI
 
 struct EventActionView: View {
-    let event: UserEvent
+    let event: EventItem
     let action: EventAction
 
     @Environment(\.dismiss) private var dismiss

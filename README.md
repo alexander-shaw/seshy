@@ -12,3 +12,10 @@
 # Seshy
 
 ## An events app that helps college students effortlessly create, discover, and attend real-world experiences.
+
+## Troubleshooting
+
+If you encounter build or runtime errors, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed solutions:
+
+- **Build errors:** "Multiple commands produce" errors (often from duplicate DTO files after Git rebases)
+- **Runtime errors:** Core Data persistent store errors ("no persistent stores" after schema changes)

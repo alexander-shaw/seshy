@@ -21,7 +21,7 @@ public protocol InviteRepository: Sendable {
     func cleanupExpiredInvites() async throws -> Int
 }
 
-final class CoreDataInviteRepository: InviteRepository {
+final class CoreInviteRepository: InviteRepository {
     private let coreDataStack: CoreDataStack
     
     init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
@@ -31,7 +31,7 @@ final class CoreDataInviteRepository: InviteRepository {
     func createInvite(for eventID: UUID, userID: UUID, type: InviteType, token: String? = nil) async throws -> Invite {
         return try await coreDataStack.performBackgroundTask { context in
             // First fetch the event.
-            let eventRequest: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
+            let eventRequest: NSFetchRequest<EventItem> = EventItem.fetchRequest()
             eventRequest.predicate = NSPredicate(format: "id == %@", eventID as CVarArg)
             eventRequest.fetchLimit = 1
             
@@ -135,9 +135,8 @@ final class CoreDataInviteRepository: InviteRepository {
     func getExpiredInvites() async throws -> [Invite] {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Invite> = Invite.fetchRequest()
-            request.predicate = NSPredicate(format: "expiresAt < %@ AND statusRaw == %d", 
-                                          Date() as NSDate, InviteStatus.pending.rawValue)
-            
+            request.predicate = NSPredicate(format: "expiresAt < %@ AND statusRaw == %d", Date() as NSDate, InviteStatus.pending.rawValue)
+
             let invites = try context.fetch(request)
             return invites
         }
@@ -146,9 +145,8 @@ final class CoreDataInviteRepository: InviteRepository {
     func cleanupExpiredInvites() async throws -> Int {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Invite> = Invite.fetchRequest()
-            request.predicate = NSPredicate(format: "expiresAt < %@ AND statusRaw == %d", 
-                                          Date() as NSDate, InviteStatus.pending.rawValue)
-            
+            request.predicate = NSPredicate(format: "expiresAt < %@ AND statusRaw == %d", Date() as NSDate, InviteStatus.pending.rawValue)
+
             let expiredInvites = try context.fetch(request)
             let count = expiredInvites.count
             

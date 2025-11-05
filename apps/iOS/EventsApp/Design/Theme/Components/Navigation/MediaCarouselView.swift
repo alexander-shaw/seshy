@@ -56,35 +56,22 @@ struct MediaCarouselView: View {
                     .clipped()
                 }
                 .overlay {
-                    // Transparent tap zones overlay: left half -> previous, right half -> next.
-                    GeometryReader { geo in
+                    // Tap-only zones: do not install drag gestures so swipes pass to TabView/sheet.
+                    HStack(spacing: 0) {
                         Color.clear
                             .contentShape(Rectangle())
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                                    .onEnded { value in
-                                        // Treat as a tap only if movement is tiny to avoid
-                                        // interfering with sheet dismissal (vertical drags).
-                                        let translation = value.translation
-                                        let movementMagnitude = sqrt(translation.width * translation.width + translation.height * translation.height)
-                                        let tapMovementThreshold: CGFloat = 10
-                                        guard movementMagnitude <= tapMovementThreshold else {
-                                            return
-                                        }
-
-                                        let width = geo.size.width
-                                        let tappedLeft = value.startLocation.x < width / 2
-                                        if tappedLeft {
-                                            if currentIndex > 0 {
-                                                currentIndex -= 1
-                                            }
-                                        } else {
-                                            if currentIndex < mediaItems.count - 1 {
-                                                currentIndex += 1
-                                            }
-                                        }
-                                    }
-                            )
+                            .onTapGesture {
+                                if currentIndex > 0 {
+                                    currentIndex -= 1
+                                }
+                            }
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if currentIndex < mediaItems.count - 1 {
+                                    currentIndex += 1
+                                }
+                            }
                     }
                 }
                 .onChange(of: mediaItems.count) { _, newCount in
@@ -107,7 +94,6 @@ struct MediaCarouselView: View {
                     VStack {
                         Spacer()
 
-                        // TODO: Replace theme.colors.accent with event.brandColor.
                         HStack(spacing: theme.spacing.small / 2) {
                             ForEach(0..<mediaItems.count, id: \.self) { index in
                                 Circle()
@@ -116,10 +102,6 @@ struct MediaCarouselView: View {
                                     .animation(.easeInOut(duration: 0.2), value: currentIndex)
                             }
                         }
-                        .padding(.vertical, theme.spacing.small / 2)
-                        .padding(.horizontal, theme.spacing.small)
-                        .background(theme.colors.surface)
-                        .clipShape(Capsule())
                         .padding(.bottom, theme.spacing.small)
                     }
                 }
@@ -150,7 +132,7 @@ struct MediaItemView: View {
                 targetSize: targetSize
             )
             .overlay(alignment: .center) {
-                // MARK: Video Play Indicator.
+                // Video Play Indicator:
                 if media.isVideo {
                     Image(systemName: "play.circle.fill")
                         .iconStyle()
@@ -162,7 +144,7 @@ struct MediaItemView: View {
         .clipped()
         .contentShape(Rectangle())
         .onAppear {
-            print("Displaying media \(media.id); URL:  \(media.url); mimeType:  \(media.mimeType ?? "nil")")
+            print("Displaying media \(media.id) and URL:  \(media.url) and mimeType:  \(media.mimeType ?? "nil").")
         }
     }
 }

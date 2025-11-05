@@ -14,18 +14,23 @@ protocol UserProfileRepository {
     func createProfile(for user: DeviceUser) async throws -> UserProfile
     func updateProfile(_ profile: UserProfile) async throws -> UserProfile
     func deleteProfile(_ profile: UserProfile) async throws
-    func addTagsToProfile(_ profileId: UUID, tags: Set<Tag>) async throws -> UserProfile
-    func removeTagsFromProfile(_ profileId: UUID, tags: Set<Tag>) async throws -> UserProfile
-    func getProfileTags(_ profileId: UUID) async throws -> Set<Tag>
-    func updateProfileWithFormData(_ profile: UserProfile, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, tags: Set<Tag>) async throws -> UserProfile
-    func createProfileWithFormData(for user: DeviceUser, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, tags: Set<Tag>) async throws -> UserProfile
+    func addVibesToProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile
+    func removeVibesFromProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile
+    func getProfileVibes(_ profileId: UUID) async throws -> Set<Vibe>
+    func updateProfileWithForm(_ profile: UserProfile, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, vibes: Set<Vibe>) async throws -> UserProfile
+    func createProfileWithForm(for user: DeviceUser, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, vibes: Set<Vibe>) async throws -> UserProfile
 }
 
-final class CoreDataUserProfileRepository: UserProfileRepository {
+final class CoreUserProfileRepository: UserProfileRepository {
     private let coreDataStack: CoreDataStack
+    private let publicProfileRepository: PublicProfileRepository
 
-    init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
+    init(
+        coreDataStack: CoreDataStack = CoreDataStack.shared,
+        publicProfileRepository: PublicProfileRepository = CorePublicProfileRepository()
+    ) {
         self.coreDataStack = coreDataStack
+        self.publicProfileRepository = publicProfileRepository
     }
 
     func getProfile(for user: DeviceUser) async throws -> UserProfile? {
@@ -54,11 +59,14 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
 
             let profile = UserProfile(context: context)
             profile.id = UUID()
-            profile.displayName = "New User"  // Default name - will be updated with form data.
+            profile.displayName = "New User"  // Default name; will be updated with form data.
             profile.createdAt = Date()
             profile.updatedAt = Date()
-            profile.syncStatus = .pending
+            // UserProfile does not sync to cloud; do not set syncStatus.
             profile.user = contextUser
+
+            // Sync to PublicProfile locally
+            try createOrUpdatePublicProfileFromUserProfile(profile, in: context)
 
             try context.save()
             return profile
@@ -67,11 +75,20 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
 
     func updateProfile(_ profile: UserProfile) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
+            // Get the profile in this context using objectID.
+            guard let contextProfile = try context.existingObject(with: profile.objectID) as? UserProfile else {
+                throw RepositoryError.profileNotFound
+            }
+            
             // Core Data entities can be updated directly.
-            profile.updatedAt = Date()
-            profile.syncStatus = .pending
+            contextProfile.updatedAt = Date()
+            // UserProfile does not sync to cloud; do not set syncStatus.
+
+            // Sync to PublicProfile locally.
+            try createOrUpdatePublicProfileFromUserProfile(contextProfile, in: context)
+            
             try context.save()
-            return profile
+            return contextProfile
         }
     }
 
@@ -83,7 +100,7 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
         }
     }
 
-    func addTagsToProfile(_ profileId: UUID, tags: Set<Tag>) async throws -> UserProfile {
+    func addVibesToProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
             let profileRequest: NSFetchRequest<UserProfile> = UserProfile.fetchRequest()
             profileRequest.predicate = NSPredicate(format: "id == %@", profileId as CVarArg)
@@ -92,20 +109,23 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
                 throw RepositoryError.profileNotFound
             }
 
-            // Add tags to profile.
-            if profile.tags == nil {
-                profile.tags = Set<Tag>()
+            // Add vibes to profile.
+            if profile.vibes == nil {
+                profile.vibes = Set<Vibe>()
             }
-            profile.tags?.formUnion(tags)
+            profile.vibes?.formUnion(vibes)
             profile.updatedAt = Date()
-            profile.syncStatus = .pending
+            // UserProfile does not sync to cloud; do not set syncStatus.
+
+            // Sync to PublicProfile locally.
+            try createOrUpdatePublicProfileFromUserProfile(profile, in: context)
 
             try context.save()
             return profile
         }
     }
 
-    func removeTagsFromProfile(_ profileId: UUID, tags: Set<Tag>) async throws -> UserProfile {
+    func removeVibesFromProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
             let profileRequest: NSFetchRequest<UserProfile> = UserProfile.fetchRequest()
             profileRequest.predicate = NSPredicate(format: "id == %@", profileId as CVarArg)
@@ -114,17 +134,20 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
                 throw RepositoryError.profileNotFound
             }
 
-            // Remove tags from profile.
-            profile.tags?.subtract(tags)
+            // Remove vibes from profile.
+            profile.vibes?.subtract(vibes)
             profile.updatedAt = Date()
-            profile.syncStatus = .pending
+            // UserProfile does not sync to cloud; do not set syncStatus.
+
+            // Sync to PublicProfile locally.
+            try createOrUpdatePublicProfileFromUserProfile(profile, in: context)
 
             try context.save()
             return profile
         }
     }
 
-    func getProfileTags(_ profileId: UUID) async throws -> Set<Tag> {
+    func getProfileVibes(_ profileId: UUID) async throws -> Set<Vibe> {
         return try await coreDataStack.performBackgroundTask { context in
             let profileRequest: NSFetchRequest<UserProfile> = UserProfile.fetchRequest()
             profileRequest.predicate = NSPredicate(format: "id == %@", profileId as CVarArg)
@@ -133,11 +156,11 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
                 throw RepositoryError.profileNotFound
             }
 
-            return profile.tags ?? Set<Tag>()
+            return profile.vibes ?? Set<Vibe>()
         }
     }
 
-    func updateProfileWithFormData(
+    func updateProfileWithForm(
         _ profile: UserProfile,
         displayName: String,
         bio: String,
@@ -146,7 +169,7 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
         genderCategory: GenderCategory,
         genderIdentity: String,
         showGender: Bool,
-        tags: Set<Tag>
+        vibes: Set<Vibe>
     ) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
             // Get the profile in this context using objectID.
@@ -162,18 +185,21 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
             contextProfile.genderCategory = genderCategory
             contextProfile.genderIdentity = genderIdentity.isEmpty ? nil : genderIdentity
             contextProfile.showGender = showGender
-            contextProfile.tags = tags
+            contextProfile.vibes = vibes
             contextProfile.updatedAt = Date()
-            contextProfile.syncStatus = .pending
+            // UserProfile does not sync to cloud; do not set syncStatus.
+
+            // Sync to PublicProfile locally.
+            try createOrUpdatePublicProfileFromUserProfile(contextProfile, in: context)
 
             try context.save()
-            print("updateProfileWithFormData: Updated profile \(contextProfile.id)")
-            print("updateProfileWithFormData: displayName: '\(displayName)', dateOfBirth: \(dateOfBirth?.description ?? "nil")")
+            print("updateProfileWithFormData | Updated profile \(contextProfile.id).")
+            print("updateProfileWithFormData | displayName:  \(displayName) and dateOfBirth:  \(dateOfBirth?.description ?? "nil")")
             return contextProfile
         }
     }
 
-    func createProfileWithFormData(
+    func createProfileWithForm(
         for user: DeviceUser,
         displayName: String,
         bio: String,
@@ -182,7 +208,7 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
         genderCategory: GenderCategory,
         genderIdentity: String,
         showGender: Bool,
-        tags: Set<Tag>
+        vibes: Set<Vibe>
     ) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
             // Use objectID to fetch the user in this context.
@@ -199,15 +225,18 @@ final class CoreDataUserProfileRepository: UserProfileRepository {
             profile.genderCategory = genderCategory
             profile.genderIdentity = genderIdentity.isEmpty ? nil : genderIdentity
             profile.showGender = showGender
-            profile.tags = tags
+            profile.vibes = vibes
             profile.createdAt = Date()
             profile.updatedAt = Date()
-            profile.syncStatus = .pending
+            // UserProfile does not sync to cloud; do not set syncStatus.
             profile.user = contextUser
 
+            // Sync to PublicProfile locally.
+            try createOrUpdatePublicProfileFromUserProfile(profile, in: context)
+
             try context.save()
-            print("createProfileWithFormData: Created profile \(profile.id) for user \(contextUser.id)")
-            print("createProfileWithFormData: displayName: '\(displayName)', dateOfBirth: \(dateOfBirth?.description ?? "nil")")
+            print("Created profile \(profile.id) for user \(contextUser.id).")
+            print("displayName:  \(displayName) and dateOfBirth:  \(dateOfBirth?.description ?? "nil").")
             return profile
         }
     }

@@ -5,13 +5,6 @@
 //  Created by Шоу on 10/11/25.
 //
 
-// Manages event membership and user roles.
-// Provides a reactive interface for SwiftUI views to work with members including:
-// - Member invitation and management;
-// - Role assignment;
-// - Member status tracking; and
-// - Integration with Core Data persistence layer.
-
 import Foundation
 import CoreData
 import SwiftUI
@@ -36,7 +29,7 @@ final class MemberViewModel: ObservableObject {
     private var member: Member?
     private var eventID: UUID?
     
-    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: MemberRepository = CoreDataMemberRepository()) {
+    init(context: NSManagedObjectContext = CoreDataStack.shared.viewContext, repository: MemberRepository = CoreMemberRepository()) {
         self.context = context
         self.repository = repository
     }
@@ -51,7 +44,7 @@ final class MemberViewModel: ObservableObject {
                 populateFromMember(loadedMember)
             }
         } catch {
-            errorMessage = "Failed to load member: \(error.localizedDescription)"
+            errorMessage = "Failed to load member:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -64,9 +57,9 @@ final class MemberViewModel: ObservableObject {
         
         do {
             let memberDTOs = try await repository.getMembers(for: eventID)
-            // TODO: work with DTOs until repository is updated.
+            // TODO: Update repository implementation -- do not use DTOs here.
         } catch {
-            errorMessage = "Failed to load members: \(error.localizedDescription)"
+            errorMessage = "Failed to load members:  \(error.localizedDescription)"
         }
         
         isLoading = false
@@ -74,7 +67,7 @@ final class MemberViewModel: ObservableObject {
     
     func createMember(for eventID: UUID) async {
         guard !displayName.isEmpty else {
-            errorMessage = "Display name is required"
+            errorMessage = "Display name is required."
             return
         }
         
@@ -235,7 +228,6 @@ final class MemberViewModel: ObservableObject {
     }
     
     // MARK: - COMPUTED PROPERTIES:
-    
     var hosts: [Member] {
         return members.filter { $0.roleRaw == MemberRole.host.rawValue }
     }
@@ -266,7 +258,6 @@ final class MemberViewModel: ObservableObject {
     }
     
     // MARK: - PRIVATE METHODS:
-
     private func populateFromMemberDTO(_ memberDTO: MemberDTO) {
         userID = memberDTO.userID
         displayName = memberDTO.displayName ?? ""

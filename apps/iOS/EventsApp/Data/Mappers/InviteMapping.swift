@@ -42,11 +42,10 @@ extension Invite {
         deletedAt = dto.deletedAt
         syncStatusRaw = dto.syncStatusRaw
         lastCloudSyncedAt = dto.lastCloudSyncedAt
-        // Event relationship handled separately.
     }
 
     // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: InviteDTO, event: UserEvent) -> Invite {
+    static func insert(into ctx: NSManagedObjectContext, from dto: InviteDTO, event: EventItem) -> Invite {
         let obj = Invite(context: ctx)
         obj.apply(dto)
         obj.event = event

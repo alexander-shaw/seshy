@@ -60,7 +60,7 @@ extension Media {
     }
     
     // Convenience for inserting new managed object from DTO with event owner.
-    static func insert(into ctx: NSManagedObjectContext, from dto: MediaDTO, event: UserEvent) -> Media {
+    static func insert(into ctx: NSManagedObjectContext, from dto: MediaDTO, event: EventItem) -> Media {
         let obj = Media(context: ctx)
         obj.apply(dto)
         obj.event = event

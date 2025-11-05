@@ -20,21 +20,21 @@ struct AppearanceButtonsView: View {
         HStack(spacing: theme.spacing.small) {
             Spacer()
             
-            // System mode button
+            // System mode button.
             appearanceButton(
                 mode: .system,
                 systemIcon: "gearshape.fill",
                 label: "System"
             )
             
-            // Light mode button
+            // Light mode button.
             appearanceButton(
                 mode: .lightMode,
                 systemIcon: "sun.max.fill",
                 label: "Light"
             )
             
-            // Dark mode button
+            // Dark mode button.
             appearanceButton(
                 mode: .darkMode,
                 systemIcon: "moon.fill",

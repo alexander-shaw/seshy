@@ -12,12 +12,11 @@ import Foundation
 public struct UserSettingsDTO: Codable, Sendable, Equatable {
     public let id: UUID
     public let appearanceModeRaw: Int16
-    public let unitsRaw: Int16
-
     public let mapStyleRaw: Int16
     public let mapCenterLatitude: Double
     public let mapCenterLongitude: Double
     public let mapZoomLevel: Double
+    public let mapStartDate: Date?
     public let mapEndDate: Date?
     public let mapMaxDistance: Double?
     

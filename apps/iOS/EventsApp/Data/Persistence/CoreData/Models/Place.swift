@@ -26,7 +26,7 @@ extension Place {
 
     @NSManaged public var name: String
     @NSManaged public var details: String?
-    @NSManaged public var maxCapacity: NSNumber?  // Nil means infinite or not strictly defined, such as an outdoor space.
+    @NSManaged public var maxCapacity: NSNumber?  // Nil means infinite (not strictly defined).
 
     @NSManaged public var roomNumber: String?
     @NSManaged public var streetAddress: String?
@@ -34,7 +34,7 @@ extension Place {
     @NSManaged public var stateRegion: String?
 
     // Relationships:
-    @NSManaged public var events: Set<UserEvent>?
+    @NSManaged public var events: Set<EventItem>?
 }
 
 // Local & Cloud Storage:

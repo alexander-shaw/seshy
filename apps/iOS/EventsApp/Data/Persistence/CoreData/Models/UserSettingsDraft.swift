@@ -9,12 +9,10 @@ import Foundation
 import CoreData
 import CoreDomain
 
-// A draft object for staging changes to user settings before applying them atomically.
-// This allows multiple property changes to be applied together in a single save operation.
+// A draft object for staging changes to UserSettings before applying them atomically.
+// Allows multiple property changes to be applied together in a single save operation.
 public struct UserSettingsDraft {
-    // Appearance & Preferences.
     public var appearanceModeRaw: Int16
-    public var preferredUnitsRaw: Int16
     
     // Map Preferences.
     public var mapStyleRaw: Int16
@@ -23,35 +21,39 @@ public struct UserSettingsDraft {
     public var mapZoomLevel: Int16
     public var mapBearingDegrees: Double
     public var mapPitchDegrees: Double
+    public var mapStartDate: Date?
     public var mapEndRollingDays: NSNumber?
     public var mapEndDate: Date?
-    
+    public var mapMaxDistance: Double?  // Maximum distance in meters.  Nil means show all results worldwide.
+
     // Initialize a draft from an existing UserSettings managed object.
     public init(from settings: UserSettings) {
         self.appearanceModeRaw = settings.appearanceModeRaw
-        self.preferredUnitsRaw = settings.preferredUnitsRaw
         self.mapStyleRaw = settings.mapStyleRaw
         self.mapCenterLatitude = settings.mapCenterLatitude
         self.mapCenterLongitude = settings.mapCenterLongitude
         self.mapZoomLevel = settings.mapZoomLevel
         self.mapBearingDegrees = settings.mapBearingDegrees
         self.mapPitchDegrees = settings.mapPitchDegrees
+        self.mapStartDate = settings.mapStartDate
         self.mapEndRollingDays = settings.mapEndRollingDays
         self.mapEndDate = settings.mapEndDate
+        self.mapMaxDistance = settings.mapMaxDistance?.doubleValue
     }
     
     // Apply the draft changes to a UserSettings managed object.
     public func apply(to settings: UserSettings) {
         settings.appearanceModeRaw = self.appearanceModeRaw
-        settings.preferredUnitsRaw = self.preferredUnitsRaw
         settings.mapStyleRaw = self.mapStyleRaw
         settings.mapCenterLatitude = self.mapCenterLatitude
         settings.mapCenterLongitude = self.mapCenterLongitude
         settings.mapZoomLevel = self.mapZoomLevel
         settings.mapBearingDegrees = self.mapBearingDegrees
         settings.mapPitchDegrees = self.mapPitchDegrees
+        settings.mapStartDate = self.mapStartDate
         settings.mapEndRollingDays = self.mapEndRollingDays
         settings.mapEndDate = self.mapEndDate
+        settings.mapMaxDistance = self.mapMaxDistance.map { NSNumber(value: $0) }
         
         // Mark as updated and pending sync.
         settings.updatedAt = Date()
@@ -60,7 +62,6 @@ public struct UserSettingsDraft {
 }
 
 // MARK: - CONVENIENCE METHODS:
-
 extension UserSettingsDraft {
     // Update the appearance mode.
     public mutating func updateAppearanceMode(_ mode: AppearanceMode) {
@@ -72,11 +73,6 @@ extension UserSettingsDraft {
         mapStyleRaw = style.rawValue
     }
     
-    // Update the preferred units.
-    public mutating func updatePreferredUnits(_ units: Units) {
-        preferredUnitsRaw = units.rawValue
-    }
-    
     // Update the map center coordinate.
     public mutating func updateMapCenter(latitude: Double, longitude: Double) {
         mapCenterLatitude = latitude
@@ -84,25 +80,25 @@ extension UserSettingsDraft {
     }
     
     // Update the map zoom level.
-    public mutating func updateMapZoom(_ zoomLevel: Double) {
+    public mutating func updateMapZoomLevel(_ zoomLevel: Double) {
         mapZoomLevel = Int16(zoomLevel)
     }
-    
-    // Update the map end date.
-    public mutating func updateMapEndDate(_ endDate: Date?) {
-        mapEndDate = endDate
-    }
-    
+
     // Update the map bearing.
     public mutating func updateMapBearing(_ degrees: Double) {
         mapBearingDegrees = degrees
     }
-    
+
     // Update the map pitch.
     public mutating func updateMapPitch(_ degrees: Double) {
         mapPitchDegrees = degrees
     }
-    
+
+    // Update the map end date.
+    public mutating func updateMapStartDate(_ startDate: Date?) {
+        mapStartDate = startDate
+    }
+
     // Update the rolling days filter.
     public mutating func updateMapEndRollingDays(_ days: Int?) {
         if let days = days {
@@ -111,6 +107,14 @@ extension UserSettingsDraft {
             mapEndRollingDays = nil
         }
     }
+
+    // Update the map end date.
+    public mutating func updateMapEndDate(_ endDate: Date?) {
+        mapEndDate = endDate
+    }
+
+    // Update the maximum distance filter (nil = show all worldwide).
+    public mutating func updateMapMaxDistance(_ distance: Double?) {
+        mapMaxDistance = distance
+    }
 }
-
-

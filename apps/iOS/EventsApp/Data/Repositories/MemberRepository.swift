@@ -23,7 +23,7 @@ public protocol MemberRepository: Sendable {
     func canUserModifyEvent(userID: UUID, eventID: UUID) async throws -> Bool
 }
 
-final class CoreDataMemberRepository: MemberRepository {
+final class CoreMemberRepository: MemberRepository {
     private let coreDataStack: CoreDataStack
     
     init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
@@ -32,8 +32,8 @@ final class CoreDataMemberRepository: MemberRepository {
     
     func createMember(for eventID: UUID, userID: UUID, role: MemberRole, displayName: String, username: String? = nil, avatarURL: String? = nil) async throws -> Member {
         return try await coreDataStack.performBackgroundTask { context in
-            // First fetch the event.
-            let eventRequest: NSFetchRequest<UserEvent> = UserEvent.fetchRequest()
+            // First, fetch the event.
+            let eventRequest: NSFetchRequest<EventItem> = EventItem.fetchRequest()
             eventRequest.predicate = NSPredicate(format: "id == %@", eventID as CVarArg)
             eventRequest.fetchLimit = 1
             
