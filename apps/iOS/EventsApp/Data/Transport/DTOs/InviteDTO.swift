@@ -25,3 +25,5 @@ public struct InviteDTO: Codable, Sendable, Equatable {
     public let lastCloudSyncedAt: Date?
     public let schemaVersion: Int
 }
+
+

@@ -1,97 +1,97 @@
-name: Terraform Apply
-
-on:
-  workflow_dispatch:
-    inputs:
-      terraform_action:
-        description: 'Terraform action to perform'
-        required: true
-        type: choice
-        options:
-          - plan
-          - apply
-          - destroy
-        default: plan
-
-jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ~1.5
-
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: .terraform
-          key: ${{ runner.os }}-terraform-${{ github.ref }}-${{ hashFiles('infra/cloudrun/**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-${{ github.ref }}-
-            ${{ runner.os }}-terraform-
-
-      - name: Terraform Init
-        working-directory: infra/cloudrun
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state" \
-            -backend-config="prefix=cloudrun"
-
-      - name: Terraform Format Check
-        working-directory: infra/cloudrun
-        run: terraform fmt -check
-
-      - name: Terraform Validate
-        working-directory: infra/cloudrun
-        run: terraform validate
-
-      - name: Terraform Plan
-        if: github.event.inputs.terraform_action == 'plan' || github.event.inputs.terraform_action == 'apply'
-        working-directory: infra/cloudrun
-        run: |
-          terraform plan \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
-            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
-
-      - name: Terraform Apply
-        if: github.event.inputs.terraform_action == 'apply'
-        working-directory: infra/cloudrun
-        run: |
-          terraform apply -auto-approve \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
-            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
-
-      - name: Terraform Destroy
-        if: github.event.inputs.terraform_action == 'destroy'
-        working-directory: infra/cloudrun
-        run: |
-          terraform destroy -auto-approve \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
-            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
-
-      # Note: Configure these secrets in GitHub repository settings:
-      # GCP_PROJECT_ID - Your GCP project ID
-      # GCP_WIF_PROVIDER - Workload Identity Provider
-      # GCP_WIF_SERVICE_ACCOUNT - Workload Identity Service Account
-      # GCP_REGION - GCP region (e.g., us-central1)
+#name: Terraform Apply
+#
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      terraform_action:
+#        description: 'Terraform action to perform'
+#        required: true
+#        type: choice
+#        options:
+#          - plan
+#          - apply
+#          - destroy
+#        default: plan
+#
+#jobs:
+#  terraform:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#      id-token: write
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Authenticate to Google Cloud
+#        uses: google-github-actions/auth@v2
+#        with:
+#          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+#          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+#          project_id: ${{ secrets.GCP_PROJECT_ID }}
+#      
+#      - name: Set up Cloud SDK
+#        uses: google-github-actions/setup-gcloud@v2
+#
+#      - name: Setup Terraform
+#        uses: hashicorp/setup-terraform@v3
+#        with:
+#          terraform_version: ~1.5
+#
+#      - name: Cache Terraform
+#        uses: actions/cache@v4
+#        with:
+#          path: .terraform
+#          key: ${{ runner.os }}-terraform-${{ github.ref }}-${{ hashFiles('infra/cloudrun/**/*.tf') }}
+#          restore-keys: |
+#            ${{ runner.os }}-terraform-${{ github.ref }}-
+#            ${{ runner.os }}-terraform-
+#
+#      - name: Terraform Init
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform init \
+#            -backend-config="bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state" \
+#            -backend-config="prefix=cloudrun"
+#
+#      - name: Terraform Format Check
+#        working-directory: infra/cloudrun
+#        run: terraform fmt -check
+#
+#      - name: Terraform Validate
+#        working-directory: infra/cloudrun
+#        run: terraform validate
+#
+#      - name: Terraform Plan
+#        if: github.event.inputs.terraform_action == 'plan' || github.event.inputs.terraform_action == 'apply'
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform plan \
+#            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+#            -var="region=${{ secrets.GCP_REGION }}" \
+#            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+#
+#      - name: Terraform Apply
+#        if: github.event.inputs.terraform_action == 'apply'
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform apply -auto-approve \
+#            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+#            -var="region=${{ secrets.GCP_REGION }}" \
+#            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+#
+#      - name: Terraform Destroy
+#        if: github.event.inputs.terraform_action == 'destroy'
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform destroy -auto-approve \
+#            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+#            -var="region=${{ secrets.GCP_REGION }}" \
+#            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+#
+#      # Note: Configure these secrets in GitHub repository settings:
+#      # GCP_PROJECT_ID - Your GCP project ID
+#      # GCP_WIF_PROVIDER - Workload Identity Provider
+#      # GCP_WIF_SERVICE_ACCOUNT - Workload Identity Service Account
+#      # GCP_REGION - GCP region (e.g., us-central1)

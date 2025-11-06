@@ -1,133 +1,133 @@
-name: Deploy API
-
-on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'services/api/**'
-      - '.github/workflows/deploy-api.yml'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        type: choice
-        options:
-          - staging
-          - production
-        default: staging
-
-jobs:
-  deploy-api:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    env:
-      ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || github.event.inputs.environment || 'staging' }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
-
-      - name: Set image tag
-        id: image-tag
-        run: |
-          echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
-
-      - name: Build Docker image
-        working-directory: services/api
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-          tags: |
-            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/seshy-${{ env.ENVIRONMENT }}/seshy-api:${{ github.sha }}
-            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/seshy-${{ env.ENVIRONMENT }}/seshy-api:latest
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ~1.5
-
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: .terraform
-          key: ${{ runner.os }}-terraform-${{ github.ref }}-${{ hashFiles('infra/cloudrun/**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-${{ github.ref }}-
-            ${{ runner.os }}-terraform-
-
-      - name: Terraform Init
-        working-directory: infra/cloudrun
-        run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state" \
-            -backend-config="prefix=cloudrun/${{ env.ENVIRONMENT }}"
-
-      - name: Terraform Plan
-        working-directory: infra/cloudrun
-        run: |
-          terraform plan \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
-            -var="environment=${{ env.ENVIRONMENT }}" \
-            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
-
-      - name: Terraform Apply
-        working-directory: infra/cloudrun
-        run: |
-          terraform apply -auto-approve \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
-            -var="environment=${{ env.ENVIRONMENT }}" \
-            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
-
-      - name: Get Service URL
-        id: service-url
-        working-directory: infra/cloudrun
-        run: |
-          URL=$(terraform output -raw cloud_run_service_url)
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "Service URL: $URL"
-
-      - name: Test endpoint
-        run: |
-          echo "Testing health endpoint..."
-          curl -f ${{ steps.service-url.outputs.url }}/healthz
-          echo "✓ Health check passed"
-
-      # Note: Configure these secrets in GitHub repository settings:
-      # GCP_PROJECT_ID - Your GCP project ID
-      # GCP_WIF_PROVIDER - Workload Identity Provider
-      # GCP_WIF_SERVICE_ACCOUNT - Workload Identity Service Account
-      # GCP_REGION - GCP region (e.g., us-central1)
+#name: Deploy API
+#
+#on:
+#  push:
+#    branches: [main, develop]
+#    paths:
+#      - 'services/api/**'
+#      - '.github/workflows/deploy-api.yml'
+#  workflow_dispatch:
+#    inputs:
+#      environment:
+#        description: 'Environment to deploy to'
+#        required: true
+#        type: choice
+#        options:
+#          - staging
+#          - production
+#        default: staging
+#
+#jobs:
+#  deploy-api:
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#      id-token: write
+#
+#    env:
+#      ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || github.event.inputs.environment || 'staging' }}
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Configure Docker Buildx
+#        uses: docker/setup-buildx-action@v3
+#
+#      - name: Authenticate to Google Cloud
+#        uses: google-github-actions/auth@v2
+#        with:
+#          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+#          service_account: ${{ secrets.GCP_WIF_SERVICE_ACCOUNT }}
+#          project_id: ${{ secrets.GCP_PROJECT_ID }}
+#      
+#      - name: Set up Cloud SDK
+#        uses: google-github-actions/setup-gcloud@v2
+#
+#      - name: Cache Docker layers
+#        uses: actions/cache@v4
+#        with:
+#          path: /tmp/.buildx-cache
+#          key: ${{ runner.os }}-buildx-${{ github.sha }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-
+#
+#      - name: Configure Docker for Artifact Registry
+#        run: |
+#          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev --quiet
+#
+#      - name: Set image tag
+#        id: image-tag
+#        run: |
+#          echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+#
+#      - name: Build Docker image
+#        working-directory: services/api
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          push: true
+#          cache-from: type=local,src=/tmp/.buildx-cache
+#          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+#          tags: |
+#            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/seshy-${{ env.ENVIRONMENT }}/seshy-api:${{ github.sha }}
+#            ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/seshy-${{ env.ENVIRONMENT }}/seshy-api:latest
+#
+#      - name: Setup Terraform
+#        uses: hashicorp/setup-terraform@v3
+#        with:
+#          terraform_version: ~1.5
+#
+#      - name: Cache Terraform
+#        uses: actions/cache@v4
+#        with:
+#          path: .terraform
+#          key: ${{ runner.os }}-terraform-${{ github.ref }}-${{ hashFiles('infra/cloudrun/**/*.tf') }}
+#          restore-keys: |
+#            ${{ runner.os }}-terraform-${{ github.ref }}-
+#            ${{ runner.os }}-terraform-
+#
+#      - name: Terraform Init
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform init \
+#            -backend-config="bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state" \
+#            -backend-config="prefix=cloudrun/${{ env.ENVIRONMENT }}"
+#
+#      - name: Terraform Plan
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform plan \
+#            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+#            -var="region=${{ secrets.GCP_REGION }}" \
+#            -var="environment=${{ env.ENVIRONMENT }}" \
+#            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+#
+#      - name: Terraform Apply
+#        working-directory: infra/cloudrun
+#        run: |
+#          terraform apply -auto-approve \
+#            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+#            -var="region=${{ secrets.GCP_REGION }}" \
+#            -var="environment=${{ env.ENVIRONMENT }}" \
+#            -var="terraform_state_bucket=${{ secrets.GCP_PROJECT_ID }}-terraform-state"
+#
+#      - name: Get Service URL
+#        id: service-url
+#        working-directory: infra/cloudrun
+#        run: |
+#          URL=$(terraform output -raw cloud_run_service_url)
+#          echo "url=$URL" >> $GITHUB_OUTPUT
+#          echo "Service URL: $URL"
+#
+#      - name: Test endpoint
+#        run: |
+#          echo "Testing health endpoint..."
+#          curl -f ${{ steps.service-url.outputs.url }}/healthz
+#          echo "✓ Health check passed"
+#
+#      # Note: Configure these secrets in GitHub repository settings:
+#      # GCP_PROJECT_ID - Your GCP project ID
+#      # GCP_WIF_PROVIDER - Workload Identity Provider
+#      # GCP_WIF_SERVICE_ACCOUNT - Workload Identity Service Account
+#      # GCP_REGION - GCP region (e.g., us-central1)
