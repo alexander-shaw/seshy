@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: seshy_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app     # bind mount for dynamic code updates
+      - db_data:/data       # persistent DB storage
+
+volumes:
+  db_data:
