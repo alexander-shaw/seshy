@@ -8,14 +8,12 @@
 import SwiftUI
 import Combine  // Required for @Published and ObservableObject.
 import CoreData
-import CoreDomain
 import UIKit  // Required for UIApplication notifications.
 
 @main
 struct EventsApp: App {
 
-    private let theme = AppTheme()
-
+    @StateObject private var themeManager = ThemeManager()
     @StateObject private var userSession: UserSessionViewModel
     @StateObject private var tabManager = TabManager()
     
@@ -82,9 +80,12 @@ struct EventsApp: App {
                         .onOpenURL { handleDeepLink($0) }
                 }
             }
-            .theme(theme)
+            .theme(themeManager.currentTheme)
             .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
+            .environmentObject(themeManager)
             .environmentObject(userSession)
+            .environmentObject(userSession.userProfileViewModel)
+            .observeSystemAppearance(themeManager)
             .onAppear {
                 sync.engine.start()
             }

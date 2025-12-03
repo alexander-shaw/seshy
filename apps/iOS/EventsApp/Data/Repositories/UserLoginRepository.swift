@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 protocol UserLoginRepository {
     func getCurrentUser() async throws -> DeviceUser?

@@ -9,7 +9,6 @@ import Foundation
 import Combine
 import CoreData
 import SwiftUI
-import CoreDomain
 
 @MainActor
 final class UserLoginViewModel: ObservableObject {

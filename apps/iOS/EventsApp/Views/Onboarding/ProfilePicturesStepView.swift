@@ -13,19 +13,20 @@ struct ProfilePicturesStepView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: theme.spacing.medium) {
-            Text("Pick your photos & videos")
+            Text("What's your energy?")
                 .headlineStyle()
 
-            Text("At least one required—tap to delete, drag to recorder.")
+            Text("Discover events you love.")
+                .fontWeight(.bold)
                 .bodyTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
 
             Spacer()
             
             MediaGridPicker(
                 mediaItems: $userSession.userProfileViewModel.selectedMediaItems,
-                maxItems: 4,
-                title: nil,
-                subtitle: nil
+                maxItems: 4
             )
             
             Spacer()

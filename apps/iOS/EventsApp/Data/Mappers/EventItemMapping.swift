@@ -15,14 +15,14 @@ public func mapUserEventToDTO(_ obj: EventItem) -> EventItemDTO {
         scheduleStatusRaw: obj.scheduleStatusRaw,
         name: obj.name,
         details: obj.details,
-        brandColor: obj.brandColor,
+        themePrimaryHex: obj.themePrimaryHex,
+        themeSecondaryHex: obj.themeSecondaryHex,
+        themeMode: obj.themeMode,
         startTime: obj.startTime,
         endTime: obj.endTime,
         durationMinutes: obj.durationMinutes?.int64Value,
         isAllDay: obj.isAllDay,
-        locationID: obj.location?.id ?? {
-            fatalError("Data integrity issue: EventItem must have a location.")
-        }(),
+        locationID: obj.location?.id, // Location is now optional
         maxCapacity: obj.maxCapacity,
         visibilityRaw: obj.visibilityRaw,
         inviteLink: obj.inviteLink,
@@ -43,7 +43,9 @@ extension EventItem {
         scheduleStatusRaw = dto.scheduleStatusRaw
         name = dto.name
         details = dto.details
-        brandColor = dto.brandColor
+        themePrimaryHex = dto.themePrimaryHex
+        themeSecondaryHex = dto.themeSecondaryHex
+        themeMode = dto.themeMode
         startTime = dto.startTime
         endTime = dto.endTime
         durationMinutes = dto.durationMinutes.map { NSNumber(value: $0) }
@@ -59,7 +61,7 @@ extension EventItem {
     }
 
     // Convenience for inserting new managed object from DTO.
-    static func insert(into ctx: NSManagedObjectContext, from dto: EventItemDTO, location: Place) -> EventItem {
+    static func insert(into ctx: NSManagedObjectContext, from dto: EventItemDTO, location: Place? = nil) -> EventItem {
         let obj = EventItem(context: ctx)
         obj.apply(dto)
         obj.location = location

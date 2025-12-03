@@ -15,15 +15,16 @@ struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            // Background that fills entire space
+            // Background that fills the entire space.
             theme.colors.background
                 .ignoresSafeArea()
             
             VStack(alignment: .center, spacing: theme.spacing.small) {
                 Spacer(minLength: theme.sizes.screenHeight / 3)
 
-                Text("s e s h i")
-                    .displayTitleStyle()
+                Text("seshy")
+                    .kerning(5.0)
+                    .largeTitleStyle()
 
                 Spacer()
 
@@ -34,9 +35,9 @@ struct WelcomeView: View {
                 Spacer()
 
                 Text(termsText())
-                    .fontWeight(.regular)
                     .captionTextStyle()
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding([.top, .horizontal], theme.spacing.medium)
         }
@@ -69,5 +70,3 @@ struct WelcomeView: View {
         return string
     }
 }
-
-

@@ -43,6 +43,7 @@ public struct Colors: Equatable {
         self.info = info
     }
 
+    // Dark mode colors
     public static let darkMode = Colors(
         accent: .blue,
         background: Color(hex: "#121212") ?? .black,
@@ -55,14 +56,15 @@ public struct Colors: Equatable {
         warning: .orange,
         info: .blue
     )
-
+    
+    // Light mode colors
     public static let lightMode = Colors(
         accent: .blue,
         background: Color(hex: "#FFFFFF") ?? .white,
         surface: Color(hex: "#F5F5F5") ?? .gray,
         mainText: Color(hex: "#000000") ?? .black,
         offText: Color(hex: "#525252") ?? .gray,
-
+        
         success: .green,
         error: .red,
         warning: .orange,

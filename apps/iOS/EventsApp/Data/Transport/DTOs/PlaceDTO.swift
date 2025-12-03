@@ -12,15 +12,10 @@ import Foundation
 public struct PlaceDTO: Codable, Sendable, Equatable {
     public let id: UUID
     public let name: String
-    public let details: String?
-    public let streetAddress: String?
-    public let city: String?
-    public let stateRegion: String?
-    public let roomNumber: String?
-    public let latitude: Double
-    public let longitude: Double
-    public let radius: Double
-    
+    public let createdAt: Date
     public let updatedAt: Date
-    public let schemaVersion: Int
+    public let deletedAt: Date?
+    public let syncStatusRaw: Int16
+    public let lastCloudSyncedAt: Date?
+    public let schemaVersion: Int16
 }

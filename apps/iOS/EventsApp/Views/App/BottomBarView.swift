@@ -81,21 +81,35 @@ struct BottomBarView: View {
 
 struct TabButton: View {
     var icon: String
-    var tab: Tab
-    var selectedTab: Tab
+    var tab: TabType
+    var selectedTab: TabType
     var action: () -> Void
+
     @Environment(\.theme) private var theme
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: icon)
-                .font(tab == .newEventTab ? theme.typography.headline : theme.typography.icon)
-                .foregroundStyle(selectedTab == tab ? theme.colors.mainText : theme.colors.offText)
-                .frame(minWidth: theme.sizes.iconButton)
-                .contentShape(Rectangle())
+            ZStack {
+                // Filled background when selected.
+                if selectedTab == tab {
+                    Circle()
+                        .fill(theme.colors.surface)
+                        .frame(width: theme.sizes.iconButton, height: theme.sizes.iconButton)
+                } else {
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: theme.sizes.iconButton, height: theme.sizes.iconButton)
+                }
+
+                Image(systemName: icon)
+                    .font(tab == .newEventTab ? theme.typography.title : theme.typography.headline)
+                    .foregroundStyle(selectedTab == tab ? theme.colors.mainText : theme.colors.offText)
+            }
+            .frame(minWidth: theme.sizes.iconButton)
+            .contentShape(Circle())
         }
         .padding(.top, theme.spacing.small)
-        .padding(.bottom, theme.spacing.small)
+        .padding(.bottom, theme.spacing.small / 2)
         .buttonStyle(CollapseButtonStyle())
         .hapticFeedback(.light)
     }

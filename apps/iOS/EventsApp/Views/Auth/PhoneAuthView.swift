@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Combine
-import CoreDomain
 
 enum PhoneAuthStep {
     case enterPhone, verifyCode
@@ -30,6 +29,7 @@ struct PhoneAuthView: View {
     @State private var timerActive = true
     @State private var showOnboarding = false
     @State private var errorMessage: String?
+    @State private var previousCodeCount: Int = 0
 
     @State private var cancellables = Set<AnyCancellable>()
 
@@ -199,6 +199,34 @@ struct PhoneAuthView: View {
             }
         }
     }
+    
+    private func handleVerificationAutoAdvance() {
+        // Guard against double-verifying: check if already sending or code is not valid.
+        guard userSession.userLoginViewModel.verificationCode.count == 6,
+              !isSending,
+              step == .verifyCode else { return }
+        
+        isSending = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                try await userSession.userLoginViewModel.verifyOTP()
+                // After successful verification, transition to onboarding phase
+                await MainActor.run {
+                    userSession.appPhase = .onboarding
+                }
+                onFinished()
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Verification failed:  \(error.localizedDescription)"
+                }
+            }
+            await MainActor.run {
+                isSending = false
+            }
+        }
+    }
 
     private var enterPhoneView: some View {
         VStack(alignment: .leading, spacing: theme.spacing.small) {
@@ -209,6 +237,7 @@ struct PhoneAuthView: View {
 
             Text("One quick code and you’re good to go.")
                 .bodyTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
 
@@ -224,7 +253,7 @@ struct PhoneAuthView: View {
                             .titleStyle()
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.bottom, theme.spacing.small * 0.5 + 1)
                 .overlay(
                     VStack {
                         Spacer()
@@ -236,8 +265,9 @@ struct PhoneAuthView: View {
 
                 TextFieldView(
                     placeholder: "000 000 0000",
-                    specialType: .phoneNumber,
-                    text: $phoneInputText
+                    specialType: .enterPhoneNumber,
+                    text: $phoneInputText,
+                    autofocus: true,
                 )
                 .textContentType(.telephoneNumber)
                 .keyboardType(.phonePad)
@@ -249,6 +279,7 @@ struct PhoneAuthView: View {
 
             Text("By continuing, you agree to receive a one-time text message.  Message & data rates may apply.")
                 .captionTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
 
@@ -312,6 +343,14 @@ struct PhoneAuthView: View {
             Spacer()
 
             VerificationCodeView(code: $userSession.userLoginViewModel.verificationCode)
+                .onChange(of: userSession.userLoginViewModel.verificationCode) { oldValue, newValue in
+                    let currentCount = newValue.count
+                    // Auto-advance when code reaches 6 digits (similar to phone number auto-advance)
+                    if currentCount == 6 && previousCodeCount != 6 && !isSending {
+                        handleVerificationAutoAdvance()
+                    }
+                    previousCodeCount = currentCount
+                }
 
             if !timerActive {
                 Button("Resend Code") {
@@ -334,6 +373,7 @@ struct PhoneAuthView: View {
                     }
                 }
                 .foregroundStyle(theme.colors.accent)
+                .fontWeight(.bold)
                 .captionTextStyle()
             }
 
@@ -374,6 +414,7 @@ struct PhoneAuthView: View {
         }
         .onAppear {
             startTimer()
+            previousCodeCount = userSession.userLoginViewModel.verificationCode.count
         }
     }
 }

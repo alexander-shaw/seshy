@@ -5,19 +5,19 @@
 //  Created by Шоу on 10/25/25.
 //
 
-// TODO: Filter events by a status attribute: watching, joined, requested, etc.
-
 import SwiftUI
 import CoreData
-import CoreDomain
 
 enum CalendarFlow: Identifiable {
     case openEvent(event: EventItem)
+    case openQRCode
 
     var id: String {
         switch self {
             case .openEvent(let event):
                 return event.objectID.uriRepresentation().absoluteString
+            case .openQRCode:
+                return "openQRCode"
         }
     }
 }
@@ -47,10 +47,15 @@ struct CalendarView: View {
             Calendar.current.startOfDay(for: event.startTime!)
         }
         
-        // Sort events within each date group by startTime.
+        // Sort events within each date group: all-day events first, then by startTime.
         return grouped.mapValues { events in
             events.sorted { event1, event2 in
-                (event1.startTime ?? Date.distantPast) < (event2.startTime ?? Date.distantPast)
+                // All-day events come first
+                if event1.isAllDay != event2.isAllDay {
+                    return event1.isAllDay
+                }
+                // Then sort by startTime
+                return (event1.startTime ?? Date.distantPast) < (event2.startTime ?? Date.distantPast)
             }
         }
     }
@@ -62,31 +67,101 @@ struct CalendarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Calendar")
+            TitleView(
+                titleText: TabType.calendarTab.rawValue,
+                trailing: {
+                    IconButton(icon: "ticket.fill") {
+                        selectedEvent = .openQRCode
+                    }
+                }
+            )
 
             // List of events grouped by date.
             if events.isEmpty {
                 VStack {
                     Spacer()
-                    AnimatedRingView()
-                        .padding(.bottom, theme.spacing.large)
-                    Spacer()
                 }
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: theme.spacing.medium) {
-                        // Events grouped by date.
-                        ForEach(sortedDates, id: \.self) { date in
-                            DateSection(
-                                date: date,
-                                events: eventsByDate[date] ?? [],
-                                onEventTap: { event in
-                                    selectedEvent = .openEvent(event: event)
+                    VStack(alignment: .leading, spacing: theme.spacing.medium) {
+                        Text("Joined")
+                            .headlineStyle()
+                            .padding(.horizontal, theme.spacing.medium)
+
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(alignment: .leading, spacing: theme.spacing.medium) {
+                                // Events grouped by date.
+                                ForEach(sortedDates, id: \.self) { date in
+                                    DateSection(
+                                        date: date,
+                                        events: eventsByDate[date] ?? [],
+                                        onEventTap: { event in
+                                            selectedEvent = .openEvent(event: event)
+                                        }
+                                    )
                                 }
-                            )
+                            }
+                        }
+
+                        Text("Watching")
+                            .headlineStyle()
+                            .padding(.horizontal, theme.spacing.medium)
+
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(alignment: .leading, spacing: theme.spacing.medium) {
+                                // Events grouped by date.
+                                ForEach(sortedDates, id: \.self) { date in
+                                    DateSection(
+                                        date: date,
+                                        events: eventsByDate[date] ?? [],
+                                        onEventTap: { event in
+                                            selectedEvent = .openEvent(event: event)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        Text("Hosting")
+                            .headlineStyle()
+                            .padding(.horizontal, theme.spacing.medium)
+
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(alignment: .leading, spacing: theme.spacing.medium) {
+                                // Events grouped by date.
+                                ForEach(sortedDates, id: \.self) { date in
+                                    DateSection(
+                                        date: date,
+                                        events: eventsByDate[date] ?? [],
+                                        onEventTap: { event in
+                                            selectedEvent = .openEvent(event: event)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // TODO: Show all joined events.  If attendance is not confirmed, offer refund option.
+                        Text("Past")
+                            .headlineStyle()
+                            .padding(.horizontal, theme.spacing.medium)
+
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(alignment: .leading, spacing: theme.spacing.medium) {
+                                // Events grouped by date.
+                                ForEach(sortedDates, id: \.self) { date in
+                                    DateSection(
+                                        date: date,
+                                        events: eventsByDate[date] ?? [],
+                                        onEventTap: { event in
+                                            selectedEvent = .openEvent(event: event)
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
-                    .padding(theme.spacing.medium)
+                    .padding(.vertical, theme.spacing.medium)
                     .padding(.bottom, bottomBarHeight)
                 }
             }
@@ -97,8 +172,19 @@ struct CalendarView: View {
             await fetchEventsAsync()
         }
         .sheet(item: $selectedEvent) { flow in
-            if case .openEvent(let event) = flow {
-                EventFullSheetView(event: event)
+            switch flow {
+                case .openEvent(let event):
+                    EventFullSheetView(event: event)
+                        .presentationDetents([.large])
+                        .presentationBackgroundInteraction(.disabled)
+                        .presentationCornerRadius(theme.spacing.medium)
+                        .presentationDragIndicator(.hidden)
+                case .openQRCode:
+                    QRCodeSheetView()
+                        .presentationDetents([.large])
+                        .presentationBackgroundInteraction(.disabled)
+                        .presentationCornerRadius(theme.spacing.medium)
+                        .presentationDragIndicator(.hidden)
             }
         }
         .onAppear {
@@ -136,105 +222,43 @@ private struct DateSection: View {
     let onEventTap: (EventItem) -> Void
     
     @Environment(\.theme) private var theme
-
-    // Formatted date.
-    private var formattedDate: String {
-        let calendar = Calendar.autoupdatingCurrent
-        let locale = Locale.autoupdatingCurrent
-        let timeZone = TimeZone.autoupdatingCurrent
-
-        let now = Date()
-        let startOfToday = calendar.startOfDay(for: now)
-        let startOfTarget = calendar.startOfDay(for: date)
-
-        let currentYear = calendar.component(.year, from: now)
-        let targetYear = calendar.component(.year, from: date)
-        let daysUntil = calendar.dateComponents([.day], from: startOfToday, to: startOfTarget).day ?? 0
-
-        let formatter = DateFormatter()
-        formatter.locale = locale
-        formatter.timeZone = timeZone
-
-        // If next year, then "October 31, 2026".
-        if targetYear > currentYear {
-            formatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
-            return formatter.string(from: date)
-        }
-
-        // If < 7 days from today (future), show weekday like "Friday".
-        if daysUntil >= 0 && daysUntil < 7 {
-            formatter.setLocalizedDateFormatFromTemplate("EEEE")
-            return formatter.string(from: date)
-        }
-
-        // Otherwise (7+ days this year, or any past date this year), show "November 10".
-        formatter.setLocalizedDateFormatFromTemplate("MMMM d")
-        return formatter.string(from: date)
-    }
-
     
     var body: some View {
         VStack(alignment: .leading, spacing: theme.spacing.small) {
-            // Date header.
-            Text(formattedDate)
-                .headlineStyle()
-                .padding(.bottom, theme.spacing.small / 2)
-            
-            // Events for this date.
-            VStack(spacing: theme.spacing.small) {
-                ForEach(events, id: \.objectID) { event in
-                    Button(action: {
-                        onEventTap(event)
-                    }) {
-                        CalendarEventRow(event: event)
-                    }
+            // Date Header (isolated to observe time updates separately):
+            DateHeaderView(date: date)
+                .padding(.horizontal, theme.spacing.medium)
+                .padding(.bottom, theme.spacing.medium / 2)
+
+            // Events (isolated from time updates):
+            ForEach(events, id: \.objectID) { event in
+                Button(action: {
+                    onEventTap(event)
+                }) {
+                    CompactPreview(event: event)
+                        .equatable()  // Prevents re-renders when event hasn't changed.
                 }
+                .hapticFeedback(.light)
             }
         }
     }
 }
 
-// MARK: - COMPACT PREVIEW:
-private struct CalendarEventRow: View {
-    let event: EventItem
-    
+// Separate view for date header that can observe TimeViewModel without affecting children
+private struct DateHeaderView: View {
+    let date: Date
+    @ObservedObject private var timeViewModel = TimeViewModel.shared
     @Environment(\.theme) private var theme
     
-    // Format start time.
-    private var formattedTime: String {
-        guard let startTime = event.startTime else {
-            return ""
-        }
-
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: startTime)
+    private var formattedDate: String {
+        let calendar = Calendar.autoupdatingCurrent
+        let locale = Locale.autoupdatingCurrent
+        return EventDateTimeFormatter.calendarHeader(for: date, now: timeViewModel.currentDateTime, calendar: calendar, locale: locale)
     }
     
     var body: some View {
-        HStack(alignment: .center, spacing: theme.spacing.small) {
-            // Time:
-            Text(formattedTime)
-                .captionTitleStyle()
-                .frame(minWidth: 60, alignment: .trailing)
-
-            Divider()
-                .foregroundStyle(theme.colors.surface)
-
-            // Event name:
-            Text(event.name)
-                .bodyTextStyle()
-            
-            Spacer(minLength: 0)
-
-            Circle()
-                .fill(Color(hex: event.brandColor) ?? Color.clear)  // TODO: Status color or icon: watching, joined, requested, etc.
-                .frame(width: theme.spacing.small / 2, height: theme.spacing.small / 2)
-        }
-        .padding(.vertical, theme.spacing.small)
-        .padding(.horizontal, theme.spacing.medium)
-        .background(theme.colors.surface)
-        .cornerRadius(12)
+        Text(formattedDate)
+            .fontWeight(.bold)
+            .bodyTextStyle()
     }
 }

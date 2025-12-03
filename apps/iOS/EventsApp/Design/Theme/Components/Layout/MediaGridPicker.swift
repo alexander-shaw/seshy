@@ -10,49 +10,31 @@ import PhotosUI
 import UIKit
 
 struct MediaGridPicker: View {
-    @Environment(\.theme) private var theme
     @Binding var mediaItems: [MediaItem]
+    let maxItems: Int
+    var onMediaChanged: (() -> Void)?
+
+    @Environment(\.theme) private var theme
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var showPhotoPicker = false
-    
-    let maxItems: Int
-    let title: String?
-    let subtitle: String?
-    
-    var onMediaChanged: (() -> Void)?
-    
+
     init(
         mediaItems: Binding<[MediaItem]>,
         maxItems: Int = 4,
-        title: String? = nil,
-        subtitle: String? = nil,
         onMediaChanged: (() -> Void)? = nil
     ) {
         self._mediaItems = mediaItems
         self.maxItems = maxItems
-        self.title = title
-        self.subtitle = subtitle
         self.onMediaChanged = onMediaChanged
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: theme.spacing.medium) {
-            if let title = title {
-                Text(title)
-                    .font(theme.typography.headline)
-                    .foregroundStyle(theme.colors.mainText)
-            }
-            
-            if let subtitle = subtitle {
-                Text(subtitle)
-                    .font(theme.typography.body)
-                    .foregroundStyle(theme.colors.offText)
-            }
-            
             DraggableMediaGrid(
                 mediaItems: $mediaItems,
                 maxItems: maxItems,
                 spacing: theme.spacing.small,
+                surfaceColor: UIColor(theme.colors.surface),
                 onAddMedia: { showPhotoPicker = true },
                 onDeleteMedia: { index in
                     if index < mediaItems.count {
@@ -76,7 +58,7 @@ struct MediaGridPicker: View {
             isPresented: $showPhotoPicker,
             selection: $pickerItems,
             maxSelectionCount: max(0, maxItems - mediaItems.count),
-            matching: .any(of: [.images, .videos])
+            matching: .images
         )
         .onChange(of: pickerItems) { oldValue, newValue in
             Task {
@@ -108,7 +90,7 @@ struct MediaGridPicker: View {
         let totalSpacing = spacing * 1  // 1 gap between 2 items.
         let itemSide = (theme.sizes.screenWidth - totalSpacing) / 2
 
-        // If 2 or fewer media items, use 1 row. Otherwise, use 2 rows.
+        // If 2 or fewer media items, use 1 row.  Otherwise, use 2 rows.
         if mediaItems.count <= 1 {
             return itemSide  // 1 row.
         } else {
@@ -122,6 +104,7 @@ struct DraggableMediaGrid: UIViewRepresentable {
     @Binding var mediaItems: [MediaItem]
     let maxItems: Int
     let spacing: CGFloat
+    let surfaceColor: UIColor
     var onAddMedia: () -> Void
     var onDeleteMedia: (Int) -> Void
     var onMoveMedia: (Int, Int) -> Void
@@ -173,7 +156,9 @@ struct DraggableMediaGrid: UIViewRepresentable {
             let isAddButton = indexPath.item == mediaItems.count && mediaItems.count < parent.maxItems
             
             if isAddButton {
-                return collectionView.dequeueReusableCell(withReuseIdentifier: "AddMediaCell", for: indexPath)
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddMediaCell", for: indexPath) as! AddMediaCell
+                cell.setBackgroundColor(parent.surfaceColor)
+                return cell
             } else {
                 // Ensure we have a valid index.
                 guard indexPath.item < mediaItems.count else {
@@ -281,7 +266,6 @@ struct DraggableMediaGrid: UIViewRepresentable {
 // MARK: Media Cell:
 class MediaCell: UICollectionViewCell {
     private let imageView = UIImageView()
-    private let videoIndicator = UIImageView()
     private let deleteButton = UIButton(type: .custom)
     var onDeleteTapped: (() -> Void)?
     
@@ -298,18 +282,6 @@ class MediaCell: UICollectionViewCell {
         imageView.layer.cornerRadius = 12
         contentView.addSubview(imageView)
         
-        // Video Indicator.
-        let videoIcon = UIImage(systemName: "play.fill")?.withConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 18, weight: .black)
-        )
-        videoIndicator.image = videoIcon
-        videoIndicator.tintColor = .white
-        videoIndicator.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        videoIndicator.layer.cornerRadius = 12
-        videoIndicator.contentMode = .center
-        videoIndicator.isHidden = true
-        contentView.addSubview(videoIndicator)
-        
         // Delete Button.
         let icon = UIImage(systemName: "xmark")?.withConfiguration(
             UIImage.SymbolConfiguration(pointSize: 10, weight: .bold)
@@ -322,7 +294,6 @@ class MediaCell: UICollectionViewCell {
         contentView.addSubview(deleteButton)
         
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        videoIndicator.translatesAutoresizingMaskIntoConstraints = false
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -330,11 +301,6 @@ class MediaCell: UICollectionViewCell {
             imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            
-            videoIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            videoIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            videoIndicator.widthAnchor.constraint(equalToConstant: 24),
-            videoIndicator.heightAnchor.constraint(equalToConstant: 24),
             
             deleteButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
             deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
@@ -347,7 +313,6 @@ class MediaCell: UICollectionViewCell {
         if let image = media.uiImage() {
             imageView.image = image
         }
-        videoIndicator.isHidden = !media.isVideo
     }
     
     @objc private func deleteTapped() {
@@ -358,10 +323,13 @@ class MediaCell: UICollectionViewCell {
 // MARK: Add Media Cell:
 class AddMediaCell: UICollectionViewCell {
     private let iconView: UIImageView = {
-        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .black)
+        // Match secondary IconButton style: body text style (size: 15, weight: .medium).
+        let config = UIImage.SymbolConfiguration(pointSize: 15, weight: .medium)
         let image = UIImage(systemName: "plus", withConfiguration: config)
         let imageView = UIImageView(image: image)
         imageView.contentMode = .center
+
+        // Use label color to match theme.colors.mainText.
         imageView.tintColor = .label
         return imageView
     }()
@@ -372,13 +340,14 @@ class AddMediaCell: UICollectionViewCell {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             iconView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            iconView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 32),
-            iconView.heightAnchor.constraint(equalToConstant: 32)
+            iconView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
-        contentView.backgroundColor = UIColor.secondarySystemFill
         contentView.layer.cornerRadius = 12
     }
     
     required init?(coder: NSCoder) { fatalError() }
+    
+    func setBackgroundColor(_ color: UIColor) {
+        contentView.backgroundColor = color
+    }
 }

@@ -8,16 +8,18 @@
 import SwiftUI
 
 public struct WrapAroundLayout: Layout {
-    @Environment(\.theme) private var theme
+    private let spacing: CGFloat
 
-    public init() {}
+    public init(spacing: CGFloat? = nil) {
+        self.spacing = spacing ?? Spacing.primary.small
+    }
 
     public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let maxWidth = proposal.width ?? UIScreen.main.bounds.width
         var currentRowWidth: CGFloat = 0
         var totalHeight: CGFloat = 0
         var maxRowHeight: CGFloat = 0
-        let spacing: CGFloat = 12  // Default spacing.
+        let spacing = spacing
 
         for subview in subviews {
             let subviewSize = subview.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))
@@ -39,7 +41,7 @@ public struct WrapAroundLayout: Layout {
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var maxRowHeight: CGFloat = 0
-        let spacing: CGFloat = theme.spacing.small  // Default spacing.
+        let spacing = spacing
 
         for subview in subviews {
             let subviewSize = subview.sizeThatFits(ProposedViewSize(width: maxWidth, height: nil))

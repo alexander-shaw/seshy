@@ -9,7 +9,6 @@ import Foundation
 import CoreData
 import SwiftUI
 import Combine
-import CoreDomain
 
 @MainActor
 final class UserSessionViewModel: ObservableObject {
@@ -164,7 +163,7 @@ final class UserSessionViewModel: ObservableObject {
                 try context.save()
             }
 
-            // Best-effort: remove local media directory (images/videos) to clear cached user media.
+            // Best-effort: remove local media directory (images) to clear cached user media.
             do {
                 let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                 let mediaDir = documents.appendingPathComponent("Media", isDirectory: true)
@@ -321,6 +320,9 @@ final class UserSessionViewModel: ObservableObject {
                     genderCategory: userProfileViewModel.genderCategorySelection,
                     genderIdentity: userProfileViewModel.genderIdentityInput,
                     showGender: userProfileViewModel.showGenderToggle,
+                    city: userProfileViewModel.cityInput,
+                    state: userProfileViewModel.stateInput,
+                    showCityState: userProfileViewModel.showCityStateToggle,
                     vibes: userProfileViewModel.vibes
                 )
                 print("Profile updated successfully.")
@@ -336,6 +338,9 @@ final class UserSessionViewModel: ObservableObject {
                     genderCategory: userProfileViewModel.genderCategorySelection,
                     genderIdentity: userProfileViewModel.genderIdentityInput,
                     showGender: userProfileViewModel.showGenderToggle,
+                    city: userProfileViewModel.cityInput,
+                    state: userProfileViewModel.stateInput,
+                    showCityState: userProfileViewModel.showCityStateToggle,
                     vibes: userProfileViewModel.vibes
                 )
                 print("Profile created successfully.")
@@ -368,6 +373,22 @@ final class UserSessionViewModel: ObservableObject {
                 print("  dateOfBirth:  \(profileDateOfBirth?.description ?? "nil").")
                 print("  displayName.isEmpty:  \(profileDisplayName.isEmpty).")
                 print("  dateOfBirth is nil:  \(profileDateOfBirth == nil).")
+
+                // Upload selected media items if any were selected.
+                if !userProfileViewModel.selectedMediaItems.isEmpty {
+                    print("Uploading \(userProfileViewModel.selectedMediaItems.count) media items...")
+                    do {
+                        try await userProfileViewModel.uploadSelectedMedia(for: savedProfile.id)
+                        print("Media upload completed successfully.")
+                        
+                        // Refresh the profile to reload media relationships.
+                        await userProfileViewModel.loadProfile(for: user)
+                        print("Profile refreshed with media.")
+                    } catch {
+                        print("ERROR: Failed to upload media:  \(error).")
+                        // Don't fail the entire profile creation if media upload fails.
+                    }
+                }
 
                 // Update current user reference and transition to home phase.
                 currentUser = user

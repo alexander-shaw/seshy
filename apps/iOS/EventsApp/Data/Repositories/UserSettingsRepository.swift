@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 import CoreLocation
 
 public protocol UserSettingsRepository: Sendable {
@@ -49,7 +48,7 @@ final class CoreUserSettingsRepository: UserSettingsRepository {
         newSettings.id = UUID()
         newSettings.createdAt = Date()
         newSettings.updatedAt = Date()
-        newSettings.appearanceModeRaw = AppearanceMode.system.rawValue
+        newSettings.appearanceModeRaw = AppearanceMode.system.rawValue  // Default to system
         newSettings.mapStyleRaw = MapStyle.darkMap.rawValue
         newSettings.mapCenterLatitude = 46.7319  // Washington State University default.
         newSettings.mapCenterLongitude = -117.1542

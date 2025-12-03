@@ -31,12 +31,14 @@ public struct Typography: Equatable {
         self.caption = caption
     }
 
+    // SF Pro Font Weights:
+    // Ultralight -> Thin -> Light -> Regular -> Medium -> Semibold -> Bold -> Heavy -> Black
     public static let primary = Typography(
-        largeTitle: .system(size: 48, weight: .black),
-        title: .system(size: 28, weight: .heavy),
-        headline: .system(size: 24, weight: .heavy),
-        icon: .system(size: 18, weight: .black),
-        body: .system(size: 15, weight: .bold),
-        caption: .system(size: 12, weight: .bold)
+        largeTitle: .system(size: 48, weight: .heavy),
+        title: .system(size: 28, weight: .bold),
+        headline: .system(size: 22, weight: .bold),
+        icon: .system(size: 18, weight: .bold),
+        body: .system(size: 15, weight: .medium),
+        caption: .system(size: 12, weight: .regular)
     )
 }

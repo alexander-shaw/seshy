@@ -9,10 +9,9 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(Place)
-public class Place: NSManagedObject {}
+public class Place: NSManagedObject, Identifiable {}
 
 extension Place {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Place> {
@@ -20,18 +19,7 @@ extension Place {
     }
 
     @NSManaged public var id: UUID  // MARK: Unique.
-    @NSManaged public var latitude: Double
-    @NSManaged public var longitude: Double
-    @NSManaged public var radius: Double
-
     @NSManaged public var name: String
-    @NSManaged public var details: String?
-    @NSManaged public var maxCapacity: NSNumber?  // Nil means infinite (not strictly defined).
-
-    @NSManaged public var roomNumber: String?
-    @NSManaged public var streetAddress: String?
-    @NSManaged public var city: String?
-    @NSManaged public var stateRegion: String?
 
     // Relationships:
     @NSManaged public var events: Set<EventItem>?

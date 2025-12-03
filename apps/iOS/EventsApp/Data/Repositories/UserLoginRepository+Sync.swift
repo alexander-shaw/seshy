@@ -9,7 +9,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 // Purpose: Syncs UserLogin data for contact matching (hashed phone/email only).
 // - Upserts hashed phone/email to cloud for contact matching.

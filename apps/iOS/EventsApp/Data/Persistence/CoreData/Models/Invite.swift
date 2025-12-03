@@ -11,7 +11,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(Invite)
 public class Invite: NSManagedObject {}
@@ -23,6 +22,8 @@ extension Invite {
 
     @NSManaged public var id: UUID  // MARK: Unique.
     @NSManaged public var userID: UUID
+    // @NSManaged public var fromUserID: UUID  // MARK: Host, if invited.  (Guest, if requested.)
+    // @NSManaged public var toUserID: UUID  // Guest.  (Or Host.)
     @NSManaged public var typeRaw: Int16  // InviteType.
     @NSManaged public var statusRaw: Int16  // InviteStatus.
     @NSManaged public var token: String?  // For link-based invites.

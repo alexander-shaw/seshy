@@ -1,56 +1,55 @@
 # Services
 
-Deployable backend microservices for Seshy.
+Monolithic FastAPI backend service for Seshy.
 
-## What Was Built
+## Architecture
+
+**Monolithic API Service** (`services/api/`):
+- Single FastAPI application containing all backend functionality
+- All endpoints (users, events, places, members, invites, media, vibes, notifications, payments)
+- Shared database connections and transactions
+- Simplified deployment and development
+
+**Why Monolithic:**
+- Faster development and deployment
+- Shared database transactions for data consistency
+- Lower latency (no inter-service network calls)
+- Easier debugging and testing
+- Can split into microservices later if needed
+
+## Current Services
 
 ### API Service (`services/api/`)
-FastAPI microservice exposing REST endpoints.
+FastAPI application with all backend endpoints.
 
 **What:**
-- FastAPI application with `/` and `/healthz` endpoints
+- FastAPI application with REST endpoints
 - Dockerized for Cloud Run deployment
 - Python 3.11-slim base image
+- PostgreSQL database (via Google Cloud SQL)
 
-**Why:**
-- FastAPI provides async performance and automatic OpenAPI docs
-- Separate API service enables independent scaling and deployments
-- Cloud Run for serverless, cost-effective hosting
+**Endpoints:**
+- User management: `/me/public-profile`, `/me/settings`, `/me/login`
+- Events: `/events/*` (to be implemented)
+- Places: `/places/*` (to be implemented)
+- Members: `/events/{id}/members/*` (to be implemented)
+- Invites: `/events/{id}/invites/*` (to be implemented)
+- Media: `/media/*` (to be implemented)
+- Vibes: `/vibes/*` (to be implemented)
+- Notifications: `/notifications/*` (to be implemented)
+- Payments: `/tickets/*`, `/payments/*` (to be implemented)
 
 **Benefits:**
 - Fast development with auto-generated docs (`/docs`)
-- Scales to zero when not in use
+- Scales to zero when not in use (Cloud Run)
 - Simple Docker-based deployment
 - Easy to extend with new endpoints
+- Shared database for transactional consistency
 
 **Tradeoffs:**
 - Cold starts can cause latency (use min_instances > 0 if needed)
 - Stateless design - no local storage or sessions
 - Vendor lock-in to GCP (but portable Docker images)
-
-### Auth Service (`services/auth/`)
-Authentication microservice (scaffolded for future implementation).
-
-**Why separate:**
-- Isolate security concerns
-- Scale independently based on auth load
-- Enable different deployment strategies per service
-
-### Fingerprint Service (`services/fingerprint/`)
-Device fingerprinting microservice (scaffolded for future implementation).
-
-**Why separate:**
-- Specialized device tracking logic
-- Privacy-sensitive data isolation
-- Modular for future ML model integration
-
-## Architecture
-
-Services follow a microservices pattern:
-- Each service has its own FastAPI app
-- Independent Docker containers
-- Shared infrastructure (Cloud Run, Artifact Registry)
-- Environment-based deployments (staging/production)
 
 ## Testing Locally
 
@@ -63,4 +62,8 @@ make run-api
 curl http://localhost:8080/healthz
 ```
 
-All services expose health checks at `/healthz` for monitoring.
+The API exposes health checks at `/healthz` for monitoring.
+
+## Development
+
+See `services/api/README.md` for detailed development instructions.

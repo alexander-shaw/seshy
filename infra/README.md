@@ -1,6 +1,6 @@
 # Infrastructure
 
-Infrastructure as Code for Seshy, managed with Terraform.
+Infrastructure as Code, managed with Terraform.
 
 ## What Was Built
 

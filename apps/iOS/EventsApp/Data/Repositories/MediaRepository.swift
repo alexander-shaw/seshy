@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol MediaRepository: Sendable {
     // Get media by owner.
@@ -16,9 +15,9 @@ public protocol MediaRepository: Sendable {
     func getMedia(publicProfileID: UUID, limit: Int?) async throws -> [Media]
     
     // Create media for owner.
-    func createMedia(eventID: UUID, url: String, mimeType: String?, position: Int16) async throws -> Media
-    func createMedia(userProfileID: UUID, url: String, mimeType: String?, position: Int16) async throws -> Media
-    func createMedia(publicProfileID: UUID, url: String, mimeType: String?, position: Int16) async throws -> Media
+    func createMedia(eventID: UUID, url: String, mimeType: String?, position: Int16, averageColorHex: String?, primaryColorHex: String?, secondaryColorHex: String?) async throws -> Media
+    func createMedia(userProfileID: UUID, url: String, mimeType: String?, position: Int16, averageColorHex: String?, primaryColorHex: String?, secondaryColorHex: String?) async throws -> Media
+    func createMedia(publicProfileID: UUID, url: String, mimeType: String?, position: Int16, averageColorHex: String?, primaryColorHex: String?, secondaryColorHex: String?) async throws -> Media
     
     // Delete media.
     func deleteMedia(_ mediaID: UUID) async throws
@@ -38,15 +37,15 @@ public protocol MediaRepository: Sendable {
     func cleanupOldMedia(olderThan date: Date) async throws -> Int
 }
 
-final class CoreMediaRepository: MediaRepository {
+public final class CoreMediaRepository: MediaRepository {
     private let coreDataStack: CoreDataStack
     
-    init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
+    public init(coreDataStack: CoreDataStack = CoreDataStack.shared) {
         self.coreDataStack = coreDataStack
     }
     
     // MARK: - GET MEDIA:
-    func getMedia(eventID: UUID, limit: Int? = nil) async throws -> [Media] {
+    public func getMedia(eventID: UUID, limit: Int? = nil) async throws -> [Media] {
         // Fetch from view context to ensure we get properly loaded objects.
         return try await coreDataStack.viewContext.perform {
             let request: NSFetchRequest<Media> = Media.fetchRequest()
@@ -69,7 +68,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func getMedia(userProfileID: UUID, limit: Int? = nil) async throws -> [Media] {
+    public func getMedia(userProfileID: UUID, limit: Int? = nil) async throws -> [Media] {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "userProfile.id == %@", userProfileID as CVarArg)
@@ -84,7 +83,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func getMedia(publicProfileID: UUID, limit: Int? = nil) async throws -> [Media] {
+    public func getMedia(publicProfileID: UUID, limit: Int? = nil) async throws -> [Media] {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "publicProfile.id == %@", publicProfileID as CVarArg)
@@ -100,7 +99,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - CREATE MEDIA:
-    func createMedia(eventID: UUID, url: String, mimeType: String? = nil, position: Int16) async throws -> Media {
+    public func createMedia(eventID: UUID, url: String, mimeType: String? = nil, position: Int16, averageColorHex: String? = nil, primaryColorHex: String? = nil, secondaryColorHex: String? = nil) async throws -> Media {
         // First create the media ID so we can use it outside the background context.
         let mediaID = UUID()
         
@@ -120,6 +119,9 @@ final class CoreMediaRepository: MediaRepository {
             media.url = url
             media.mimeType = mimeType
             media.position = position
+            media.averageColorHex = averageColorHex
+            media.primaryColorHex = primaryColorHex
+            media.secondaryColorHex = secondaryColorHex
             media.event = event
             media.userProfile = nil
             media.publicProfile = nil
@@ -178,7 +180,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func createMedia(userProfileID: UUID, url: String, mimeType: String? = nil, position: Int16) async throws -> Media {
+    public func createMedia(userProfileID: UUID, url: String, mimeType: String? = nil, position: Int16, averageColorHex: String? = nil, primaryColorHex: String? = nil, secondaryColorHex: String? = nil) async throws -> Media {
         // First create the media ID so we can use it outside the background context.
         let mediaID = UUID()
         
@@ -198,6 +200,9 @@ final class CoreMediaRepository: MediaRepository {
             media.url = url
             media.mimeType = mimeType
             media.position = position
+            media.averageColorHex = averageColorHex
+            media.primaryColorHex = primaryColorHex
+            media.secondaryColorHex = secondaryColorHex
             media.userProfile = profile
             media.event = nil
             media.publicProfile = nil
@@ -207,8 +212,21 @@ final class CoreMediaRepository: MediaRepository {
             media.schemaVersion = 1
             
             try media.validateRelationships()
+            
+            // Explicitly ensure the inverse relationship is set on the profile.
+            // Core Data should do this automatically, but we will make sure.
+            if profile.media == nil {
+                profile.media = Set<Media>()
+            }
+            // The inverse relationship should already be set, but log for debugging
+            print("MediaRepository | Created media \(mediaID) and assigned to userProfile \(userProfileID).")
+            
             try context.save()
+            print("MediaRepository | Saved media \(mediaID) in background context.")
         }
+        
+        // Wait a moment for merge notification to propagate.
+        try await Task.sleep(nanoseconds: 100_000_000)  // 0.1 seconds
         
         // Now fetch the media from the main context to return a safe object.
         return try await self.coreDataStack.viewContext.perform {
@@ -224,7 +242,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func createMedia(publicProfileID: UUID, url: String, mimeType: String? = nil, position: Int16) async throws -> Media {
+    public func createMedia(publicProfileID: UUID, url: String, mimeType: String? = nil, position: Int16, averageColorHex: String? = nil, primaryColorHex: String? = nil, secondaryColorHex: String? = nil) async throws -> Media {
         return try await coreDataStack.performBackgroundTask { context in
             // First, fetch the profile.
             let profileRequest: NSFetchRequest<PublicProfile> = PublicProfile.fetchRequest()
@@ -240,6 +258,9 @@ final class CoreMediaRepository: MediaRepository {
             media.url = url
             media.mimeType = mimeType
             media.position = position
+            media.averageColorHex = averageColorHex
+            media.primaryColorHex = primaryColorHex
+            media.secondaryColorHex = secondaryColorHex
             media.publicProfile = profile
             media.event = nil
             media.userProfile = nil
@@ -255,7 +276,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - DELETE MEDIA:
-    func deleteMedia(_ mediaID: UUID) async throws {
+    public func deleteMedia(_ mediaID: UUID) async throws {
         try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "id == %@", mediaID as CVarArg)
@@ -291,7 +312,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - REORDER MEDIA:
-    func reorderMedia(_ mediaIDs: [UUID], eventID: UUID) async throws {
+    public func reorderMedia(_ mediaIDs: [UUID], eventID: UUID) async throws {
         try await coreDataStack.performBackgroundTask { context in
             for (index, mediaID) in mediaIDs.enumerated() {
                 let request: NSFetchRequest<Media> = Media.fetchRequest()
@@ -306,7 +327,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func reorderMedia(_ mediaIDs: [UUID], userProfileID: UUID) async throws {
+    public func reorderMedia(_ mediaIDs: [UUID], userProfileID: UUID) async throws {
         try await coreDataStack.performBackgroundTask { context in
             for (index, mediaID) in mediaIDs.enumerated() {
                 let request: NSFetchRequest<Media> = Media.fetchRequest()
@@ -321,7 +342,7 @@ final class CoreMediaRepository: MediaRepository {
         }
     }
     
-    func reorderMedia(_ mediaIDs: [UUID], publicProfileID: UUID) async throws {
+    public func reorderMedia(_ mediaIDs: [UUID], publicProfileID: UUID) async throws {
         try await coreDataStack.performBackgroundTask { context in
             for (index, mediaID) in mediaIDs.enumerated() {
                 let request: NSFetchRequest<Media> = Media.fetchRequest()
@@ -337,7 +358,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - UPDATE MEDIA POSITION:
-    func updateMediaPosition(_ mediaID: UUID, position: Int16) async throws -> Media? {
+    public func updateMediaPosition(_ mediaID: UUID, position: Int16) async throws -> Media? {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "id == %@", mediaID as CVarArg)
@@ -357,7 +378,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - UPDATE MEDIA URL:
-    func updateMediaURL(_ mediaID: UUID, url: String) async throws {
+    public func updateMediaURL(_ mediaID: UUID, url: String) async throws {
         try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "id == %@", mediaID as CVarArg)
@@ -398,7 +419,7 @@ final class CoreMediaRepository: MediaRepository {
     }
     
     // MARK: - CLEANUP:
-    func cleanupOldMedia(olderThan date: Date) async throws -> Int {
+    public func cleanupOldMedia(olderThan date: Date) async throws -> Int {
         return try await coreDataStack.performBackgroundTask { context in
             let request: NSFetchRequest<Media> = Media.fetchRequest()
             request.predicate = NSPredicate(format: "updatedAt < %@", date as NSDate)

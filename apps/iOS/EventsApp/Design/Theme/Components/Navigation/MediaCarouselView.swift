@@ -6,52 +6,84 @@
 //
 
 import SwiftUI
-import CoreDomain
 
 struct MediaCarouselView: View {
     let mediaItems: [Media]
     let imageWidth: CGFloat
+    let imageHeight: CGFloat?
     
     @Environment(\.theme) private var theme
     @State private var currentIndex: Int = 0
     
-    private var imageHeight: CGFloat {
-        imageWidth * 5 / 4
+    init(mediaItems: [Media], imageWidth: CGFloat, imageHeight: CGFloat? = nil) {
+        self.mediaItems = mediaItems
+        self.imageWidth = imageWidth
+        self.imageHeight = imageHeight
+    }
+    
+    private var computedImageHeight: CGFloat {
+        imageHeight ?? (imageWidth * 5 / 4)
+    }
+    
+    private var capsuleWidth: CGFloat {
+        guard mediaItems.count > 0 else { return 0 }
+        let n = CGFloat(mediaItems.count)
+        return (imageWidth - (n + 1) * theme.spacing.small) / n
     }
     
     var body: some View {
         ZStack {
-            // Background color.
-            Rectangle()
-                .fill(theme.colors.surface)
-                .frame(width: imageWidth, height: imageHeight)
+            // Animated gradient background based on current media
+            if !mediaItems.isEmpty && currentIndex < mediaItems.count {
+                let currentMedia = mediaItems[currentIndex]
+                let gradientColors = mediaGradientColors(for: currentMedia)
+                
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: gradientColors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: imageWidth, height: computedImageHeight)
+                    .animation(.easeInOut(duration: 0.3), value: currentIndex)
+            } else {
+                // Fallback background
+                Rectangle()
+                    .fill(theme.colors.surface)
+                    .frame(width: imageWidth, height: computedImageHeight)
+            }
             
             if mediaItems.isEmpty {
                 // Placeholder when no media; show rectangle fallback.
                 Rectangle()
                     .fill(theme.colors.surface)
-                    .frame(width: imageWidth, height: imageHeight)
+                    .frame(width: imageWidth, height: computedImageHeight)
             } else {
                 // Carousel of media items.
                 TabView(selection: $currentIndex) {
                     ForEach(0..<mediaItems.count, id: \.self) { index in
-                        MediaItemView(media: mediaItems[index], targetSize: CGSize(width: imageWidth, height: imageHeight))
+                        MediaItemView(media: mediaItems[index], targetSize: CGSize(width: imageWidth, height: computedImageHeight))
                             .tag(index)
-                            .frame(width: imageWidth, height: imageHeight)
+                            .frame(width: imageWidth, height: computedImageHeight)
                             .clipped()
                     }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(width: imageWidth, height: imageHeight)
+                .frame(width: imageWidth, height: computedImageHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 // Bottom blur gradient to improve text/dot contrast.
                 .overlay(alignment: .bottom) {
                     LinearGradient(
-                        gradient: Gradient(colors: [.clear, theme.colors.background.opacity(0.80)]),
+                        gradient: Gradient(colors: [
+                            .clear,
+                            theme.colors.background.opacity(0.80)
+                        ]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    .frame(height: imageHeight / 3)
+                    .frame(height: computedImageHeight / 3)
                     .frame(maxWidth: .infinity, alignment: .bottom)
                     .clipped()
                 }
@@ -73,6 +105,7 @@ struct MediaCarouselView: View {
                                 }
                             }
                     }
+                    .hapticFeedback(.light)
                 }
                 .onChange(of: mediaItems.count) { _, newCount in
                     if newCount > 0 && currentIndex >= newCount {
@@ -88,26 +121,47 @@ struct MediaCarouselView: View {
                     }
                 }
                 
-                // MARK: Indicator Dots:
+                // MARK: Capsule Indicators:
                 // Only show if more than 1 item.
                 if mediaItems.count > 1 {
                     VStack {
-                        Spacer()
-
-                        HStack(spacing: theme.spacing.small / 2) {
+                        HStack(spacing: theme.spacing.small) {
                             ForEach(0..<mediaItems.count, id: \.self) { index in
-                                Circle()
-                                    .frame(width: currentIndex == index ? 6 : 4, height: currentIndex == index ? 6 : 4)
+                                Capsule()
+                                    .frame(width: capsuleWidth, height: theme.spacing.small / 3)
                                     .foregroundStyle(currentIndex == index ? theme.colors.mainText : theme.colors.offText)
                                     .animation(.easeInOut(duration: 0.2), value: currentIndex)
                             }
                         }
-                        .padding(.bottom, theme.spacing.small)
+                        .padding([.top, .horizontal], theme.spacing.small)
+
+                        Spacer()
                     }
                 }
             }
         }
-        .frame(width: imageWidth, height: imageHeight)
+        .frame(width: imageWidth, height: computedImageHeight)
+    }
+    
+    // MARK: - Helper Methods
+    
+    /// Gets gradient colors for a media item, with fallback for legacy media
+    private func mediaGradientColors(for media: Media) -> [Color] {
+        // Try to get primary and secondary colors
+        let primaryHex = media.primaryColorHex ?? media.averageColorHex
+        let secondaryHex = media.secondaryColorHex ?? media.averageColorHex ?? primaryHex
+        
+        if let primaryHex = primaryHex, let primaryColor = Color(hex: primaryHex) {
+            if let secondaryHex = secondaryHex, let secondaryColor = Color(hex: secondaryHex), secondaryHex != primaryHex {
+                return [primaryColor, secondaryColor]
+            } else {
+                // Single color - create a subtle gradient
+                return [primaryColor, primaryColor.opacity(0.8)]
+            }
+        }
+        
+        // Fallback to theme surface color
+        return [theme.colors.surface, theme.colors.surface.opacity(0.8)]
     }
 }
 
@@ -131,13 +185,6 @@ struct MediaItemView: View {
                 media: media,
                 targetSize: targetSize
             )
-            .overlay(alignment: .center) {
-                // Video Play Indicator:
-                if media.isVideo {
-                    Image(systemName: "play.circle.fill")
-                        .iconStyle()
-                }
-            }
         }
         .frame(width: targetSize.width, height: targetSize.height)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

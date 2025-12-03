@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol PublicProfileRepository: Sendable {
     func createPublicProfile(id: UUID, displayName: String, username: String?, avatarURL: String?, bio: String?, ageYears: Int?, gender: String?, isVerified: Bool) async throws -> PublicProfile

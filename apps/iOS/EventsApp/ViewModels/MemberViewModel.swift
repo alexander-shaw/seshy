@@ -9,7 +9,6 @@ import Foundation
 import CoreData
 import SwiftUI
 import Combine
-import CoreDomain
 
 @MainActor
 final class MemberViewModel: ObservableObject {

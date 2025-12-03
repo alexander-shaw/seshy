@@ -11,7 +11,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(Vibe)
 public class Vibe: NSManagedObject {}

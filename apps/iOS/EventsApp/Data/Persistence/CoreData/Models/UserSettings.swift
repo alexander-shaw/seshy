@@ -10,7 +10,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 import CoreLocation
 
 @objc(UserSettings)

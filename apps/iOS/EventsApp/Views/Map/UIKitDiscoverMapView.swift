@@ -5,6 +5,7 @@
 //  Created by Шоу on 10/25/25.
 //
 
+/*
 import SwiftUI
 import MapboxMaps
 
@@ -23,3 +24,4 @@ struct UIKitDiscoverMapView: UIViewControllerRepresentable {
         controller.configure(events: events, style: style)
     }
 }
+*/

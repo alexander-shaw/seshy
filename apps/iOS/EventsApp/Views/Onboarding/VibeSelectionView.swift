@@ -13,12 +13,15 @@ struct VibeSelectionView: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: theme.spacing.small) {
+        VStack(alignment: .leading, spacing: theme.spacing.medium) {
             Text("What are you into?")
                 .headlineStyle()
 
-            Text("Helps match you with events—and people—that share your interests.")
+            Text("Vibes match you with communities that share your interests.")
+                .fontWeight(.bold)
                 .bodyTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
 
             ScrollView(.vertical) {
                 WrapAroundLayout {

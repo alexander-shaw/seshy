@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 extension CorePublicProfileRepository: PublicProfileSyncRepository {
     func upsertPublicProfile(from dto: PublicProfileDTO, policy: ConflictRule, in ctx: NSManagedObjectContext) throws {

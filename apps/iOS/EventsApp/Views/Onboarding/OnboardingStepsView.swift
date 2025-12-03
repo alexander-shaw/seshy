@@ -22,6 +22,7 @@ struct OnboardingStepsView: View {
     @State private var currentIndex: Int = 0
     @State private var isStepAccessible: Bool = false
     @State private var showErrorMessage = false
+    @State private var showDateOfBirthConfirmation = false
 
     // MARK: - ORDER:
     // (1) DISPLAY NAME
@@ -35,7 +36,7 @@ struct OnboardingStepsView: View {
         [
             OnboardingStep(
                 id: "displayName",
-                view: AnyView(DisplayNameStepView(userSession: userSession, isFocused: true)),
+                view: AnyView(DisplayNameStepView(userSession: userSession)),
                 isAccessible: { userSession.userProfileViewModel.isValidDisplayName }
             ),
 
@@ -60,13 +61,18 @@ struct OnboardingStepsView: View {
             OnboardingStep(
                 id: "tags",
                 view: AnyView(
-                    VibeSelectionView()
-                        .environmentObject(userSession.userProfileViewModel)
+                    VibeSelectionView().environmentObject(userSession.userProfileViewModel)
                 ),
                 isAccessible: { userSession.userProfileViewModel.isValidVibes }
-            )
+            ),
 
-            // TODO: Add other onboarding steps...
+            // TODO: Turn on notifications here.
+
+            OnboardingStep(
+                id: "location",
+                view: AnyView(LocationStepView(userSession: userSession)),
+                isAccessible: { true }
+            )
         ]
     }
 
@@ -91,7 +97,13 @@ struct OnboardingStepsView: View {
                 if currentIndex < steps.count - 1 {
                     if isStepAccessible {
                         showErrorMessage = false
-                        currentIndex += 1
+                        
+                        // Show confirmation alert for date of birth step.
+                        if steps[currentIndex].id == "dateOfBirth" {
+                            showDateOfBirthConfirmation = true
+                        } else {
+                            currentIndex += 1
+                        }
                     } else {
                         showErrorMessage = true
                     }
@@ -101,6 +113,18 @@ struct OnboardingStepsView: View {
                 }
             }
             .padding(.bottom, theme.spacing.small)
+            .alert("Confirm Your Age", isPresented: $showDateOfBirthConfirmation) {
+                Button("Edit", role: .cancel) {
+                    // Stay on the current step.
+                }
+                Button("Continue") {
+                    currentIndex += 1
+                }
+            } message: {
+                if let age = calculatedAge {
+                    Text("This cannot be changed later.  You are \(age) years old?")
+                }
+            }
         }
         .background(theme.colors.background)
         .statusBarHidden(true)
@@ -111,6 +135,17 @@ struct OnboardingStepsView: View {
         .onAppear {
             isStepAccessible = steps[currentIndex].isAccessible()
         }
+    }
+    
+    // MARK: - COMPUTED PROPERTIES:
+    private var calculatedAge: Int? {
+        guard let dateOfBirth = userSession.userProfileViewModel.dateOfBirthInput else {
+            return nil
+        }
+        
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: Date())
+        return ageComponents.year
     }
 }
 

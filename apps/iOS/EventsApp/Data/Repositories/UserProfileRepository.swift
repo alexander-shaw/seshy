@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 protocol UserProfileRepository {
     func getProfile(for user: DeviceUser) async throws -> UserProfile?
@@ -17,8 +16,8 @@ protocol UserProfileRepository {
     func addVibesToProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile
     func removeVibesFromProfile(_ profileId: UUID, vibes: Set<Vibe>) async throws -> UserProfile
     func getProfileVibes(_ profileId: UUID) async throws -> Set<Vibe>
-    func updateProfileWithForm(_ profile: UserProfile, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, vibes: Set<Vibe>) async throws -> UserProfile
-    func createProfileWithForm(for user: DeviceUser, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, vibes: Set<Vibe>) async throws -> UserProfile
+    func updateProfileWithForm(_ profile: UserProfile, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, city: String?, state: String?, showCityState: Bool, vibes: Set<Vibe>) async throws -> UserProfile
+    func createProfileWithForm(for user: DeviceUser, displayName: String, bio: String, dateOfBirth: Date?, showAge: Bool, genderCategory: GenderCategory, genderIdentity: String, showGender: Bool, city: String?, state: String?, showCityState: Bool, vibes: Set<Vibe>) async throws -> UserProfile
 }
 
 final class CoreUserProfileRepository: UserProfileRepository {
@@ -169,6 +168,9 @@ final class CoreUserProfileRepository: UserProfileRepository {
         genderCategory: GenderCategory,
         genderIdentity: String,
         showGender: Bool,
+        city: String?,
+        state: String?,
+        showCityState: Bool,
         vibes: Set<Vibe>
     ) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
@@ -185,6 +187,9 @@ final class CoreUserProfileRepository: UserProfileRepository {
             contextProfile.genderCategory = genderCategory
             contextProfile.genderIdentity = genderIdentity.isEmpty ? nil : genderIdentity
             contextProfile.showGender = showGender
+            contextProfile.city = city
+            contextProfile.state = state
+            contextProfile.showCityState = showCityState
             contextProfile.vibes = vibes
             contextProfile.updatedAt = Date()
             // UserProfile does not sync to cloud; do not set syncStatus.
@@ -208,6 +213,9 @@ final class CoreUserProfileRepository: UserProfileRepository {
         genderCategory: GenderCategory,
         genderIdentity: String,
         showGender: Bool,
+        city: String?,
+        state: String?,
+        showCityState: Bool,
         vibes: Set<Vibe>
     ) async throws -> UserProfile {
         return try await coreDataStack.performBackgroundTask { context in
@@ -225,6 +233,9 @@ final class CoreUserProfileRepository: UserProfileRepository {
             profile.genderCategory = genderCategory
             profile.genderIdentity = genderIdentity.isEmpty ? nil : genderIdentity
             profile.showGender = showGender
+            profile.city = city
+            profile.state = state
+            profile.showCityState = showCityState
             profile.vibes = vibes
             profile.createdAt = Date()
             profile.updatedAt = Date()

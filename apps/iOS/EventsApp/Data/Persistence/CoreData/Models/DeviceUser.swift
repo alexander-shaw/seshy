@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(DeviceUser)
 public class DeviceUser: NSManagedObject {}

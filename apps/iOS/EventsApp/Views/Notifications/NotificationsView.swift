@@ -16,20 +16,18 @@ struct NotificationsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TitleView(titleText: "Recents")
+            TitleView(titleText: TabType.notificationsTab.rawValue)
 
             if notifications.isEmpty {
                 VStack {
                     Spacer()
-                    AnimatedRingView()
-                        .padding(.bottom, theme.spacing.large)
-                    Spacer()
                 }
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: theme.spacing.large) {
+                    LazyVStack(spacing: theme.spacing.medium) {
                         ForEach(notifications) { notification in
                             NotificationRow(notification: notification)
+                                .hapticFeedback(.light)
                         }
                     }
                     .padding(.vertical, theme.spacing.medium)

@@ -13,16 +13,12 @@ public func mapPlaceToDTO(_ obj: Place) -> PlaceDTO {
     PlaceDTO(
         id: obj.id,
         name: obj.name,
-        details: obj.details,
-        streetAddress: obj.streetAddress,
-        city: obj.city,
-        stateRegion: obj.stateRegion,
-        roomNumber: obj.roomNumber,
-        latitude: obj.latitude,
-        longitude: obj.longitude,
-        radius: obj.radius,
+        createdAt: obj.createdAt,
         updatedAt: obj.updatedAt,
-        schemaVersion: 1
+        deletedAt: obj.deletedAt,
+        syncStatusRaw: obj.syncStatusRaw,
+        lastCloudSyncedAt: obj.lastCloudSyncedAt,
+        schemaVersion: obj.schemaVersion
     )
 }
 
@@ -32,16 +28,12 @@ extension Place {
     func apply(_ dto: PlaceDTO) {
         id = dto.id
         name = dto.name
-        details = dto.details
-        streetAddress = dto.streetAddress
-        city = dto.city
-        stateRegion = dto.stateRegion
-        roomNumber = dto.roomNumber
-        latitude = dto.latitude
-        longitude = dto.longitude
-        radius = dto.radius
+        createdAt = dto.createdAt
         updatedAt = dto.updatedAt
-        // createdAt / deletedAt / syncStatus handled by your sync flow.
+        deletedAt = dto.deletedAt
+        syncStatusRaw = dto.syncStatusRaw
+        lastCloudSyncedAt = dto.lastCloudSyncedAt
+        schemaVersion = dto.schemaVersion
     }
 
     // Convenience for inserting new managed object from DTO.

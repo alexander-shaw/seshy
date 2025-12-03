@@ -44,6 +44,7 @@ extension Vibe {
         deletedAt = dto.deletedAt
         syncStatusRaw = dto.syncStatusRaw
         lastCloudSyncedAt = dto.lastCloudSyncedAt
+        schemaVersion = Int16(dto.schemaVersion)
     }
 
     // Convenience for inserting new managed object from DTO.

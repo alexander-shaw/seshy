@@ -9,7 +9,6 @@ import Foundation
 import CoreData
 import SwiftUI
 import Combine
-import CoreDomain
 
 @MainActor
 final class PublicProfileViewModel: ObservableObject {
@@ -221,7 +220,10 @@ final class PublicProfileViewModel: ObservableObject {
                 publicProfileID: currentProfile.id,
                 url: url,
                 mimeType: mimeType,
-                position: position
+                position: position,
+                averageColorHex: nil,
+                primaryColorHex: nil,
+                secondaryColorHex: nil
             )
             media.append(newMedia)
         } catch {

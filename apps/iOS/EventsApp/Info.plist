@@ -10,5 +10,9 @@
 		<string>remote-notification</string>
 		<string>location</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to scan event QR codes.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to show nearby events and help you get to them.</string>
 </dict>
 </plist>

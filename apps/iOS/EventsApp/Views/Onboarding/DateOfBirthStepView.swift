@@ -30,12 +30,15 @@ struct DateOfBirthStepView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: theme.spacing.small) {
+        VStack(alignment: .leading, spacing: theme.spacing.medium) {
             Text("Your b-day?")
                 .headlineStyle()
 
             Text("You cannot change this later.")
+                .fontWeight(.bold)
                 .bodyTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
 
             Spacer()
 
@@ -45,12 +48,11 @@ struct DateOfBirthStepView: View {
                         ForEach(0..<4, id: \.self) { index in
                             HStack(spacing: 0) {
                                 RoundedRectangle(cornerRadius: theme.spacing.small)
-                                    .fill(index == input.count ? theme.colors.mainText.opacity(0.25) : theme.colors.offText.opacity(0.20))
+                                    .fill(index == input.count ? theme.colors.mainText.opacity(0.25) : theme.colors.offText.opacity(0.25))
                                     .frame(width: theme.sizes.digitField.width, height: theme.sizes.digitField.height)
                                     .overlay(
                                         Text(digits[index].isEmpty ? ["M", "M", "D", "D"][index] : digits[index])
                                             .font(theme.typography.title)
-                                            .fontDesign(.monospaced)
                                             .foregroundStyle(digits[index].isEmpty ? theme.colors.offText.opacity(0.75) : theme.colors.mainText)
                                     )
 
@@ -148,18 +150,18 @@ struct DateOfBirthStepView: View {
     }
 
     private func formatRaw(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = Foundation.DateFormatter()
         formatter.dateFormat = "MMddyyyy"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
+        formatter.timeZone = TimeZone.current
         return formatter.string(from: date)
     }
 
     private func parseDate(_ string: String) -> Date? {
-        let formatter = DateFormatter()
+        let formatter = Foundation.DateFormatter()
         formatter.dateFormat = "MM/dd/yyyy"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
+        formatter.timeZone = TimeZone.current
         return formatter.date(from: string)
     }
 }

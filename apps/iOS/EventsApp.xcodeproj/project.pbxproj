@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F908F5572EA08CD20020B6A7 /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = F908F5562EA08CD20020B6A7 /* MapboxMaps */; };
 		F978191E2EA1BE5E000C8B1A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */; };
 		F97819202EA1BE5E000C8B1A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F978191F2EA1BE5E000C8B1A /* FirebaseAuth */; };
 		F97819222EA1BE5E000C8B1A /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F97819212EA1BE5E000C8B1A /* FirebaseCore */; };
@@ -17,13 +16,23 @@
 		F978192A2EA1BE5E000C8B1A /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = F97819292EA1BE5E000C8B1A /* FirebaseRemoteConfig */; };
 		F978192C2EA1BE5E000C8B1A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = F978192B2EA1BE5E000C8B1A /* FirebaseStorage */; };
 		F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9999CDA2E9988D7008AE0E2 /* H3 */; };
-		F999A2142E9D7EB4008AE0E2 /* CoreDomain in Frameworks */ = {isa = PBXBuildFile; productRef = F999A2132E9D7EB4008AE0E2 /* CoreDomain */; };
-		F9A504522E9963390009812A /* H3 in Frameworks */ = {isa = PBXBuildFile; productRef = F9A504512E9963390009812A /* H3 */; };
+		F9B2B57B2ED3F38000E1C09A /* MapboxMaps in Frameworks */ = {isa = PBXBuildFile; productRef = F9B2B57A2ED3F38000E1C09A /* MapboxMaps */; };
 		F9C947912EB9125C00997CF3 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F9C947902EB9125C00997CF3 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F9D7000E2EDAFAF8007A1A9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F969709B2E8B5049007AE897 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F96970A22E8B504A007AE897;
+			remoteInfo = EventsApp;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		F96970A32E8B504A007AE897 /* EventsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EventsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9D7000B2EDAFA7E007A1A9B /* EventsAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventsAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -52,19 +61,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F9B2B57B2ED3F38000E1C09A /* MapboxMaps in Frameworks */,
 				F97819282EA1BE5E000C8B1A /* FirebasePerformance in Frameworks */,
-				F9A504522E9963390009812A /* H3 in Frameworks */,
+				F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */,
 				F978192A2EA1BE5E000C8B1A /* FirebaseRemoteConfig in Frameworks */,
 				F97819262EA1BE5E000C8B1A /* FirebaseMessaging in Frameworks */,
 				F978191E2EA1BE5E000C8B1A /* FirebaseAnalytics in Frameworks */,
-				F9999CDB2E9988D7008AE0E2 /* H3 in Frameworks */,
-				F999A2142E9D7EB4008AE0E2 /* CoreDomain in Frameworks */,
 				F978192C2EA1BE5E000C8B1A /* FirebaseStorage in Frameworks */,
 				F9C947912EB9125C00997CF3 /* Kingfisher in Frameworks */,
 				F97819202EA1BE5E000C8B1A /* FirebaseAuth in Frameworks */,
 				F97819242EA1BE5E000C8B1A /* FirebaseCrashlytics in Frameworks */,
 				F97819222EA1BE5E000C8B1A /* FirebaseCore in Frameworks */,
-				F908F5572EA08CD20020B6A7 /* MapboxMaps in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9D700082EDAFA1E007A1A9B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				F96970A32E8B504A007AE897 /* EventsApp.app */,
+				F9D7000B2EDAFA7E007A1A9B /* EventsAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,10 +122,7 @@
 			);
 			name = EventsApp;
 			packageProductDependencies = (
-				F9A504512E9963390009812A /* H3 */,
 				F9999CDA2E9988D7008AE0E2 /* H3 */,
-				F999A2132E9D7EB4008AE0E2 /* CoreDomain */,
-				F908F5562EA08CD20020B6A7 /* MapboxMaps */,
 				F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */,
 				F978191F2EA1BE5E000C8B1A /* FirebaseAuth */,
 				F97819212EA1BE5E000C8B1A /* FirebaseCore */,
@@ -120,10 +132,29 @@
 				F97819292EA1BE5E000C8B1A /* FirebaseRemoteConfig */,
 				F978192B2EA1BE5E000C8B1A /* FirebaseStorage */,
 				F9C947902EB9125C00997CF3 /* Kingfisher */,
+				F9B2B57A2ED3F38000E1C09A /* MapboxMaps */,
 			);
 			productName = EventsApp;
 			productReference = F96970A32E8B504A007AE897 /* EventsApp.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F9D700052EDAF9E5007A1A9B /* EventsAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9D7000A2EDAFA50007A1A9B /* Build configuration list for PBXNativeTarget "EventsAppTests" */;
+			buildPhases = (
+				F9D700072EDAF9FF007A1A9B /* Sources */,
+				F9D700082EDAFA1E007A1A9B /* Frameworks */,
+				F9D700092EDAFA33007A1A9B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F9D7000D2EDAFAF8007A1A9B /* PBXTargetDependency */,
+			);
+			name = EventsAppTests;
+			productName = EventsAppTests;
+			productReference = F9D7000B2EDAFA7E007A1A9B /* EventsAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -138,6 +169,10 @@
 					F96970A22E8B504A007AE897 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
+					F9D700052EDAF9E5007A1A9B = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = F96970A22E8B504A007AE897;
+					};
 				};
 			};
 			buildConfigurationList = F969709E2E8B5049007AE897 /* Build configuration list for PBXProject "EventsApp" */;
@@ -151,7 +186,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */,
-				F999A2122E9D7EB4008AE0E2 /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */,
 				F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */,
 				F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				F9C9478F2EB9125C00997CF3 /* XCRemoteSwiftPackageReference "Kingfisher" */,
@@ -162,12 +196,20 @@
 			projectRoot = "";
 			targets = (
 				F96970A22E8B504A007AE897 /* EventsApp */,
+				F9D700052EDAF9E5007A1A9B /* EventsAppTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		F96970A12E8B504A007AE897 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F9D700092EDAFA33007A1A9B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -184,7 +226,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F9D700072EDAF9FF007A1A9B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F9D7000D2EDAFAF8007A1A9B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F96970A22E8B504A007AE897 /* EventsApp */;
+			targetProxy = F9D7000E2EDAFAF8007A1A9B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F96970B12E8B504E007AE897 /* Debug */ = {
@@ -320,7 +377,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EventsApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = seshi;
+				INFOPLIST_KEY_CFBundleDisplayName = seshy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
@@ -357,7 +414,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EventsApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = seshi;
+				INFOPLIST_KEY_CFBundleDisplayName = seshy;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location helps us find events near you and show what’s popular around your area. Your location is never shared with others.";
@@ -384,6 +441,50 @@
 			};
 			name = Release;
 		};
+		F9D7000F2EDAFA81007A1A9B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.optify.EventsAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EventsApp.app/EventsApp";
+			};
+			name = Debug;
+		};
+		F9D700102EDAFA81007A1A9B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.optify.EventsAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EventsApp.app/EventsApp";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -405,16 +506,21 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		F9D7000A2EDAFA50007A1A9B /* Build configuration list for PBXNativeTarget "EventsAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9D7000F2EDAFA81007A1A9B /* Debug */,
+				F9D700102EDAFA81007A1A9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
 		F9999CD92E9988D7008AE0E2 /* XCLocalSwiftPackageReference "../../packages/H3" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../packages/H3;
-		};
-		F999A2122E9D7EB4008AE0E2 /* XCLocalSwiftPackageReference "../../packages/CoreDomain" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../packages/CoreDomain;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -446,11 +552,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F908F5562EA08CD20020B6A7 /* MapboxMaps */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
-			productName = MapboxMaps;
-		};
 		F978191D2EA1BE5E000C8B1A /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F978191C2EA1BE5E000C8B1A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -495,13 +596,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = H3;
 		};
-		F999A2132E9D7EB4008AE0E2 /* CoreDomain */ = {
+		F9B2B57A2ED3F38000E1C09A /* MapboxMaps */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = CoreDomain;
-		};
-		F9A504512E9963390009812A /* H3 */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = H3;
+			package = F908F5552EA08CD20020B6A7 /* XCRemoteSwiftPackageReference "mapbox-maps-ios" */;
+			productName = MapboxMaps;
 		};
 		F9C947902EB9125C00997CF3 /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;

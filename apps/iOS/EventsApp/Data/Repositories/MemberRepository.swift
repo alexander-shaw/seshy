@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol MemberRepository: Sendable {
     func createMember(for eventID: UUID, userID: UUID, role: MemberRole, displayName: String, username: String?, avatarURL: String?) async throws -> Member

@@ -236,6 +236,24 @@ extension NotificationItem {
             secondaryAction: nil
         ))
         
+        // Multiple users example
+        notifications.append(NotificationItem(
+            id: UUID(),
+            type: .newMemberJoined,
+            timestamp: now.addingTimeInterval(-388800),  // 4.5 days ago.
+            isUnread: true,
+            userName: nil,
+            userAvatar: nil,
+            eventName: "Summer BBQ Party",
+            eventID: UUID(),
+            eventColor: "#FF6B6B",
+            title: "5 people joined",
+            subtitle: "Summer BBQ Party",
+            metadata: ["userCount": "5"],
+            primaryAction: "View Event",
+            secondaryAction: nil
+        ))
+        
         // Social notifications.
         notifications.append(NotificationItem(
             id: UUID(),

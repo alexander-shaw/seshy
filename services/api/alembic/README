@@ -1,0 +1,16 @@
+Generic single-database configuration with an async focus.
+
+A generic Alembic environment is configured.  The migration environment has the following characteristics:
+
+* Migration files are versioned according to the revision ID.
+* The migration environment uses a standard connection string from `alembic.ini`.
+* The migration environment uses a standard Python logging configuration.
+
+
+
+
+
+
+
+
+

@@ -12,7 +12,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(UserProfile)
 public class UserProfile: NSManagedObject {}
@@ -33,6 +32,11 @@ extension UserProfile {
     @NSManaged public var genderCategoryRaw: NSNumber?  // Optional Int16.
     @NSManaged public var genderIdentity: String?
     @NSManaged public var showGender: Bool
+    
+    // Location display preferences.
+    @NSManaged public var city: String?
+    @NSManaged public var state: String?
+    @NSManaged public var showCityState: Bool
 
     @NSManaged public var isVerified: Bool
     @NSManaged public var wasVerifiedAt: Date?
@@ -54,7 +58,7 @@ public extension UserProfile {
 extension UserProfile {
     // NOTE: Could depend on subscription tier!
     // Free: up to 4 images.
-    // Paid: up to 9 images & videos.
+    // Paid: up to 9 images.
     public var maxMediaUploads: Int {
         return 4
     }

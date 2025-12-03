@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreDomain
 
 struct GenderStepView: View {
     @ObservedObject var userSession: UserSessionViewModel
@@ -22,12 +21,15 @@ struct GenderStepView: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: theme.spacing.small) {
+        VStack(alignment: .leading, spacing: theme.spacing.medium) {
             Text("What's your gender?")
                 .headlineStyle()
 
             Text("You can always update this later.")
+                .fontWeight(.bold)
                 .bodyTextStyle()
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
 
             Spacer()
 
@@ -47,18 +49,15 @@ struct GenderStepView: View {
 
                                 Spacer()
 
-                                Image(systemName: selectedGender == option
-                                      ? (option == .other ? "plus.circle" : "checkmark.circle.fill")
-                                      : (option == .other ? "plus.circle" : "circle"))
-                                    .imageScale(.large)
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(theme.colors.mainText, selectedGender == option ? AnyShapeStyle(theme.colors.accent) : AnyShapeStyle(theme.colors.mainText))
-                                    .buttonTextStyle()
+                                SelectionIcon(
+                                    isSelected: selectedGender == option,
+                                    isExpandable: option == .other
+                                )
                             }
                             .padding(theme.spacing.medium)
                             .background(Capsule().fill(theme.colors.surface))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             } else {
@@ -74,6 +73,7 @@ struct GenderStepView: View {
                     TextFieldView(
                         icon: nil,
                         placeholder: "Identity",
+                        specialType: .enterName,
                         text: $userSession.userProfileViewModel.genderIdentityInput,
                         autofocus: selectedGender == .other
                     )

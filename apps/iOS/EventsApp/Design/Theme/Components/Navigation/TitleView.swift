@@ -32,12 +32,12 @@ public struct TitleView<Trailing: View>: View {
     }
 
     public var body: some View {
-        HStack(spacing: theme.spacing.small) {
+        HStack(spacing: theme.spacing.medium / 2) {
             if canGoBack {
                 IconButton(icon: backIcon) {
                     if let onBack { onBack() } else { dismiss() }
                 }
-                .padding(.leading, theme.spacing.small)
+                .padding(.leading, theme.spacing.medium)
             }
 
             Text(titleText)
@@ -53,10 +53,10 @@ public struct TitleView<Trailing: View>: View {
 
             trailing()
         }
-        .padding([.vertical, .trailing], theme.spacing.small)
+        .padding(.vertical, theme.spacing.small)
+        .padding(.trailing, theme.spacing.medium)
         .overlay(alignment: .bottom) {
-            Divider()
-                .foregroundStyle(theme.colors.surface)
+            Divider().foregroundStyle(theme.colors.surface)
         }
         .background(theme.colors.background)
     }

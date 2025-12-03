@@ -1,9 +1,17 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import Response
 from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel
 from uuid import UUID
+from sqlalchemy.orm import Session
+
+from .database import get_db, engine, Base, SessionLocal
+from .routers import places, events, members, invites, media, vibes, notifications, tickets, payments
+from .services.vibe_seed import upsert_default_vibes
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Seshy API",
@@ -11,17 +19,28 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# In-memory storage for demo purposes (replace with real database)
-user_public_profile_store: dict[UUID, dict] = {}
-user_settings_store: dict[UUID, dict] = {}
-user_login_store: dict[UUID, dict] = {}
+# Include routers
+app.include_router(places.router)
+app.include_router(events.router)
+app.include_router(members.router)
+app.include_router(invites.router)
+app.include_router(media.router)
+app.include_router(vibes.router)
+app.include_router(notifications.router)
+app.include_router(tickets.router)
+app.include_router(payments.router)
 
-# ETags for conditional requests
-public_profile_etags: dict[UUID, str] = {}
-settings_etags: dict[UUID, str] = {}
-login_etags: dict[UUID, str] = {}
 
-# Pydantic models matching iOS DTOs
+@app.on_event("startup")
+def seed_system_vibes():
+    """Ensure default system vibes exist on every boot."""
+    db = SessionLocal()
+    try:
+        upsert_default_vibes(db)
+    finally:
+        db.close()
+
+# Pydantic models matching iOS DTOs (keeping for backward compatibility)
 class PublicProfileDTO(BaseModel):
     id: UUID
     avatarURL: Optional[str] = None
@@ -30,6 +49,7 @@ class PublicProfileDTO(BaseModel):
     bio: Optional[str] = None
     ageYears: Optional[int] = None
     gender: Optional[str] = None
+    reputationScore: int = 0
     isVerified: bool
     createdAt: datetime
     updatedAt: datetime
@@ -85,7 +105,15 @@ class UserLoginDTO(BaseModel):
     updatedAt: datetime
     schemaVersion: int
 
-# LoginUpdateDTO removed - using full UserLoginDTO for upsert (hashed phone/email for contact matching)
+# In-memory storage for demo purposes (will be replaced with database)
+user_public_profile_store: dict[UUID, dict] = {}
+user_settings_store: dict[UUID, dict] = {}
+user_login_store: dict[UUID, dict] = {}
+
+# ETags for conditional requests
+public_profile_etags: dict[UUID, str] = {}
+settings_etags: dict[UUID, str] = {}
+login_etags: dict[UUID, str] = {}
 
 def generate_etag(data: dict) -> str:
     """Generate ETag from data hash"""
@@ -109,7 +137,7 @@ async def healthz():
     """Health check endpoint."""
     return {"status": "ok"}
 
-# PublicProfile endpoints
+# PublicProfile endpoints (keeping for backward compatibility - TODO: migrate to database)
 @app.get("/me/public-profile", response_model=PublicProfileDTO)
 async def get_public_profile(if_none_match: Optional[str] = Header(None, alias="If-None-Match")):
     """Get user public profile with ETag support"""
@@ -146,6 +174,7 @@ async def update_public_profile(update: PublicProfileUpdateDTO, idempotency_key:
             "bio": update.bio,
             "ageYears": update.ageYears,
             "gender": update.gender,
+            "reputationScore": existing.get("reputationScore", 0),
             "isVerified": update.isVerified,
             "createdAt": existing.get("createdAt", datetime.now()),
             "updatedAt": update.updatedAt,
@@ -164,6 +193,7 @@ async def update_public_profile(update: PublicProfileUpdateDTO, idempotency_key:
             "bio": update.bio,
             "ageYears": update.ageYears,
             "gender": update.gender,
+            "reputationScore": 0,
             "isVerified": update.isVerified,
             "createdAt": datetime.now(),
             "updatedAt": update.updatedAt,
@@ -178,7 +208,7 @@ async def update_public_profile(update: PublicProfileUpdateDTO, idempotency_key:
     
     return PublicProfileDTO(**profile_data)
 
-# Settings endpoints
+# Settings endpoints (keeping for backward compatibility - TODO: migrate to database)
 @app.get("/me/settings", response_model=UserSettingsDTO)
 async def get_settings(if_none_match: Optional[str] = Header(None, alias="If-None-Match")):
     """Get user settings with ETag support"""
@@ -224,7 +254,7 @@ async def update_settings(update: SettingsUpdateDTO, idempotency_key: str = Head
     
     return UserSettingsDTO(**settings_data)
 
-# Login endpoints
+# Login endpoints (keeping for backward compatibility - TODO: migrate to database)
 @app.get("/me/login", response_model=UserLoginDTO)
 async def get_login(if_none_match: Optional[str] = Header(None, alias="If-None-Match")):
     """Get user login with ETag support"""

@@ -6,7 +6,6 @@
 //
 
 import CoreData
-import CoreDomain
 
 // CoreData -> DTO (nonisolated by default; safe to call from background context).
 @inline(__always)
@@ -20,6 +19,9 @@ public func mapUserProfileToDTO(_ obj: UserProfile) -> UserProfileDTO {
         genderCategoryRaw: obj.genderCategoryRaw?.int16Value,
         genderIdentity: obj.genderIdentity,
         showGender: obj.showGender,
+        city: obj.city,
+        state: obj.state,
+        showCityState: obj.showCityState,
         isVerified: obj.isVerified,
         wasVerifiedAt: obj.wasVerifiedAt,
         updatedAt: obj.updatedAt,
@@ -39,6 +41,9 @@ extension UserProfile {
         genderCategoryRaw = dto.genderCategoryRaw.map { NSNumber(value: $0) }
         genderIdentity = dto.genderIdentity
         showGender = dto.showGender
+        city = dto.city
+        state = dto.state
+        showCityState = dto.showCityState
         isVerified = dto.isVerified
         wasVerifiedAt = dto.wasVerifiedAt
         updatedAt = dto.updatedAt

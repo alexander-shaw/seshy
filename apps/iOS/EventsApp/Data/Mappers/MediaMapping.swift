@@ -29,6 +29,8 @@ public func mapMediaToDTO(_ obj: Media) -> MediaDTO {
         position: obj.position,
         mimeType: obj.mimeType,
         averageColorHex: obj.averageColorHex,
+        primaryColorHex: obj.primaryColorHex,
+        secondaryColorHex: obj.secondaryColorHex,
         eventID: eventID,
         userProfileID: userProfileID,
         publicProfileID: publicProfileID,
@@ -50,6 +52,8 @@ extension Media {
         position = dto.position
         mimeType = dto.mimeType
         averageColorHex = dto.averageColorHex
+        primaryColorHex = dto.primaryColorHex
+        secondaryColorHex = dto.secondaryColorHex
         createdAt = dto.createdAt
         updatedAt = dto.updatedAt
         deletedAt = dto.deletedAt

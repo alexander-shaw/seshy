@@ -57,4 +57,3 @@ public struct PublicProfileUpdateDTO: Codable, Sendable, Equatable {
     }
 }
 
-

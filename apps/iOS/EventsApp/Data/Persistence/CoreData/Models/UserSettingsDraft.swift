@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 // A draft object for staging changes to UserSettings before applying them atomically.
 // Allows multiple property changes to be applied together in a single save operation.
@@ -116,5 +115,12 @@ extension UserSettingsDraft {
     // Update the maximum distance filter (nil = show all worldwide).
     public mutating func updateMapMaxDistance(_ distance: Double?) {
         mapMaxDistance = distance
+    }
+}
+
+private extension String {
+    var nilIfBlank: String? {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

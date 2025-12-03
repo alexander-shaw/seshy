@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 // Calculate age in years from date of birth.
 private func calculateAgeYears(from dateOfBirth: Date?) -> Int? {

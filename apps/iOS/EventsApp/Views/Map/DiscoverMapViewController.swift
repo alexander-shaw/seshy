@@ -5,10 +5,10 @@
 //  Created by Шоу on 10/25/25.
 //
 
+/*
 import UIKit
 import MapboxMaps
 import CoreLocation
-import CoreDomain
 import H3
 
 class DiscoverMapViewController: UIViewController {
@@ -198,7 +198,8 @@ class DiscoverMapViewController: UIViewController {
                 return nil
             }
             
-            print("Event: \(event.name), Place: \(place.name) at (\(place.latitude), \(place.longitude)) with radius \(place.radius) meters [\(event.brandColor)]")
+            let normalizedColor = event.themePrimaryHex ?? "#808080"
+            print("Event: \(event.name), Place: \(place.name) at \(place.name) [\(normalizedColor)]")
 
             // Validate coordinates.
             guard place.latitude != 0 || place.longitude != 0 else {
@@ -224,7 +225,7 @@ class DiscoverMapViewController: UIViewController {
             var feature = Feature(geometry: .polygon(Polygon([coords])))
             
             // Set color property for this event.
-            feature.properties = ["color": JSONValue.string(event.brandColor)]
+            feature.properties = ["color": JSONValue.string(normalizedColor)]
 
             return feature
         }
@@ -233,3 +234,4 @@ class DiscoverMapViewController: UIViewController {
         return FeatureCollection(features: features)
     }
 }
+*/

@@ -49,3 +49,9 @@ SyncEngine.push(delete) → CloudStore(Cloud Run) → ack → Core Data purge(la
 UI → ViewModel → UnifiedRepository.fetch → LocalStore miss → (return empty) → ViewModel → UI
 
 SyncEngine.pull → CloudStore(Cloud Run) → DTO → map→Domain → Core Data upsert → notify → ViewModel → UI
+
+### Default Vibe Hydration
+
+- `SystemVibeHydrator` calls `GET /vibes?system_only=true&active_only=true` during splash to keep Core Data in sync with server defaults.
+- The hydrator stores the server ETag so the splash screen only re-downloads when the canonical list changes.
+- `SplashViewModel` updates the UI status text while seeding; once complete it continues the normal session evaluation flow.

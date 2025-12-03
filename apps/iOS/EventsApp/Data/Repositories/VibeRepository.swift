@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol VibeRepository: Sendable {
     func createVibe(name: String, slug: String, category: VibeCategory, systemDefined: Bool, isActive: Bool) async throws -> Vibe

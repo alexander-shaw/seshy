@@ -25,7 +25,10 @@ public struct AppTheme: ThemeProtocol, Equatable {
         self.sizes = sizes
     }
     
-    // Convenience initializers for different themes:
+    // Theme variants
     public static let darkTheme = AppTheme(colors: .darkMode)
     public static let lightTheme = AppTheme(colors: .lightMode)
+    
+    // Extensible for future themes (holidays, subscriber personalization, etc.)
+    // Example: public static let holidayTheme = AppTheme(colors: .holidayColors)
 }

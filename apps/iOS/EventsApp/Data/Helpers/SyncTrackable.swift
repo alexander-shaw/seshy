@@ -10,7 +10,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol SyncTrackable {
     var createdAt: Date { get set }

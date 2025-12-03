@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(Media)
 public class Media: NSManagedObject {}
@@ -23,7 +22,9 @@ extension Media {
     
     // UX fields.
     @NSManaged public var mimeType: String?  // Example: image/jpeg.
-    @NSManaged public var averageColorHex: String?
+    @NSManaged public var averageColorHex: String?  // Legacy field, kept for backward compatibility
+    @NSManaged public var primaryColorHex: String?  // Dominant primary color extracted from image
+    @NSManaged public var secondaryColorHex: String?  // Dominant secondary color extracted from image
     
     // Polymorphic relationships (exactly ONE must be set).
     @NSManaged public var event: EventItem?
@@ -42,6 +43,7 @@ extension Media {
     
     // Convenience type checkers for cleaner code.
     var isImage: Bool { inferredKind == .image }
+    // Note: isVideo and isAudio kept for Core Data compatibility but not used in business logic
     var isVideo: Bool { inferredKind == .video }
     var isAudio: Bool { inferredKind == .audio }
     
@@ -72,66 +74,17 @@ extension Media {
         return nil
     }
     
-    // Gets the actual file URL where media is stored locally.
-    // Tries multiple strategies: stored URL and then expected path by ID.
-    var actualFileURL: URL? {
-        // First try the stored URL.
-        if !url.isEmpty {
-            // Try parsing as URL.
-            if let storedURL = URL(string: url) {
-                // If it's a file URL that exists:
-                if storedURL.isFileURL && FileManager.default.fileExists(atPath: storedURL.path) {
-                    return storedURL
-                }
-            }
-            
-            // Try as direct file path.
-            if url.hasPrefix("file://") {
-                let path = String(url.dropFirst(7))
-                let fileURL = URL(fileURLWithPath: path)
-                if FileManager.default.fileExists(atPath: fileURL.path) {
-                    return fileURL
-                }
-            } else if !url.hasPrefix("http://") && !url.hasPrefix("https://") {
-                // Treat as file path.
-                let fileURL = URL(fileURLWithPath: url)
-                if FileManager.default.fileExists(atPath: fileURL.path) {
-                    return fileURL
-                }
-            }
-        }
-        
-        // Fallback: construct expected path by media ID.
-        let expectedURL = MediaStorageHelper.getMediaFileURL(mediaID: id, isVideo: isVideo)
-        if FileManager.default.fileExists(atPath: expectedURL.path) {
-            return expectedURL
-        }
-        
-        return nil
-    }
-    
-    // Gets the media data from the file system.
-    // Returns nil if file does not exist or cannot be loaded.
-    var mediaData: Data? {
-        guard let fileURL = actualFileURL else { return nil }
-        return try? Data(contentsOf: fileURL)
-    }
-    
-    // Determines if this media is available locally.
-    var isAvailableLocally: Bool {
-        return actualFileURL != nil
-    }
-    
-    // Gets the remote URL if this is a remote media item.
+    // Gets the remote URL for this media item.
+    // All media is stored in cloud - Kingfisher handles local caching automatically.
     var remoteURL: URL? {
-        // Only return remote URL if it is not a local file and not empty.
         guard !url.isEmpty else { return nil }
         
+        // Return URL if it's a valid remote URL (http/https)
         if url.hasPrefix("http://") || url.hasPrefix("https://") {
             return URL(string: url)
         }
         
-        // If it is not a local file and not a remote URL, it is invalid.
+        // Legacy file:// URLs or invalid URLs return nil
         return nil
     }
 }

@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(DeviceFingerprint)
 public class DeviceFingerprint: NSManagedObject {}

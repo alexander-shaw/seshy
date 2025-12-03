@@ -1,5 +1,7 @@
 # Python
 __pycache__/
+alembic/__pycache__/
+alembic/versions/*.pyc
 *.py[cod]
 *$py.class
 *.so
@@ -20,10 +22,31 @@ ENV/
 *.swo
 *~
 
-# Testing
+# Testing / tooling
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.cache/
+tests/
+examples/
 .coverage
+coverage.xml
+pytest.xml
 htmlcov/
+
+# Logs
+*.log
+
+# Local databases
+*.sqlite
+*.db
+
+# iOS build artifacts (when building from repo root)
+apps/iOS/EventsApp/build/
+apps/iOS/EventsApp.xcodeproj/xcuserdata/
+apps/iOS/EventsApp.xcworkspace/xcuserdata/
+DerivedData/
 
 # Git
 .git/
@@ -31,6 +54,7 @@ htmlcov/
 
 # Documentation
 *.md
+!README.md
 docs/
 
 # Local env files

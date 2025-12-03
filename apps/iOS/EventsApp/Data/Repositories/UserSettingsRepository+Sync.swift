@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 extension CoreUserSettingsRepository: UserSettingsSyncRepository {
     func upsertSettings(from dto: UserSettingsDTO, policy: ConflictRule, in ctx: NSManagedObjectContext) throws {

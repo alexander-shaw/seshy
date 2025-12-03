@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 extension String {
-    // True if string is exactly 6 hex digits (no '#').
+    // True if string is exactly 6 hex digits (no "#").
     var isValidHex6: Bool {
         guard count == 6 else { return false }
         return range(of: "^[0-9A-Fa-f]{6}$", options: .regularExpression) != nil

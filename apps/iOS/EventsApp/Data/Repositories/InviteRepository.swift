@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 public protocol InviteRepository: Sendable {
     func createInvite(for eventID: UUID, userID: UUID, type: InviteType, token: String?) async throws -> Invite

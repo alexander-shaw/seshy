@@ -11,7 +11,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(Member)
 public class Member: NSManagedObject {}

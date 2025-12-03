@@ -26,6 +26,17 @@ public protocol APIClient {
     func get<T: Decodable>(_ path: String, headers: [String: String]) async throws -> APIResult<T>
     func put<Body: Encodable, T: Decodable>(_ path: String, body: Body, headers: [String: String]) async throws -> APIResult<T>
     func post<Body: Encodable, T: Decodable>(_ path: String, body: Body, headers: [String: String]) async throws -> APIResult<T>
+    func uploadMedia<T: Decodable>(
+        _ path: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        eventID: UUID?,
+        userProfileID: UUID?,
+        publicProfileID: UUID?,
+        position: Int16,
+        headers: [String: String]
+    ) async throws -> APIResult<T>
 }
 
 // MARK: HTTP API Client Implementation:
@@ -71,11 +82,99 @@ public final class HTTPAPIClient: APIClient {
         return try await performRequest(method: "POST", path: path, body: bodyData, headers: headers)
     }
     
+    public func uploadMedia<T: Decodable>(
+        _ path: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        eventID: UUID?,
+        userProfileID: UUID?,
+        publicProfileID: UUID?,
+        position: Int16,
+        headers: [String: String]
+    ) async throws -> APIResult<T> {
+        let boundary = UUID().uuidString
+        let body = try createMultipartFormData(
+            boundary: boundary,
+            fileData: fileData,
+            fileName: fileName,
+            mimeType: mimeType,
+            eventID: eventID,
+            userProfileID: userProfileID,
+            publicProfileID: publicProfileID,
+            position: Int(position) // Convert Int16 to Int for API
+        )
+        
+        var multipartHeaders = headers
+        multipartHeaders["Content-Type"] = "multipart/form-data; boundary=\(boundary)"
+        
+        return try await performRequest(method: "POST", path: path, body: body, headers: multipartHeaders, isMultipart: true)
+    }
+    
+    private func createMultipartFormData(
+        boundary: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        eventID: UUID?,
+        userProfileID: UUID?,
+        publicProfileID: UUID?,
+        position: Int
+    ) throws -> Data {
+        var body = Data()
+        
+        func appendString(_ string: String) throws {
+            guard let data = string.data(using: .utf8) else {
+                throw APIError.invalidURL("Failed to encode string: \(string)")
+            }
+            body.append(data)
+        }
+        
+        // Add file
+        try appendString("--\(boundary)\r\n")
+        try appendString("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n")
+        try appendString("Content-Type: \(mimeType)\r\n\r\n")
+        body.append(fileData)
+        try appendString("\r\n")
+        
+        // Add event_id if provided
+        if let eventID = eventID {
+            try appendString("--\(boundary)\r\n")
+            try appendString("Content-Disposition: form-data; name=\"event_id\"\r\n\r\n")
+            try appendString("\(eventID.uuidString)\r\n")
+        }
+        
+        // Add user_profile_id if provided
+        if let userProfileID = userProfileID {
+            try appendString("--\(boundary)\r\n")
+            try appendString("Content-Disposition: form-data; name=\"user_profile_id\"\r\n\r\n")
+            try appendString("\(userProfileID.uuidString)\r\n")
+        }
+        
+        // Add public_profile_id if provided
+        if let publicProfileID = publicProfileID {
+            try appendString("--\(boundary)\r\n")
+            try appendString("Content-Disposition: form-data; name=\"public_profile_id\"\r\n\r\n")
+            try appendString("\(publicProfileID.uuidString)\r\n")
+        }
+        
+        // Add position
+        try appendString("--\(boundary)\r\n")
+        try appendString("Content-Disposition: form-data; name=\"position\"\r\n\r\n")
+        try appendString("\(position)\r\n")
+        
+        // Close boundary
+        try appendString("--\(boundary)--\r\n")
+        
+        return body
+    }
+    
     private func performRequest<T: Decodable>(
         method: String,
         path: String,
         body: Data?,
-        headers: [String: String]
+        headers: [String: String],
+        isMultipart: Bool = false
     ) async throws -> APIResult<T> {
         guard let url = URL(string: path, relativeTo: baseURL) else {
             throw APIError.invalidURL(path)
@@ -83,7 +182,11 @@ public final class HTTPAPIClient: APIClient {
         
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Set content type - use from headers if multipart, otherwise JSON
+        if !isMultipart {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         // Adds auth token if available.

@@ -18,11 +18,13 @@ public struct UserProfileDTO: Codable, Sendable, Equatable {
     public let genderCategoryRaw: Int16?
     public let genderIdentity: String?
     public let showGender: Bool
+    public let city: String?
+    public let state: String?
+    public let showCityState: Bool
     public let isVerified: Bool
     public let wasVerifiedAt: Date?
 
     public let updatedAt: Date
     public let schemaVersion: Int
 }
-
 

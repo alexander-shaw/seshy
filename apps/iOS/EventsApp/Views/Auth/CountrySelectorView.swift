@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CoreDomain
 
 struct CountrySelectorView: View {
     @Environment(\.theme) private var theme
@@ -33,7 +32,7 @@ struct CountrySelectorView: View {
             VStack(spacing: 0) {
                 SearchBarView(
                     text: $searchText,
-                    placeholder: "Search Country Code",
+                    placeholder: "Search",
                     autofocus: false
                 )
                 .padding(.top, theme.spacing.small)

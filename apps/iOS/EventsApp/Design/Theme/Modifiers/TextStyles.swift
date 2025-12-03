@@ -10,7 +10,7 @@ import SwiftUI
 // MARK: Public Sugar API:
 // Single-call.
 public extension View {
-    func displayTitleStyle() -> some View { modifier(DisplayTitleStyle()) }
+    func largeTitleStyle() -> some View { modifier(LargeTitleStyle()) }
     func titleStyle() -> some View { modifier(TitleStyle()) }
     func numbersTitleStyle() -> some View { modifier(NumbersTitleStyle()) }
     func headlineStyle() -> some View { modifier(HeadlineStyle()) }
@@ -22,7 +22,7 @@ public extension View {
 }
 
 // MARK: Concrete Modifiers:
-private struct DisplayTitleStyle: ViewModifier {
+private struct LargeTitleStyle: ViewModifier {
     @Environment(\.theme) private var theme
     
     func body(content: Content) -> some View {

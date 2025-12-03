@@ -4,9 +4,9 @@ Terraform configuration for provisioning Google Cloud Run infrastructure.
 
 ## Resources Provisioned
 
-- **Artifact Registry Repository** (`seshy`) - Docker registry for application images
+- **Artifact Registry Repository** (`seshi`) - Docker registry for application images
 - **Service Account** (`cloud-run-deployer`) - Service account with Cloud Run admin permissions
-- **Cloud Run Service** (`seshy-api`) - Managed Cloud Run service for the API
+- **Cloud Run Service** (`seshi-api`) - Managed Cloud Run service for the API
 
 ## Prerequisites
 
@@ -109,4 +109,3 @@ The following roles are provisioned:
 - `roles/run.admin` - Cloud Run admin (for deployer service account)
 - `roles/artifactregistry.admin` - Artifact Registry admin (for deployer service account)
 - `roles/run.invoker` - Cloud Run invoker (for specified members)
-

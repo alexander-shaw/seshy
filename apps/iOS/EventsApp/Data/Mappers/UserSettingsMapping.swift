@@ -6,7 +6,6 @@
 //
 
 import CoreData
-import CoreDomain
 
 // CoreData -> DTO (nonisolated by default; safe to call from background context).
 @inline(__always)

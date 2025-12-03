@@ -7,7 +7,6 @@
 
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(UserLogin)
 public class UserLogin: NSManagedObject {}

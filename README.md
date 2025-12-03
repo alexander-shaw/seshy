@@ -9,6 +9,6 @@
 
 - [@Tomas-Stoker](https://github.com/Tomas-Stoker)
 
-# Seshy
+# Seshi
 
 ## An events app that helps college students effortlessly create, discover, and attend real-world experiences.

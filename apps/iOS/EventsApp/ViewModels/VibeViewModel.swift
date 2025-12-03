@@ -9,7 +9,6 @@ import Foundation
 import CoreData
 import SwiftUI
 import Combine
-import CoreDomain
 
 @MainActor
 final class VibeViewModel: ObservableObject {
@@ -328,7 +327,21 @@ final class VibeViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func loadAvailableVibes() {}
+    private func loadAvailableVibes() {
+        let request: NSFetchRequest<Vibe> = Vibe.fetchRequest()
+        request.predicate = NSPredicate(format: "isActive == YES")
+        request.sortDescriptors = [
+            NSSortDescriptor(key: "systemDefined", ascending: false),
+            NSSortDescriptor(key: "categoryRaw", ascending: true),
+            NSSortDescriptor(key: "name", ascending: true)
+        ]
+        
+        do {
+            availableVibes = try context.fetch(request)
+        } catch {
+            errorMessage = "Failed to load cached vibes: \(error.localizedDescription)"
+        }
+    }
     
     private func performSearch(_ searchText: String) {
         guard !searchText.isEmpty else {

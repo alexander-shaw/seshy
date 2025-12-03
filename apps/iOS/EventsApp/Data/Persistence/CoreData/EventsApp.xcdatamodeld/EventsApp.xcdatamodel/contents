@@ -36,7 +36,9 @@
         <relationship name="settings" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UserSettings" inverseName="user" inverseEntity="UserSettings"/>
     </entity>
     <entity name="EventItem" representedClassName="EventItem" syncable="YES">
-        <attribute name="brandColor" optional="YES" attributeType="String"/>
+        <attribute name="themePrimaryHex" optional="YES" attributeType="String"/>
+        <attribute name="themeSecondaryHex" optional="YES" attributeType="String"/>
+        <attribute name="themeMode" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="details" optional="YES" attributeType="String"/>
@@ -54,13 +56,17 @@
         <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="visibilityRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="isBookmarked" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Place" inverseName="events" inverseEntity="Place"/>
         <relationship name="media" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Media" inverseName="event" inverseEntity="Media"/>
         <relationship name="members" toMany="YES" deletionRule="Nullify" destinationEntity="Member" inverseName="event" inverseEntity="Member"/>
         <relationship name="vibes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Vibe" inverseName="events" inverseEntity="Vibe"/>
+        <relationship name="tickets" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Ticket" inverseName="event" inverseEntity="Ticket"/>
     </entity>
     <entity name="Media" representedClassName="Media" syncable="YES">
         <attribute name="averageColorHex" optional="YES" attributeType="String"/>
+        <attribute name="primaryColorHex" optional="YES" attributeType="String"/>
+        <attribute name="secondaryColorHex" optional="YES" attributeType="String"/>
         <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
@@ -90,23 +96,14 @@
         <relationship name="event" maxCount="1" deletionRule="Nullify" destinationEntity="EventItem" inverseName="members" inverseEntity="EventItem"/>
     </entity>
     <entity name="Place" representedClassName="Place" syncable="YES">
-        <attribute name="city" optional="YES" attributeType="String"/>
-        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="details" optional="YES" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="maxCapacity" optional="YES" attributeType="Integer 64" defaultValueString="100" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="radius" attributeType="Double" defaultValueString="10.0" usesScalarValueType="YES"/>
-        <attribute name="roomNumber" optional="YES" attributeType="String"/>
-        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
-        <attribute name="stateRegion" optional="YES" attributeType="String"/>
-        <attribute name="streetAddress" optional="YES" attributeType="String"/>
-        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EventItem" inverseName="location" inverseEntity="EventItem"/>
     </entity>
     <entity name="PublicProfile" representedClassName="PublicProfile" syncable="YES">
@@ -153,8 +150,11 @@
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isVerified" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="showAge" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
-        <attribute name="showGender" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="showAge" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="showGender" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
+        <attribute name="city" optional="YES" attributeType="String"/>
+        <attribute name="state" optional="YES" attributeType="String"/>
+        <attribute name="showCityState" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="wasVerifiedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
@@ -170,11 +170,14 @@
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="mapBearingDegrees" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="mapCenterLatitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="mapCenterLongitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="mapEndDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="mapEndRollingDays" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="mapPitchDegrees" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="mapStartDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="mapStyleRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="mapZoomLevel" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="mapMaxDistance" optional="YES" attributeType="Double" usesScalarValueType="YES"/>
         <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
@@ -193,5 +196,17 @@
         <attribute name="systemDefined" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="EventItem" inverseName="vibes" inverseEntity="EventItem"/>
+    </entity>
+    <entity name="Ticket" representedClassName="Ticket" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="priceCents" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="deletedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="syncStatusRaw" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastCloudSyncedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="schemaVersion" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EventItem" inverseName="tickets" inverseEntity="EventItem"/>
     </entity>
 </model>

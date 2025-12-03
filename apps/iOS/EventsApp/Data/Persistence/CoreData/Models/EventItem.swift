@@ -5,12 +5,8 @@
 //  Created by Шоу on 10/4/25.
 //
 
-// Defines the Core Data entity for events.
-// It includes event details, scheduling, location, members, and media.
-
 import Foundation
 import CoreData
-import CoreDomain
 
 @objc(EventItem)
 public class EventItem: NSManagedObject {}
@@ -25,7 +21,9 @@ extension EventItem {
 
     @NSManaged public var name: String
     @NSManaged public var details: String?
-    @NSManaged public var brandColor: String
+    @NSManaged public var themePrimaryHex: String?  // Event theme primary color
+    @NSManaged public var themeSecondaryHex: String?  // Event theme secondary color
+    @NSManaged public var themeMode: String?  // Theme mode: "auto", "bold", "muted", "dark", "custom"
 
     @NSManaged public var startTime: Date?
     @NSManaged public var endTime: Date?
@@ -36,11 +34,13 @@ extension EventItem {
     @NSManaged public var maxCapacity: Int64
     @NSManaged public var visibilityRaw: Int16
     @NSManaged public var inviteLink: String?
+    @NSManaged public var isBookmarked: Bool
 
     // Relationships:
     @NSManaged public var media: Set<Media>?  // Durable, official gallery.
     @NSManaged public var vibes: Set<Vibe>?  // Highly encouraged.
     @NSManaged public var members: Set<Member>  // One or more.  Host, at minimum.
+    @NSManaged public var tickets: Set<Ticket>?  // Optional tickets for the event.
 }
 
 extension EventItem {
@@ -95,6 +95,9 @@ extension EventItem {
         return !isAtCapacity && scheduleStatus != .ended && scheduleStatus != .cancelled
     }
 }
+
+// Identifiable conformance for SwiftUI ForEach
+extension EventItem: Identifiable {}
 
 // Local & Cloud Storage:
 extension EventItem: SyncTrackable {

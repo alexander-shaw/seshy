@@ -5,6 +5,7 @@
 //  Created by Шоу on 10/1/25.
 //
 
+/*
 import SwiftUI
 import CoreLocation
 import MapboxMaps
@@ -74,7 +75,8 @@ struct DiscoverMapView: View {
                 print("Fetched \(fetchedEvents.count) events.")
                 for (idx, event) in fetchedEvents.enumerated() {
                     if let place = event.location {
-                        print("  Event \(idx): \(event.name) at (\(place.latitude), \(place.longitude)) with color: \(event.brandColor)")
+                        let normalizedColor = event.themePrimaryHex ?? "#808080"
+                        print("  Event \(idx): \(event.name) at (\(place.name) with color: \(normalizedColor)")
                     } else {
                         print("  Event \(idx): \(event.name) - no location")
                     }
@@ -85,3 +87,4 @@ struct DiscoverMapView: View {
         }
     }
 }
+*/
